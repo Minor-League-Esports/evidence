@@ -41,7 +41,7 @@ where name like '${inputs.Name.value}'
 </Dropdown>
 
 <DataTable data={trackers} rows=20 rowShading=true headerColor=#7FFFD4 backgroundColor=#A9A9A9>
-    <Column id=tracker align=center contentType=link linkLabel=name />
+    <Column id=tracker align=center contentType=link linkLabel=name openInNewTab=true />
     <Column id=platform align=center />
     <Column id=gamertag align=center />
 </DataTable>
