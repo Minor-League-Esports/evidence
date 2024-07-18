@@ -1,56 +1,38 @@
 ---
-title: Welcome to Evidence
+title: MLE Homepage
 ---
 
-<Details title='How to edit this page'>
+<LastRefreshed/>
 
-  This page can be found in your project at `/pages/index.md`. Make a change to the markdown file and save it to see the change take effect in your browser.
+### About Evidence:
+
+Welcome to evidence where MLE's data lives. This website is living documentation on all things MLE. Here you can navigate the panel on the left hand side to find stats, standings or even trackers. We hope you enjoy your time here and if there is anything you would like to see add to evidence please follow the link below and let us know.
+
+```sql player_page
+  with players as (
+  SELECT
+  name,
+  salary,
+  p.member_id,
+  '/player_page/' || p.member_id as id_link,
+  franchise
+     from read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/players.parquet') p
+    inner join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/player_stats_s17.parquet') ps
+        on p.member_id = ps.member_id
+  group by name, salary, p.member_id, franchise
+  )
+  select *
+  from players
+```
+
+<Details title="Player Pages">
+
+<p>In the table below you can find any player in MLE and click on their row to be directed to their personal player page.</p>
+
 </Details>
 
-```sql categories
-  select
-      category
-  from needful_things.orders
-  group by category
-```
+<DataTable data={player_page} link=id_link search=true />
 
-<Dropdown data={categories} name=category value=category>
-    <DropdownOption value="%" valueLabel="All Categories"/>
-</Dropdown>
+## Have ideas or need help?
 
-<Dropdown name=year>
-    <DropdownOption value=% valueLabel="All Years"/>
-    <DropdownOption value=2019/>
-    <DropdownOption value=2020/>
-    <DropdownOption value=2021/>
-</Dropdown>
-
-```sql orders_by_category
-  select 
-      date_trunc('month', order_datetime) as month,
-      sum(sales) as sales_usd,
-      category
-  from needful_things.orders
-  where category like '${inputs.category.value}'
-  and date_part('year', order_datetime) like '${inputs.year.value}'
-  group by all
-  order by sales_usd desc
-```
-
-<BarChart
-    data={orders_by_category}
-    title="Sales by Month, {inputs.category.label}"
-    x=month
-    y=sales_usd
-    series=category
-/>
-
-## What's Next?
-- [Connect your data sources](settings)
-- Edit/add markdown files in the `pages` folder
-- Deploy your project with [Evidence Cloud](https://evidence.dev/cloud)
-
-## Get Support
-- Message us on [Slack](https://slack.evidence.dev/)
-- Read the [Docs](https://docs.evidence.dev/)
-- Open an issue on [Github](https://github.com/evidence-dev/evidence)
+- Message us on [Discord](https://discord.com/channels/172404472637685760/470327770443022346)
