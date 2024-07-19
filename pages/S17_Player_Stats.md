@@ -15,7 +15,7 @@ title: S17 Player Stats
 ```sql Stats
 With playerstats as (
     Select name as Name,
-    salary as Salary,
+    salary::text as Salary,
     team_name as Team,
     ps.skill_group as League,
     gamemode as GameMode
@@ -68,44 +68,8 @@ and GameMode like '${inputs.GameMode.value}'
 order by Score_Per_Game desc
 ```
 
-<!-- <Dropdown data={Stats} name=Salary value=Salary>
+<Dropdown data={Stats} name=Salary value=Salary>
     <DropdownOption value="%" valueLabel="Filter By Salary"/>
-     Bug where we can't get the .0 from the query
-</Dropdown> -->
-
-<Dropdown name=Salary defaultValue="%">
-    <DropdownOption value="%" valueLabel="Filter By Salary" />
-    <DropdownOption value=5.0 />
-    <DropdownOption value=5.5 />
-    <DropdownOption value=6.0 />
-    <DropdownOption value=6.5 />
-    <DropdownOption value=7.0 />
-    <DropdownOption value=7.5 />
-    <DropdownOption value=8.0 />
-    <DropdownOption value=8.5 />
-    <DropdownOption value=9.0 />
-    <DropdownOption value=9.5 />
-    <DropdownOption value=10.0 />
-    <DropdownOption value=10.5 />
-    <DropdownOption value=11.0 />
-    <DropdownOption value=11.5 />
-    <DropdownOption value=12.0 />
-    <DropdownOption value=12.5 />
-    <DropdownOption value=13.0 />
-    <DropdownOption value=13.5 />
-    <DropdownOption value=14.0 />
-    <DropdownOption value=14.5 />
-    <DropdownOption value=15.0 />
-    <DropdownOption value=15.5 />
-    <DropdownOption value=16.0 />
-    <DropdownOption value=16.5 />
-    <DropdownOption value=17.0 />
-    <DropdownOption value=17.5 />
-    <DropdownOption value=18.0 />
-    <DropdownOption value=18.5 />
-    <DropdownOption value=19.0 />
-    <DropdownOption value=19.5 />
-    <DropdownOption value=20.0 />
 </Dropdown>
 
 <Dropdown data={Stats} name=Team value=Team>
@@ -120,4 +84,4 @@ order by Score_Per_Game desc
     <DropdownOption value="%" valueLabel="Filter By GameMode"/>
 </Dropdown>
 
-<DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#7FFFD4 backgroundColor=#A9A9A9/>
+<DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#7FFFD4 backgroundColor=#A9A9A9 />
