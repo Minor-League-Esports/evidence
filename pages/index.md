@@ -30,11 +30,18 @@ Welcome to evidence where MLE's data lives. This website is living documentation
 
 </Details>
 
-<DataTable data={player_page} link=id_link search=true />
+<DataTable data={player_page} link=id_link search=true rows=5 />
 
 ```sql leagueStats
 With leaguestats as (
     select
+    case
+      when ps.skill_group = 'Foundation League' then 1
+      when ps.skill_group = 'Academy League' then 2
+      when ps.skill_group = 'Champion League' then 3
+      when ps.skill_group = 'Master League' then 4
+      when ps.skill_group = 'Premier League' then 5
+    end as league_order,
     ps.skill_group as league,
     case
       when gamemode = 'RL_DOUBLES' then 'Doubles'
@@ -54,7 +61,8 @@ With leaguestats as (
  from read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/players.parquet') p
     inner join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/player_stats_s17.parquet') ps
         on p.member_id = ps.member_id
-group by League, game_mode)
+group by League, game_mode
+order by league_order)
 select *
 from leaguestats
 ```
@@ -82,7 +90,10 @@ from leaguestats
 x=league
 y='{inputs.Stats.value}'
 series=game_mode
-type=grouped />
+type=grouped 
+colorPalette={['#0c88fc', '#fd7600']}
+sort=false
+/>
 
 ## Have ideas or need help?
 

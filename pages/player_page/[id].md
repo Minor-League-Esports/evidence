@@ -7,6 +7,8 @@
     ps.skill_group as league,
     p.member_id as member_id,
     t.logo_img_link as logo,
+    t.primary_color as primary_color,
+    t.secondary_color as secondary_color,
     case
        when p."Franchise Staff Position" = 'NA' then 'Player'
        else p."Franchise Staff Position"
@@ -22,7 +24,9 @@
   franchise,
   logo,
   league,
-  franchise_position
+  franchise_position,
+  primary_color,
+  secondary_color
   from playerstats
   where member_id = '${params.id}'
 ```
@@ -43,10 +47,8 @@
   With playerstats as (
     Select
     name,
-    salary,
-    team_name as team,
-    ps.skill_group as league,
     p.member_id,
+    ps.skill_group as league,
     case
       when gamemode = 'RL_DOUBLES' then 'Doubles'
       when gamemode = 'RL_STANDARD' then 'Standard'
@@ -61,15 +63,50 @@
     avg(saves) as saves_per_game,
     avg(shots) as shots_per_game,
     avg(goals_against) as goals_against_per_game,
-    avg(shots_against) as shots_against_per_game
+    avg(shots_against) as shots_against_per_game,
+    sum(goals)/sum(shots) as shooting_pct2
  from read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/players.parquet') p
     inner join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/player_stats_s17.parquet') ps
         on p.member_id = ps.member_id
 where p.member_id = '${params.id}'
-group by name, salary, team, league, p.member_id, gamemode
+group by name, league, p.member_id, gamemode
+),
+leaguestats as (
+    select
+    ps.skill_group || ' Average' as name,
+    'league_averages' as member_id,
+    ps.skill_group as league,
+    case
+      when gamemode = 'RL_DOUBLES' then 'Doubles'
+      when gamemode = 'RL_STANDARD' then 'Standard'
+      else gamemode
+    end as game_mode,
+    avg(dpi) as avg_dpi,
+    avg(gpi) as avg_gpi,
+    avg(opi) as avg_opi,
+    avg(score) as score_per_game,
+    avg(goals) as goals_per_game,
+    avg(assists) as assists_per_game,
+    avg(saves) as saves_per_game,
+    avg(shots) as shots_per_game,
+    avg(goals_against) as goals_against_per_game,
+    avg(shots_against) as shots_against_per_game,
+    sum(goals)/sum(shots) as shooting_pct2
+ from read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/players.parquet') p
+    inner join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/player_stats_s17.parquet') ps
+        on p.member_id = ps.member_id
+group by League, game_mode
 )
   select *
-  from playerstats
+    from playerstats
+
+  union
+
+  select leaguestats.*
+    from leaguestats
+  inner join playerstats 
+    on playerstats.league = leaguestats.league and playerstats.game_mode = leaguestats.game_mode
+  order by game_mode
 ```
 
 <Details title="Player Match Averages">
@@ -90,12 +127,15 @@ group by name, salary, team, league, p.member_id, gamemode
     <DropdownOption value=shots_per_game valueLabel=Shots />
     <DropdownOption value=goals_against_per_game valueLabel="Goals Against" />
     <DropdownOption value=shots_against_per_game valueLabel="Shots Against"/>
+    <DropdownOption value=shooting_pct2 valueLabel="Shooting %" />
 </Dropdown>
 
 <BarChart 
 data={player_stats}
 x=game_mode
 y='{inputs.Stats.value}'
+series=name
+type=grouped
+colorPalette={[basic_info[0].primary_color, '#A9A9A9']}
+sort=false
 />
-
-<DimensionGrid data={player_stats} />
