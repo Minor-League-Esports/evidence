@@ -13,7 +13,7 @@ title: Player Trackers
 
 ```sql dropdown
 with tracker_search as (
-    SELECT * FROM read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/trackers.parquet')
+    SELECT * FROM trackers
 )
 select
 name,
@@ -25,7 +25,7 @@ from tracker_search
 
 ```sql trackers
 with tracker_search as (
-    SELECT * FROM read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/trackers.parquet')
+    SELECT * FROM trackers
 )
 select
 name,
@@ -34,6 +34,7 @@ platform,
 platform_id as gamertag
 from tracker_search
 where name like '${inputs.Name.value}'
+order by name
 ```
 
 <Dropdown data={dropdown} name=Name value=name>

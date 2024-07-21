@@ -17,11 +17,11 @@ With playerstats as (
     Select name as Name,
     salary::text as Salary,
     team_name as Team,
-    ps.skill_group as League,
+    s17.skill_group as League,
     gamemode as GameMode
- from read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/players.parquet') p
-    inner join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/player_stats_s17.parquet') ps
-        on p.member_id = ps.member_id
+ from players p
+    inner join S17_stats s17
+        on p.member_id = s17.member_id
 group by name, salary, team_name, League, gamemode)
 select *
 from playerstats
@@ -32,7 +32,7 @@ With playerstats as (
     Select name as Name,
     salary as Salary,
     team_name as Team,
-    ps.skill_group as League,
+    s17.skill_group as League,
     gamemode as GameMode,
     avg(dpi) as Avg_DPI,
     avg(gpi) as Avg_GPI,
@@ -42,24 +42,12 @@ With playerstats as (
     avg(assists) as Assists_Per_Game,
     avg(saves) as Saves_Per_Game,
     avg(shots) as Shots_Per_Game
- from read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/players.parquet') p
-    inner join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/player_stats_s17.parquet') ps
-        on p.member_id = ps.member_id
+ from players p
+    inner join S17_stats s17
+        on p.member_id = s17.member_id
 group by name, salary, team_name, League, gamemode)
-select
-Name,
-Salary,
-Team,
-League,
-gamemode,
-Avg_DPI,
-Avg_GPI,
-Avg_OPI,
-Score_Per_Game,
-Goals_Per_Game,
-Assists_Per_Game,
-Saves_Per_Game,
-Shots_Per_Game
+
+select *
 from playerstats
 where Salary like '${inputs.Salary.value}'
 and Team like '${inputs.Team.value}'

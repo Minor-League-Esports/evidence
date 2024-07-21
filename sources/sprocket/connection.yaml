@@ -1,0 +1,5 @@
+# This file was automatically generated
+name: sprocket
+type: duckdb
+options:
+  filename: ":memory:"
