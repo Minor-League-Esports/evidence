@@ -17,8 +17,8 @@ title: S17 Standings
 ```sql blueconference
 with S17standings as (
     SELECT *
-    FROM read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/standings_s17.parquet') st
-        inner join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/teams.parquet') t
+    FROM S17_standings st
+        inner join teams t
             on st.name = t.name
 )
 select
@@ -69,8 +69,8 @@ order by team_wins desc
 ```sql orangeconference
 with S17standings as (
     SELECT *
-    FROM read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/standings_s17.parquet') st
-        inner join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/teams.parquet') t
+    FROM S17_standings st
+        inner join teams t
             on st.name = t.name
 )
 select
@@ -135,8 +135,8 @@ order by team_wins desc
 ```sql bluestandings
 with S17standings as (
     SELECT *
-    FROM read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/standings_s17.parquet') st
-        inner join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/teams.parquet') t
+    FROM S17_standings st
+        inner join teams t
             on st.name = t.name
 )
 select
@@ -193,8 +193,8 @@ and GameMode like '${inputs.GameMode.value}'
 ```sql orangestandings
 with S17standings as (
     SELECT *
-    FROM read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/standings_s17.parquet') st
-        inner join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/teams.parquet') t
+    FROM S17_standings st
+        inner join teams t
             on st.name = t.name
 )
 select

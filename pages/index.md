@@ -9,19 +9,19 @@ title: MLE Homepage
 Welcome to evidence where MLE's data lives. This website is living documentation on all things MLE. Here you can navigate the panel on the left hand side to find stats, standings or even trackers. We hope you enjoy your time here and if there is anything you would like to see add to evidence please follow the link below and let us know.
 
 ```sql player_page
-  with players as (
+  with player as (
   SELECT
   name,
   salary,
   '/player_page/' || p.member_id as id_link,
   franchise
-     from read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/players.parquet') p
-    left join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/player_stats_s17.parquet') ps
-        on p.member_id = ps.member_id
+    from players p
+    left join S17_stats s17
+        on p.member_id = s17.member_id
   group by name, salary, p.member_id, franchise
   )
   select *
-  from players
+  from player
 ```
 
 <Details title="Player Pages">
@@ -36,13 +36,13 @@ Welcome to evidence where MLE's data lives. This website is living documentation
 With leaguestats as (
     select
     case
-      when ps.skill_group = 'Foundation League' then 1
-      when ps.skill_group = 'Academy League' then 2
-      when ps.skill_group = 'Champion League' then 3
-      when ps.skill_group = 'Master League' then 4
-      when ps.skill_group = 'Premier League' then 5
+      when s17.skill_group = 'Foundation League' then 1
+      when s17.skill_group = 'Academy League' then 2
+      when s17.skill_group = 'Champion League' then 3
+      when s17.skill_group = 'Master League' then 4
+      when s17.skill_group = 'Premier League' then 5
     end as league_order,
-    ps.skill_group as league,
+    s17.skill_group as league,
     case
       when gamemode = 'RL_DOUBLES' then 'Doubles'
       when gamemode = 'RL_STANDARD' then 'Standard'
@@ -57,10 +57,11 @@ With leaguestats as (
     avg(saves) as saves_per_game,
     avg(shots) as shots_per_game,
     avg(goals_against) as goals_against_per_game,
-    avg(shots_against) as shots_against_per_game
- from read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/players.parquet') p
-    inner join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/player_stats_s17.parquet') ps
-        on p.member_id = ps.member_id
+    avg(shots_against) as shots_against_per_game,
+    sum(goals)/sum(shots) as shooting_pct2
+ from players p
+    inner join s17_stats s17
+        on p.member_id = s17.member_id
 group by League, game_mode
 order by league_order)
 select *
@@ -84,6 +85,7 @@ from leaguestats
     <DropdownOption value=shots_per_game valueLabel=Shots />
     <DropdownOption value=goals_against_per_game valueLabel="Goals Against" />
     <DropdownOption value=shots_against_per_game valueLabel="Shots Against"/>
+    <DropdownOption value=shooting_pct2 valueLabel="Shooting Percentage" />
 </Dropdown>
 
 <BarChart data={leagueStats}

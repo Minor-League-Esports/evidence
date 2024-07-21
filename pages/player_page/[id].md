@@ -4,7 +4,7 @@
     p.name as name,
     salary as salary,
     franchise,
-    ps.skill_group as league,
+    s17.skill_group as league,
     p.member_id as member_id,
     t.logo_img_link as logo,
     t.primary_color as primary_color,
@@ -13,10 +13,10 @@
        when p."Franchise Staff Position" = 'NA' then 'Player'
        else p."Franchise Staff Position"
        end as franchise_position
- from read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/players.parquet') p
-    left join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/player_stats_s17.parquet') ps
-        on p.member_id = ps.member_id
-    left join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/teams.parquet') t
+ from players p
+    left join S17_stats s17
+        on p.member_id = s17.member_id
+    left join teams t
         on p.franchise = t.name
     )
   select distinct(name),
@@ -48,7 +48,7 @@
     Select
     name,
     p.member_id,
-    ps.skill_group as league,
+    s17.skill_group as league,
     case
       when gamemode = 'RL_DOUBLES' then 'Doubles'
       when gamemode = 'RL_STANDARD' then 'Standard'
@@ -65,17 +65,17 @@
     avg(goals_against) as goals_against_per_game,
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
- from read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/players.parquet') p
-    inner join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/player_stats_s17.parquet') ps
-        on p.member_id = ps.member_id
+ from players p
+    inner join S17_stats s17 
+        on p.member_id = s17.member_id
 where p.member_id = '${params.id}'
 group by name, league, p.member_id, gamemode
 ),
 leaguestats as (
     select
-    ps.skill_group || ' Average' as name,
+    s17.skill_group || ' Average' as name,
     'league_averages' as member_id,
-    ps.skill_group as league,
+    s17.skill_group as league,
     case
       when gamemode = 'RL_DOUBLES' then 'Doubles'
       when gamemode = 'RL_STANDARD' then 'Standard'
@@ -92,9 +92,9 @@ leaguestats as (
     avg(goals_against) as goals_against_per_game,
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
- from read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/players.parquet') p
-    inner join read_parquet('https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/player_stats_s17.parquet') ps
-        on p.member_id = ps.member_id
+ from players p
+    inner join S17_stats s17
+        on p.member_id = s17.member_id
 group by League, game_mode
 )
   select *
