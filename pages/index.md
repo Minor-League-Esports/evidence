@@ -65,6 +65,14 @@ group by League, game_mode
 order by league_order
 ```
 
+```sql leagueComparison
+select 
+league,
+game_mode,
+${inputs.Stats.value} as value
+from ${leagueStats}
+```
+
 ## League Averages
 
 <Dropdown name=Stats defaultValue=score_per_game>
@@ -82,19 +90,11 @@ order by league_order
 </Dropdown>
 
 > Comparitive stats between leagues
-
-
-```sql chart_query
-SELECT league as x, {inputs.Stats.value} as y, game_mode as series FROM ${leagueStats}
-```
-
-<BarChart data={chart_query}
-  x=x
-  y=y
-  series=series
-  type=grouped 
-  colorPalette={['#0c88fc', '#fd7600']}
-  sort=false
+<BarChart data={leagueComparison}
+x=league
+y=value
+series=game_mode
+type=grouped 
+colorPalette={['#0c88fc', '#fd7600']}
+sort=false
 />
-
-
