@@ -83,10 +83,15 @@ order by league_order
 
 > Comparitive stats between leagues
 
-<BarChart data={leagueStats}
-  x=league
-  y='{inputs.Stats.value}'
-  series=game_mode
+
+```sql chart_query
+SELECT league as x, {inputs.Stats.value} as y, game_mode as series FROM ${leagueStats}
+```
+
+<BarChart data={chart_query}
+  x=x
+  y=y
+  series=series
   type=grouped 
   colorPalette={['#0c88fc', '#fd7600']}
   sort=false
