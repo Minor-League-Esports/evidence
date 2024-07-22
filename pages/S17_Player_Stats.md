@@ -74,4 +74,4 @@ order by Score_Per_Game desc
     <DropdownOption value="%" valueLabel="All Game Modes"/>
 </Dropdown>
 
-<DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#7FFFD4 />
+<DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white />

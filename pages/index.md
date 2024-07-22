@@ -5,7 +5,7 @@ title: MLE Homepage
 <LastRefreshed/>
 
 
-Evidence is your gateway into MLE's statistics, here you will find pages for
+Evidence is your gateway into MLE's statistics. Here you will find pages for
 many areas of current, and historical stats (performance, standings, etc).
 If you don't see something here, or are unsure of how to use this tool, reach out
 to the team on [Discord](https://discord.com/channels/172404472637685760/470327770443022346)
@@ -23,13 +23,13 @@ group by name, salary, p.member_id, franchise
 LIMIT 4500
 ```
 
-### Player Summaries
+## Player Summaries
 
-<DataTable data={player_page} search=true rows=5>
+<DataTable data={player_page} search=true rows=5 headerColor=#2a4b82 headerFontColor=white>
   <Column id="name"/>
   <Column id="salary"/>
   <Column id="franchise"/>
-  <Column id="id_link" contentType=link linkLabel="Player Details" title="-"/>
+  <Column id="id_link" contentType=link linkLabel="Player Page" title="Link to Player Page"/>
 </DataTable>
 
 ```sql leagueStats
