@@ -54,7 +54,7 @@ order by team_wins desc
     <DropdownOption valueLabel="Standard" value="Standard"/>
 </Dropdown>
 
-<DataTable data={blueconference} rows=16 rowShading=true headerColor=#1E90FF backgroundColor=#A9A9A9 wrapTitles=true>
+<DataTable data={blueconference} rows=16 rowShading=true headerColor=#1E90FF wrapTitles=true>
     <Column id=divisional_rank align=center />
     <Column id=team_name align=center />
     <Column id=team_logo contentType=image height=25px align=center />
@@ -106,7 +106,7 @@ order by team_wins desc
     <DropdownOption valueLabel="Standard" value="Standard"/>
 </Dropdown>
 
-<DataTable data={orangeconference} rows=16 rowShading=true headerColor=#FFA500 backgroundColor=#A9A9A9 wrapTitles=true>
+<DataTable data={orangeconference} rows=16 rowShading=true headerColor=#FFA500 wrapTitles=true>
     <Column id=divisional_rank align=center />
     <Column id=team_name align=center />
     <Column id=team_logo contentType=image height=25px align=center />
