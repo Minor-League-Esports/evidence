@@ -20,7 +20,7 @@ SELECT
   left join S17_stats s17
       on p.member_id = s17.member_id
 group by name, salary, p.member_id, franchise
-LIMIT 2000
+LIMIT 4500
 ```
 
 ### Player Summaries
