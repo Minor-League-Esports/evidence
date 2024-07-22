@@ -4,37 +4,36 @@ title: MLE Homepage
 
 <LastRefreshed/>
 
-### About Evidence:
 
-Welcome to evidence where MLE's data lives. This website is living documentation on all things MLE. Here you can navigate the panel on the left hand side to find stats, standings or even trackers. We hope you enjoy your time here and if there is anything you would like to see add to evidence please follow the link below and let us know.
+Evidence is your gateway into MLE's statistics, here you will find pages for
+many areas of current, and historical stats (performance, standings, etc).
+If you don't see something here, or are unsure of how to use this tool, reach out
+to the team on [Discord](https://discord.com/channels/172404472637685760/470327770443022346)
 
 ```sql player_page
-  with player as (
-  SELECT
+SELECT
   name,
   salary,
   '/player_page/' || p.member_id as id_link,
   franchise
-    from players p
-    left join S17_stats s17
-        on p.member_id = s17.member_id
-  group by name, salary, p.member_id, franchise
-  )
-  select *
-  from player
+  from players p
+  left join S17_stats s17
+      on p.member_id = s17.member_id
+group by name, salary, p.member_id, franchise
+LIMIT 4500
 ```
 
-<Details title="Player Pages">
+### Player Summaries
 
-<p>In the table below you can find any player in MLE and click on their row to be directed to their personal player page.</p>
-
-</Details>
-
-<DataTable data={player_page} link=id_link search=true rows=5 />
+<DataTable data={player_page} search=true rows=5>
+  <Column id="name"/>
+  <Column id="salary"/>
+  <Column id="franchise"/>
+  <Column id="id_link" contentType=link linkLabel="Player Details" title="-"/>
+</DataTable>
 
 ```sql leagueStats
-With leaguestats as (
-    select
+select
     case
       when s17.skill_group = 'Foundation League' then 1
       when s17.skill_group = 'Academy League' then 2
@@ -63,9 +62,7 @@ With leaguestats as (
     inner join s17_stats s17
         on p.member_id = s17.member_id
 group by League, game_mode
-order by league_order)
-select *
-from leaguestats
+order by league_order
 ```
 
 ```sql leagueComparison
@@ -77,10 +74,6 @@ from ${leagueStats}
 ```
 
 ## League Averages
-
-<Details title="Sort By Stat">
-<p>Below you can use the dropdown menu to compare the averages of each league for each game mode. </p>
-</Details>
 
 <Dropdown name=Stats defaultValue=score_per_game>
     <DropdownOption value=avg_dpi valueLabel=DPI />
@@ -96,6 +89,7 @@ from ${leagueStats}
     <DropdownOption value=shooting_pct2 valueLabel="Shooting Percentage" />
 </Dropdown>
 
+> Comparitive stats between leagues
 <BarChart data={leagueComparison}
 x=league
 y=value
@@ -104,7 +98,3 @@ type=grouped
 colorPalette={['#0c88fc', '#fd7600']}
 sort=false
 />
-
-## Have ideas or need help?
-
-- Message us on [Discord](https://discord.com/channels/172404472637685760/470327770443022346)
