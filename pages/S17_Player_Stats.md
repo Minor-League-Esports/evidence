@@ -6,10 +6,12 @@ title: S17 Player Stats
 
 <Details title='Instructions'>
 
-<p>Below you will find all stats for all players in MLE for S17.</p>
-<p>-You can use the search bar above the table to search for a specific player.</p>
-<p>-You can also use the drop down menus below to Filter the stats however you see fit.</p>
-<p>-Lastly you can click on the stat column to put stats in ascending or descending order.</p>
+Below you will find all stats for all players in MLE for S17.
+- You can use the search bar above the table to search for a specific player.
+- You can also use the drop down menus below to Filter the stats however you see fit.
+- Lastly you can click on the stat column to put stats in ascending or descending order.
+
+
 </Details>
 
 ```sql Stats
@@ -18,7 +20,7 @@ With playerstats as (
     salary::text as Salary,
     team_name as Team,
     s17.skill_group as League,
-    gamemode as GameMode
+    CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
  from players p
     inner join S17_stats s17
         on p.member_id = s17.member_id
@@ -33,7 +35,7 @@ With playerstats as (
     salary as Salary,
     team_name as Team,
     s17.skill_group as League,
-    gamemode as GameMode,
+    CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode,
     avg(dpi) as Avg_DPI,
     avg(gpi) as Avg_GPI,
     avg(opi) as Avg_OPI,
@@ -57,19 +59,19 @@ order by Score_Per_Game desc
 ```
 
 <Dropdown data={Stats} name=Salary value=Salary>
-    <DropdownOption value="%" valueLabel="Filter By Salary"/>
+    <DropdownOption value="%" valueLabel="All Salaries"/>
 </Dropdown>
 
 <Dropdown data={Stats} name=Team value=Team>
-    <DropdownOption value="%" valueLabel="Filter By Team"/>
+    <DropdownOption value="%" valueLabel="All Teams"/>
 </Dropdown>
 
 <Dropdown data={Stats} name=League value=League>
-    <DropdownOption value="%" valueLabel="Filter By League"/>
+    <DropdownOption value="%" valueLabel="All Leagues"/>
 </Dropdown>
 
 <Dropdown data={Stats} name=GameMode value=GameMode>
-    <DropdownOption value="%" valueLabel="Filter By GameMode"/>
+    <DropdownOption value="%" valueLabel="All Game Modes"/>
 </Dropdown>
 
-<DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#7FFFD4 backgroundColor=#A9A9A9 />
+<DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#7FFFD4 />
