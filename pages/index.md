@@ -68,6 +68,14 @@ select *
 from leaguestats
 ```
 
+```sql leagueComparison
+select 
+league,
+game_mode,
+${inputs.Stats.value} as value
+from ${leagueStats}
+```
+
 ## League Averages
 
 <Details title="Sort By Stat">
@@ -88,9 +96,9 @@ from leaguestats
     <DropdownOption value=shooting_pct2 valueLabel="Shooting Percentage" />
 </Dropdown>
 
-<BarChart data={leagueStats}
+<BarChart data={leagueComparison}
 x=league
-y='{inputs.Stats.value}'
+y=value
 series=game_mode
 type=grouped 
 colorPalette={['#0c88fc', '#fd7600']}

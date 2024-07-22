@@ -109,6 +109,14 @@ group by League, game_mode
   order by game_mode
 ```
 
+```sql comparison
+select
+game_mode,
+name,
+${inputs.Stats.value} as value
+from ${player_stats}
+```
+
 <Details title="Player Match Averages">
 
 <p>Below you can use the dropdown to choose the statistic you would like to display. </p>
@@ -131,9 +139,9 @@ group by League, game_mode
 </Dropdown>
 
 <BarChart 
-data={player_stats}
+data={comparison}
 x=game_mode
-y='{inputs.Stats.value}'
+y=value
 series=name
 type=grouped
 colorPalette={[basic_info[0].primary_color, '#A9A9A9']}
