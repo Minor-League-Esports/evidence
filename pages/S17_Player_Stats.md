@@ -51,27 +51,22 @@ group by name, salary, team_name, League, gamemode)
 
 select *
 from playerstats
-where Salary like '${inputs.Salary.value}'
-and Team like '${inputs.Team.value}'
-and League like '${inputs.League.value}'
-and GameMode like '${inputs.GameMode.value}'
+where Salary in ${inputs.Salary.value}
+and Team in ${inputs.Team.value}
+and League in ${inputs.League.value}
+and GameMode in ${inputs.GameMode.value}
 order by Score_Per_Game desc
 ```
 
-<Dropdown data={Stats} name=Salary value=Salary>
-    <DropdownOption value="%" valueLabel="All Salaries"/>
-</Dropdown>
+<Dropdown data={Stats} name=Salary value=Salary multiple=true selectAllByDefault=true />
 
-<Dropdown data={Stats} name=Team value=Team>
-    <DropdownOption value="%" valueLabel="All Teams"/>
-</Dropdown>
+<Dropdown data={Stats} name=Team value=Team multiple=true selectAllByDefault=true />
 
-<Dropdown data={Stats} name=League value=League>
-    <DropdownOption value="%" valueLabel="All Leagues"/>
-</Dropdown>
 
-<Dropdown data={Stats} name=GameMode value=GameMode>
-    <DropdownOption value="%" valueLabel="All Game Modes"/>
-</Dropdown>
+<Dropdown data={Stats} name=League value=League multiple=true selectAllByDefault=true />
+
+
+<Dropdown data={Stats} name=GameMode value=GameMode multiple=true selectAllByDefault=true />
+
 
 <DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white />
