@@ -3,12 +3,12 @@
     Select
     p.name as name,
     salary as salary,
-    franchise,
+    p.franchise,
     s17.skill_group as league,
     p.member_id as member_id,
-    t.logo_img_link as logo,
-    t.primary_color as primary_color,
-    t.secondary_color as secondary_color,
+    t."Photo URL" as logo,
+    t."Primary Color" as primary_color,
+    t."Secondary Color" as secondary_color,
     case
        when p."Franchise Staff Position" = 'NA' then 'Player'
        else p."Franchise Staff Position"
@@ -17,7 +17,7 @@
     left join S17_stats s17
         on p.member_id = s17.member_id
     left join teams t
-        on p.franchise = t.name
+        on p.franchise = t.Franchise
     )
   select distinct(name),
   salary,
