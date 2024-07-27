@@ -80,7 +80,7 @@ from ${leagueStats}
 
 <Dropdown name=Stats defaultValue=score_per_game>
     <DropdownOption value=avg_dpi valueLabel=DPI />
-    <DropdownOption value=avg_gpi valueLabel=GPI />
+    <DropdownOption value=avg_gpi valueLabel="Sprocket Rating" />
     <DropdownOption value=avg_opi valueLabel=OPI />
     <DropdownOption value=score_per_game valueLabel=Score />
     <DropdownOption value=goals_per_game valueLabel=Goals />

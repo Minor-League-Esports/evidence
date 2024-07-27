@@ -38,7 +38,7 @@ With playerstats as (
     team_name as Team,
     s17.skill_group as League,
     CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode,
-    count(score) as games_played,
+    count(*) as games_played,
     avg(dpi) as Avg_DPI,
     avg(gpi) as Avg_GPI,
     avg(opi) as Avg_OPI,
@@ -106,7 +106,7 @@ With playerstats as (
     team_name as Team,
     s17.skill_group as League,
     CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode,
-    count(score) as games_played,
+    count(*) as games_played,
     avg(dpi) as Avg_DPI,
     avg(gpi) as Avg_GPI,
     avg(opi) as Avg_OPI,
@@ -149,7 +149,7 @@ Below you can use the dropdown menus to select multiple players to compare stats
 
 <Dropdown name=stats defaultValue=score_per_game>
     <DropdownOption value=avg_dpi valueLabel=DPI />
-    <DropdownOption value=avg_gpi valueLabel=GPI />
+    <DropdownOption value=avg_gpi valueLabel="Sprocket Rating" />
     <DropdownOption value=avg_opi valueLabel=OPI />
     <DropdownOption value=score_per_game valueLabel=Score />
     <DropdownOption value=goals_per_game valueLabel=Goals />
