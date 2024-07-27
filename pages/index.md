@@ -8,7 +8,7 @@ title: MLE Homepage
 Evidence is your gateway into MLE's statistics. Here you will find pages for
 many areas of current, and historical stats (performance, standings, etc).
 If you don't see something here, or are unsure of how to use this tool, reach out
-to the team on [Discord](https://discord.com/channels/172404472637685760/470327770443022346)
+to the team on [Discord](https://discord.com/channels/172404472637685760/323511951357509642)
 
 ```sql player_page
 SELECT
@@ -47,14 +47,17 @@ select
       when gamemode = 'RL_STANDARD' then 'Standard'
       else gamemode
     end as game_mode,
-    avg(dpi) as avg_dpi,
-    avg(gpi) as avg_gpi,
-    avg(opi) as avg_opi,
-    avg(score) as score_per_game,
-    avg(goals) as goals_per_game,
-    avg(assists) as assists_per_game,
-    avg(saves) as saves_per_game,
-    avg(shots) as shots_per_game,
+    avg(dpi) as Avg_DPI,
+    avg(gpi) as Avg_GPI,
+    avg(opi) as Avg_OPI,
+    avg(score) as Score_Per_Game,
+    avg(goals) as Goals_Per_Game,
+    sum(goals) as total_goals,
+    avg(assists) as Assists_Per_Game,
+    sum(assists) as total_assists,
+    avg(saves) as Saves_Per_Game,
+    sum(saves) as total_saves,
+    avg(shots) as Shots_Per_Game,
     avg(goals_against) as goals_against_per_game,
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
@@ -77,16 +80,19 @@ from ${leagueStats}
 
 <Dropdown name=Stats defaultValue=score_per_game>
     <DropdownOption value=avg_dpi valueLabel=DPI />
-    <DropdownOption value=avg_gpi valueLabel=GPI />
+    <DropdownOption value=avg_gpi valueLabel="Sprocket Rating" />
     <DropdownOption value=avg_opi valueLabel=OPI />
     <DropdownOption value=score_per_game valueLabel=Score />
     <DropdownOption value=goals_per_game valueLabel=Goals />
+    <DropdownOption value=total_goals valueLabel="Total Goals" />
     <DropdownOption value=assists_per_game valueLabel=Assists />
+    <DropdownOption value=total_assists valueLabel="Total Assists" />
     <DropdownOption value=saves_per_game valueLabel=Saves />
+    <DropdownOption value=total_saves valueLabel="Total Saves" />
     <DropdownOption value=shots_per_game valueLabel=Shots />
     <DropdownOption value=goals_against_per_game valueLabel="Goals Against" />
     <DropdownOption value=shots_against_per_game valueLabel="Shots Against"/>
-    <DropdownOption value=shooting_pct2 valueLabel="Shooting Percentage" />
+    <DropdownOption value=shooting_pct2 valueLabel="Shooting %" />
 </Dropdown>
 
 > Comparitive stats between leagues
