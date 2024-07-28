@@ -33,8 +33,8 @@
 
 <LastRefreshed/>
 
-# <Value data={basic_info} column=name /> 
-<img src={basic_info[0].logo} class="h-16" />
+# <center> <Value data={basic_info} column=name /> </center>
+<center><img src={basic_info[0].logo} class="h-16" /></center>
 
 <DataTable data={basic_info} >
     <Column id=salary align=center />
