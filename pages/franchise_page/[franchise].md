@@ -12,10 +12,9 @@ Code,
 where t.franchise = '${params.franchise}'
 ```
 
-<center><img src={team_info[0].logo} class="h-64" /></center>
-<br>
+<center><img src={team_info[0].logo} class="h-32" /></center>
 
-# <center> <Value data={team_info} column=Franchise /> </center>
+#  <center><Value data={team_info} column=Franchise /> </center>
 
 ```sql staff_members
   With playerstats as (
@@ -128,15 +127,60 @@ order by slot asc
 > League Selection
 <Dropdown data={player_info} name=League value=league />
 
+```sql staff_members1
+  With playerstats as (
+    Select
+    p.name as name,
+    salary as salary,
+    p.franchise as franchise,
+    s17.skill_group as league,
+    p.member_id as member_id,
+    '/player_page/' || p.member_id as id_link,
+    t."Photo URL" as logo,
+    t."Primary Color" as primary_color,
+    t."Secondary Color" as secondary_color,
+    case
+       when p."Franchise Staff Position" = 'NA' then 'Player'
+       else p."Franchise Staff Position"
+       end as franchise_position,
+    case when p."Franchise Staff Position" = 'Franchise Manager' then 3
+        when p."Franchise Staff Position" = 'General Manager' then 2
+        when p."Franchise Staff Position" = 'Assistant General Manager' then 4
+        when p."Franchise Staff Position" = 'Captain' then 1
+        when p."Franchise Staff Position" = 'Player' then 5
+        end as franchise_order
+ from players p
+    left join S17_stats s17
+        on p.member_id = s17.member_id
+    left join teams t
+        on p.franchise = t.Franchise
+    )
+  select distinct(name),
+  salary,
+  franchise,
+  logo,
+  league,
+  id_link,
+  franchise_position,
+  primary_color,
+  secondary_color
+  from playerstats
+  where franchise = '${params.franchise}'
+  and league = '${inputs.League.value}'
+order by franchise_order asc
+```
+
+<BigValue data={staff_members1} value=name title=Captain: />
+
 > Franchise Players
 <DataTable data={players} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white wrapTitles=true>
     <Column id=id_link contentType=link linkLabel=name align=center title=Player />
     <Column id=salary align=center />
     <Column id=slot align=center />
-    <Column id=doubles_uses align=center contentType=colorscale scaleColor={['#6db678','white','#ce5050']} colorMin=0 colorMid=3 colorMax=6 />
-    <Column id=standard_uses align=center contentType=colorscale scaleColor={['#6db678','white','#ce5050']} colorMin=0 colorMid=4 colorMax=8 />
-    <Column id=total_uses align=center contentType=colorscale scaleColor={['#6db678','white','#ce5050']} colorMin=0 colorMid=6 colorMax=12 />
-    <Column id=current_scrim_points align=center />
+    <Column id=doubles_uses align=center contentType=colorscale scaleColor={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 4, 5, 6]} />
+    <Column id=standard_uses align=center contentType=colorscale scaleColor={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 6, 7, 8]} />
+    <Column id=total_uses align=center contentType=colorscale scaleColor={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 10, 11, 12]} />
+    <Column id=current_scrim_points align=center contentType=colorscale scaleColor={['#ce5050','white']} colorBreakpoints={[0, 30]}/>
 </DataTable>
 
 ```sql gamemodes
