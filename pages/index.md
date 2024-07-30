@@ -2,7 +2,7 @@
 title: MLE Homepage
 ---
 
-<LastRefreshed/>
+<LastRefreshed prefix="Data last updated"/>
 
 
 Evidence is your gateway into MLE's statistics. Here you will find pages for

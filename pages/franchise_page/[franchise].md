@@ -11,6 +11,7 @@ Code,
  from teams t
 where t.franchise = '${params.franchise}'
 ```
+<LastRefreshed prefix="Data last updated"/>
 
 <center><img src={team_info[0].logo} class="h-32" /></center>
 
@@ -127,50 +128,55 @@ order by slot asc
 > League Selection
 <Dropdown data={player_info} name=League value=league />
 
-```sql staff_members1
-  With playerstats as (
+```sql captain
+  With captain_search as (
     Select
     p.name as name,
     salary as salary,
     p.franchise as franchise,
-    s17.skill_group as league,
+    p.skill_group as league,
     p.member_id as member_id,
     '/player_page/' || p.member_id as id_link,
-    t."Photo URL" as logo,
-    t."Primary Color" as primary_color,
-    t."Secondary Color" as secondary_color,
-    case
-       when p."Franchise Staff Position" = 'NA' then 'Player'
-       else p."Franchise Staff Position"
-       end as franchise_position,
-    case when p."Franchise Staff Position" = 'Franchise Manager' then 3
-        when p."Franchise Staff Position" = 'General Manager' then 2
-        when p."Franchise Staff Position" = 'Assistant General Manager' then 4
+    p."Franchise Staff Position" as staff_position,
+    case 
+        when p."Franchise Staff Position"  = 'Franchise Manager'  and league = '${inputs.League.value}' then 2
+        when p."Franchise Staff Position" = 'General Manager' and league = '${inputs.League.value}' then 3
+        when p."Franchise Staff Position" = 'Assistant General Manager' and league= '${inputs.League.value}' then 4
         when p."Franchise Staff Position" = 'Captain' then 1
-        when p."Franchise Staff Position" = 'Player' then 5
+        when p."Franchise Staff Position"  = 'Franchise Manager' then 5
+        when p."Franchise Staff Position"  = 'General Manager' then 6
+        when p."Franchise Staff Position"  = 'Assistant General Manager' then 7
         end as franchise_order
  from players p
-    left join S17_stats s17
-        on p.member_id = s17.member_id
-    left join teams t
-        on p.franchise = t.Franchise
     )
-  select distinct(name),
+  select 
+  distinct(name),
   salary,
+  franchise_order,
   franchise,
-  logo,
   league,
   id_link,
-  franchise_position,
-  primary_color,
-  secondary_color
-  from playerstats
+  staff_position
+
+  from captain_search
+
   where franchise = '${params.franchise}'
   and league = '${inputs.League.value}'
+  and staff_position = 'Captain'
+  or
+  franchise = '${params.franchise}'
+  and staff_position = 'Franchise Manager'
+  or
+  franchise = '${params.franchise}'
+  and staff_position = 'General Manager'
+  or
+  franchise = '${params.franchise}'
+  and staff_position = 'Assistant General Manager'
+  
 order by franchise_order asc
 ```
 
-<BigValue data={staff_members1} value=name title=Captain: />
+<BigValue data={captain} value=name title=Captain: />
 
 > Franchise Players
 <DataTable data={players} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white wrapTitles=true>

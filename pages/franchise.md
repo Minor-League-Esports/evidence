@@ -2,7 +2,7 @@
 title: Franchise Pages
 ---
 
-<LastRefreshed/>
+<LastRefreshed prefix="Data last updated"/>
 
 ```sql franchises
 select 
