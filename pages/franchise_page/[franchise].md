@@ -172,7 +172,7 @@ order by slot asc
   or
   franchise = '${params.franchise}'
   and staff_position = 'Assistant General Manager'
-  
+
 order by franchise_order asc
 ```
 
@@ -221,7 +221,7 @@ from matches m
 order by m.match_group_id asc
 )
 select 
-SUBSTRING(match_group_title, 7) as week,
+SUBSTRING(match_group_title, 7)::INT as week,
 home,
 away,
 series_winner,
