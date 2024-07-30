@@ -4,6 +4,8 @@ title: S17 Standings
 
 <Tabs>
 <Tab label="Overall Standings">
+	
+<LastRefreshed prefix="Data last updated"/>
 
 ## Filters
 

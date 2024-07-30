@@ -31,10 +31,11 @@
   where member_id = '${params.id}'
 ```
 
-<LastRefreshed/>
+<LastRefreshed prefix="Data last updated"/>
 
-# <Value data={basic_info} column=name /> 
-<img src={basic_info[0].logo} class="h-16" />
+<center><img src={basic_info[0].logo} class="h-16" /></center>
+
+# <center> <Value data={basic_info} column=name /> </center>
 
 <DataTable data={basic_info} >
     <Column id=salary align=center />
