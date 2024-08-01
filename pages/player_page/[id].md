@@ -244,9 +244,9 @@ order by week asc
     <Column id=games_played align=center />
     <Column id=record align=center />
     <Column id=series_result align=center />
-    <Column id=Avg_DPI align=center />
-    <Column id=Avg_GPI align=center />
+    <Column id=Avg_GPI title="Sprocket Rating" align=center />
     <Column id=Avg_OPI align=center />
+    <Column id=Avg_DPI align=center />
     <Column id=Score_Per_Game align=center />
     <Column id=Goals_Per_Game align=center />
     <Column id=total_goals align=center />
