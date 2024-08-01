@@ -237,7 +237,7 @@ order by week asc
 ```
 
 >Season 17 Stats by Series
-<DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primary_color}' headerFontColor=white >
+<DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primary_color}' headerFontColor=white compact=true wrapTitles=true>
     <Column id=week align=center />
     <Column id=game_mode align=center />
     <Column id=opponent align=center />
@@ -247,15 +247,15 @@ order by week asc
     <Column id=Avg_GPI title="Sprocket Rating" align=center />
     <Column id=Avg_OPI align=center />
     <Column id=Avg_DPI align=center />
-    <Column id=Score_Per_Game align=center />
-    <Column id=Goals_Per_Game align=center />
+    <Column id=Score_Per_Game title="Score/Game" align=center />
+    <Column id=Goals_Per_Game title="Goals/Game" align=center />
     <Column id=total_goals align=center />
-    <Column id=Assists_Per_Game align=center />
+    <Column id=Assists_Per_Game title="Assists/Game" align=center />
     <Column id=total_assists align=center />
-    <Column id=Saves_Per_Game align=center />
+    <Column id=Saves_Per_Game title="Saves/Game" align=center />
     <Column id=total_saves align=center />
-    <Column id=Shots_Per_Game align=center />
-    <Column id=goals_against_per_game align=center />
-    <Column id=shots_against_per_game align=center />
+    <Column id=Shots_Per_Game title="Shots/Game" align=center />
+    <Column id=goals_against_per_game title="Goals Against/Game" align=center />
+    <Column id=shots_against_per_game title="Shots Against/Game"align=center />
     <Column id=shooting_pct2 align=center />
 </DataTable>
