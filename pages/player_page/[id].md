@@ -148,3 +148,89 @@ type=grouped
 colorPalette={[basic_info[0].primary_color, '#A9A9A9']}
 sort=false
 />
+
+```sql playerSeries
+with seriesRecord as(
+select 
+name,
+salary,
+r.Home as home,
+r.Away as away,
+m.match_id as match_id,
+SUBSTRING(match_group_title, 7)::INT as week,
+CASE WHEN r.home = '${basic_info[0].franchise}' THEN concat(cast(home_wins as integer), ' - ', cast(away_wins as integer))   
+    WHEN r.away = '${basic_info[0].franchise}' THEN concat(cast(away_wins as integer), ' - ', cast(home_wins as integer))
+         END as record,
+CASE WHEN winning_team = '${basic_info[0].franchise}' THEN 'Win' 
+    WHEN winning_team = 'Not Played / Data Unavailable' THEN 'NA'
+        ELSE 'Loss' 
+            END AS series_result,
+game_mode
+from players p
+  inner join S17_stats s17
+    on p.member_id = s17.member_id
+  inner join rounds r
+    on s17.match_id = r.match_id
+  inner join matches m
+    on r.match_id = m.match_id
+  inner join match_groups mg
+    on m.match_group_id = mg.match_group_id
+where p.member_id = '${params.id}'
+group by name, salary, r.home, r.away, week, home_wins, away_wins, winning_team, game_mode, m.match_id
+), seriesStats as (
+select 
+p.member_id,
+team_name,
+gamemode,
+match_id,
+count(*) as games_played,
+    avg(dpi) as Avg_DPI,
+    avg(gpi) as Avg_GPI,
+    avg(opi) as Avg_OPI,
+    avg(score) as Score_Per_Game,
+    avg(goals) as Goals_Per_Game,
+    sum(goals) as total_goals,
+    avg(assists) as Assists_Per_Game,
+    sum(assists) as total_assists,
+    avg(saves) as Saves_Per_Game,
+    sum(saves) as total_saves,
+    avg(shots) as Shots_Per_Game,
+    avg(goals_against) as goals_against_per_game,
+    avg(shots_against) as shots_against_per_game,
+    sum(goals)/sum(shots) as shooting_pct2
+from players p
+  inner join S17_stats s17
+    on p.member_id = s17.member_id
+where p.member_id = '${params.id}'
+group by p.member_id, team_name, gamemode, match_id
+)
+Select
+home,
+away,
+week,
+record,
+series_result,
+game_mode,
+games_played,
+Avg_DPI,
+Avg_GPI,
+Avg_OPI,
+Score_Per_Game,
+Goals_Per_Game,
+total_goals,
+Assists_Per_Game,
+total_assists,
+Saves_Per_Game,
+total_saves,
+Shots_Per_Game,
+goals_against_per_game,
+shots_against_per_game,
+shooting_pct2
+from seriesStats ss
+  inner join seriesRecord sr
+    on ss.match_id = sr.match_id
+order by week asc 
+```
+
+>Season 17 Stats by Series
+<DataTable data={playerSeries} rows=20 rowShading=true/>
