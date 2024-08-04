@@ -180,16 +180,16 @@ order by franchise_order asc
 
 > Franchise Players
 <DataTable data={players} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white wrapTitles=true>
+    <Column id=slot align=center />
     <Column id=id_link contentType=link linkLabel=name align=center title=Player />
     <Column id=salary align=center />
-    <Column id=slot align=center />
     <Column id=doubles_uses align=center contentType=colorscale scaleColor={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 4, 5, 6]} />
     <Column id=standard_uses align=center contentType=colorscale scaleColor={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 6, 7, 8]} />
     <Column id=total_uses align=center contentType=colorscale scaleColor={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 10, 11, 12]} />
     <Column id=current_scrim_points align=center contentType=colorscale scaleColor={['#ce5050','white']} colorBreakpoints={[0, 30]}/>
 </DataTable>
 
-```sql gamemodes
+```sql gamemodeDropdown
 select game_mode
 from matches
 ```
@@ -199,6 +199,10 @@ with record as(
 select 
 home,
 away,
+case
+  when home = '${params.franchise}' then away
+  else home
+  end as opponent,
 league,
 game_mode,
 home_wins,
@@ -222,8 +226,7 @@ order by m.match_group_id asc
 )
 select 
 SUBSTRING(match_group_title, 7)::INT as week,
-home,
-away,
+opponent,
 series_winner,
 CASE WHEN series_winner = '${params.franchise}' THEN 'Win' 
     WHEN series_winner = 'Not Played / Data Unavailable' THEN 'NA'
@@ -238,13 +241,136 @@ from record
 ```
 
 >GameMode Selection
-<Dropdown data={gamemodes} name=Gamemodes value=game_mode />
+<Dropdown data={gamemodeDropdown} name=Gamemodes value=game_mode />
+
+<BigValue data={teamStatistics} value=record /> <BigValue data={teamStatistics} value=series_record /> <BigValue data={teamStatistics} value=goal_differential />
 
 >Season 17 Results
 <DataTable data={team_record} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white >
     <Column id=week align=center />
-    <Column id=home align=center />
-    <Column id=away align=center />
+    <Column id=opponent align=center />
     <Column id=series_result align=center />
     <Column id=record align=center />
 </DataTable>
+
+```sql teamStatistics
+with S17standings as (
+    
+    SELECT
+        *
+        , CASE
+            WHEN s17.mode IN ('Doubles', 'Standard') THEN s17.mode
+            ELSE 'Overall'
+        END AS game_mode
+    FROM S17_standings s17
+    INNER JOIN teams t
+        ON s17.name = t.Franchise
+
+), results AS (
+
+	SELECT
+		r.match_id
+		, m.league
+		, m.game_mode
+		, r.Home AS team_name
+		, m.home_wins AS wins
+		, m.away_wins AS loses
+		, CASE WHEN r.Home = m.winning_team THEN 1 ELSE 0 END AS series_wins
+		, CASE WHEN r.Home != m.winning_team THEN 1 ELSE 0 END AS series_loses
+		, SUM(r."Home Goals") AS goals_for
+		, SUM(r."Away Goals") AS goals_against
+		, goals_for - goals_against AS goal_diff
+	FROM rounds r
+	INNER JOIN matches m
+	    ON r.match_id = m.match_id
+	INNER JOIN match_groups mg
+	    on m.match_group_id = mg.match_group_id
+	WHERE mg.parent_group_title = 'Season 17'
+	GROUP BY
+		1, 2, 3, 4, 5, 6, 7, 8
+		
+	UNION ALL
+	
+	SELECT
+		r.match_id
+		, m.league
+		, m.game_mode
+		, r.Away AS team_name
+		, m.away_wins AS wins
+		, m.home_wins AS loses
+		, CASE WHEN r.Away = m.winning_team THEN 1 ELSE 0 END AS series_wins
+		, CASE WHEN r.Away != m.winning_team THEN 1 ELSE 0 END AS series_loses
+		, SUM(r."Away Goals") AS goals_for
+		, SUM(r."Home Goals") AS goals_against
+		, goals_for - goals_against AS goal_diff
+	FROM rounds r
+	INNER JOIN matches m
+	    ON r.match_id = m.match_id
+	INNER JOIN match_groups mg
+	    on m.match_group_id = mg.match_group_id
+	WHERE mg.parent_group_title = 'Season 17'
+	GROUP BY
+		1, 2, 3, 4, 5, 6, 7, 8
+
+), series_and_goal_diff AS (
+
+    SELECT
+        league
+        , game_mode
+        , team_name
+        , SUM(wins) AS wins
+        , SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins
+        , SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for
+        , SUM(goals_against) AS goals_against
+        , SUM(goal_diff) AS goal_diff
+    FROM results
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        league
+        , 'Overall' AS game_mode
+        , team_name
+        , SUM(wins) AS wins
+        , SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins
+        , SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for
+        , SUM(goals_against) AS goals_against
+        , SUM(goal_diff) AS goal_diff
+    FROM results
+    GROUP BY 1, 2, 3
+
+)
+
+SELECT
+    s17.ranking AS divisional_rank
+    , s17.Franchise AS team_name
+    , s17."Photo URL" AS team_logo
+    , s17.Division AS division
+	, s17."Super Division" AS super_division
+    , s17.Conference
+    , s17.team_wins::INT || ' - ' || s17.team_losses::INT AS record
+    , sagd.series_wins || ' - ' || sagd.series_loses AS series_record
+    , sagd.goals_for
+    , sagd.goals_against
+    , sagd.goal_diff AS goal_differential
+FROM S17standings s17
+INNER JOIN series_and_goal_diff sagd
+    ON s17.Franchise = sagd.team_name
+    AND s17.league = sagd.league
+    AND s17.game_mode = sagd.game_mode
+WHERE s17.conference NOT NULL
+    AND s17.division_name NOT NULL
+    AND s17.league LIKE '${inputs.League.value}'
+    AND s17.game_mode LIKE '${inputs.Gamemodes.value}'
+    AND team_name = '${params.franchise}'
+ORDER BY
+    s17.team_wins DESC
+    , sagd.series_wins DESC
+    , sagd.goal_diff DESC
+    , sagd.goals_for DESC
+```
