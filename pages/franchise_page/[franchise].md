@@ -203,6 +203,7 @@ case
   when home = '${params.franchise}' then away
   else home
   end as opponent,
+'/franchise_page/' || opponent as franchise_link,
 league,
 game_mode,
 home_wins,
@@ -223,21 +224,54 @@ from matches m
     and league = '${inputs.League.value}'
     and game_mode = '${inputs.Gamemodes.value}'
 order by m.match_group_id asc
+), goal_diff as (
+select
+r.match_id,
+SUBSTRING(mg.match_group_title, 7)::INT as week,
+m.league,
+m.game_mode,
+r.home as home,
+sum("Home Goals") as home_goals,
+r.away as away,
+sum("Away Goals") as away_goals,
+case
+    when r.home = '${params.franchise}' then home_goals - away_goals
+    when r.away = '${params.franchise}' then away_goals - home_goals
+    end as goal_differential
+from rounds r
+    inner join matches m
+        on m.match_id = r.match_id
+    inner join match_groups mg
+        on mg.match_group_id = m.match_group_id
+where parent_group_title = 'Season 17'
+    and r.home = '${params.franchise}'
+    and m.league = '${inputs.League.value}'
+    and m.game_mode = '${inputs.Gamemodes.value}'
+    or parent_group_title = 'Season 17'
+    and r.away = '${params.franchise}'
+    and m.league = '${inputs.League.value}'
+    and m.game_mode = '${inputs.Gamemodes.value}'
+group by r.match_id, week, m.league, m.game_mode, r.home, r.away
+order by week asc
 )
 select 
 SUBSTRING(match_group_title, 7)::INT as week,
 opponent,
+franchise_link,
 series_winner,
 CASE WHEN series_winner = '${params.franchise}' THEN 'Win' 
     WHEN series_winner = 'Not Played / Data Unavailable' THEN 'NA'
         ELSE 'Loss' 
             END AS series_result,
-CASE WHEN home = '${params.franchise}' THEN concat(cast(home_wins as integer), ' - ', cast(away_wins as integer))   
-    WHEN away = '${params.franchise}' THEN concat(cast(away_wins as integer), ' - ', cast(home_wins as integer))
+CASE WHEN re.home = '${params.franchise}' THEN concat(cast(home_wins as integer), ' - ', cast(away_wins as integer))   
+    WHEN re.away = '${params.franchise}' THEN concat(cast(away_wins as integer), ' - ', cast(home_wins as integer))
          END as record,
 series_winner,
-game_mode
-from record
+re.game_mode,
+goal_differential
+from record re
+    inner join goal_diff gd
+        on re.home = gd.home and re.away = gd.away
 ```
 
 >GameMode Selection
@@ -248,9 +282,10 @@ from record
 >Season 17 Results
 <DataTable data={team_record} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white >
     <Column id=week align=center />
-    <Column id=opponent align=center />
+    <Column id=franchise_link contentType=link linkLabel=opponent title=Opponent align=center />
     <Column id=series_result align=center />
     <Column id=record align=center />
+    <Column id=goal_differential align=center />
 </DataTable>
 
 ```sql teamStatistics

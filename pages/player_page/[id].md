@@ -176,6 +176,7 @@ from players p
   inner join match_groups mg
     on m.match_group_id = mg.match_group_id
 where p.member_id = '${params.id}'
+and parent_group_title = 'Season 17'
 group by name, salary, r.home, r.away, week, home_wins, away_wins, winning_team, game_mode, m.match_id
 ), seriesStats as (
 select 
@@ -213,6 +214,7 @@ case
   when home = '${basic_info[0].franchise}' then away
   else home
   end as opponent,
+'/franchise_page/' || opponent as franchise_link,
 games_played,
 record,
 series_result,
@@ -240,7 +242,7 @@ order by week asc
 <DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primary_color}' headerFontColor=white compact=true wrapTitles=true>
     <Column id=week align=center />
     <Column id=game_mode align=center />
-    <Column id=opponent align=center />
+    <Column id=franchise_link contentType=link linkLabel=opponent title=Opponent align=center />
     <Column id=games_played align=center />
     <Column id=record align=center />
     <Column id=series_result align=center />
