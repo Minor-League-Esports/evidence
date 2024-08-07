@@ -104,5 +104,3 @@ type=grouped
 colorPalette={['#0c88fc', '#fd7600']}
 sort=false
 />
-
-comment
