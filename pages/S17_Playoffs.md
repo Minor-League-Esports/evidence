@@ -34,4 +34,4 @@ from matches m
 
 <Dropdown data={leagues} name=gamemode value=game_mode />
 
-<DataTable data={playoffs} groupBy=round />
+<DataTable data={playoffs} groupBy=round rowShading=true headerColor=#2a4b82 headerFontColor=white />
