@@ -60,7 +60,7 @@ select
     avg(shots) as Shots_Per_Game,
     avg(goals_against) as goals_against_per_game,
     avg(shots_against) as shots_against_per_game,
-    sum(goals)/sum(shots) as shooting_pct2
+    sum(goals)/sum(shots) * 100 as shooting_pct2
  from players p
     inner join s17_stats s17
         on p.member_id = s17.member_id
@@ -76,26 +76,26 @@ ${inputs.Stats.value} as value
 from ${leagueStats}
 ```
 
-## League Averages
+## League Statistics
 
 <Dropdown name=Stats defaultValue=score_per_game>
-    <DropdownOption value=avg_dpi valueLabel=DPI />
-    <DropdownOption value=avg_gpi valueLabel="Sprocket Rating" />
-    <DropdownOption value=avg_opi valueLabel=OPI />
-    <DropdownOption value=score_per_game valueLabel=Score />
-    <DropdownOption value=goals_per_game valueLabel=Goals />
+    <DropdownOption value=avg_dpi valueLabel="Avg DPI" />
+    <DropdownOption value=avg_gpi valueLabel="Avg Sprocket Rating" />
+    <DropdownOption value=avg_opi valueLabel="Avg OPI" />
+    <DropdownOption value=score_per_game valueLabel="Avg Score" />
+    <DropdownOption value=goals_per_game valueLabel="Avg Goals" />
     <DropdownOption value=total_goals valueLabel="Total Goals" />
-    <DropdownOption value=assists_per_game valueLabel=Assists />
+    <DropdownOption value=assists_per_game valueLabel="Avg Assists" />
     <DropdownOption value=total_assists valueLabel="Total Assists" />
-    <DropdownOption value=saves_per_game valueLabel=Saves />
+    <DropdownOption value=saves_per_game valueLabel="Avg Saves" />
     <DropdownOption value=total_saves valueLabel="Total Saves" />
-    <DropdownOption value=shots_per_game valueLabel=Shots />
-    <DropdownOption value=goals_against_per_game valueLabel="Goals Against" />
-    <DropdownOption value=shots_against_per_game valueLabel="Shots Against"/>
-    <DropdownOption value=shooting_pct2 valueLabel="Shooting %" />
+    <DropdownOption value=shots_per_game valueLabel="Avg Shots" />
+    <DropdownOption value=goals_against_per_game valueLabel="Avg Goals Against" />
+    <DropdownOption value=shots_against_per_game valueLabel="Avg Shots Against"/>
+    <DropdownOption value=shooting_pct2 valueLabel="Avg Shooting %" />
 </Dropdown>
 
-> Comparitive stats between leagues
+> ### {inputs.Stats.label} per League
 <BarChart data={leagueComparison}
 x=league
 y=value
@@ -104,4 +104,6 @@ type=grouped
 colorPalette={['#0c88fc', '#fd7600']}
 sort=false
 showAllXAxisLabels=true
+labels=true
+yFmt=0.00
 />
