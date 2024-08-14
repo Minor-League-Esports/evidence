@@ -8,13 +8,13 @@ title: Franchise Pages
 select 
   Franchise,
   '/franchise_page/' || t.Franchise as franchise_link,
-  ANY_VALUE("Photo URL") as logo,
+  t."Photo URL" as logo,
   SUM(team_wins)::int || ' - ' || SUM(team_losses)::int as Record,
 from teams t
   join s17_standings s17
     on t.Franchise=s17.name
 where not (s17.mode is null or s17.league is null or s17.conference is null or s17.division_name is null)
-group by t.Franchise
+group by t.Franchise, t."Photo URL"
 order by t.Franchise asc
 ```
 
