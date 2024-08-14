@@ -14,7 +14,6 @@ tracker,
 platform,
 platform_id as gamertag
 from tracker_search
-where name like '${inputs.Name.value}'
 order by name
 ```
 
