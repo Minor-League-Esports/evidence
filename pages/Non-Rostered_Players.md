@@ -31,13 +31,42 @@ WHERE franchise IN ('FA', 'Pend', 'Waivers', 'RFA');
 
 <Dropdown data={PWDropdown} name=Status value=franchise multiple=true selectAllByDefault=true />
 
+>
+```sql PWChart
+select
+    franchise, 
+    replace(skill_group, ' League', '') as shortened_skill_group,
+    count(*) as data,
+    case
+      when skill_group = 'Foundation League' then 1
+      when skill_group = 'Academy League' then 2
+      when skill_group = 'Champion League' then 3
+      when skill_group = 'Master League' then 4
+      when skill_group = 'Premier League' then 5
+    end as league_order,
+FROM players p
+WHERE franchise IN ${inputs.Status.value}
+    AND skill_group in ${inputs.League.value}
+    Group by skill_group, franchise, league_order
+    order by league_order
+   ```
+<BarChart 
+    data={PWChart}
+    x=shortened_skill_group
+    y=data
+    showAllXAxisLabels=true
+    series=franchise
+    title="Total Per League"
+    sort=false
+/>
+
 ```sql PWTable
 SELECT DISTINCT 
     name, 
     p.member_id, 
     franchise, 
     current_scrim_points, 
-    p.skill_group AS skill_group, 
+    replace(p.skill_group, 'League', '') as skill_group,
     salary, 
     CASE 
         WHEN current_scrim_points >= 30 THEN 'Yes' 
