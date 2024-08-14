@@ -103,4 +103,5 @@ series=game_mode
 type=grouped 
 colorPalette={['#0c88fc', '#fd7600']}
 sort=false
+showAllXAxisLabels=true
 />
