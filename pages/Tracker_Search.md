@@ -23,6 +23,6 @@ select name from trackers
 
 <DataTable data={trackers} rows=20 rowShading=true headerColor=#2a4b82 headerFontColor=white>
     <Column id=name />
-    <Column id=tracker contentType=link linkLabel=platform openInNewTab=true />
+    <Column id=cleaned_tracker contentType=link linkLabel=platform openInNewTab=true />
     <Column id=gamertag />
 </DataTable>
