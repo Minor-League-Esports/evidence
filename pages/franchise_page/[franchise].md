@@ -173,7 +173,7 @@ ORDER BY franchise_order ASC
 </DataTable>
 
     </Tab>
-    <Tab label="Franchise Records">
+    <Tab label="S17 Records">
 
 ```sql team_record
 WITH record AS(
@@ -408,6 +408,10 @@ ORDER BY
     , sagd.goals_for DESC
 ```
 
+    </Tab>
+
+    <Tab label="All Time Records">
+
 ```sql allTimeRecord
 SELECT 
 name
@@ -431,6 +435,19 @@ AND mode = '${inputs.Gamemodes}'
 AND league = '${inputs.League}'
 ORDER BY season ASC
 ```
+<ButtonGroup name=League title="League Selection:" >
+    <ButtonGroupItem valueLabel="Foundation League" value="Foundation League" />
+    <ButtonGroupItem valueLabel="Academy League" value="Academy League" default />
+    <ButtonGroupItem valueLabel="Champion League" value="Champion League" />
+    <ButtonGroupItem valueLabel="Master League" value="Master League" />
+    <ButtonGroupItem valueLabel="Premier League" value="Premier League" />
+</ButtonGroup>
+
+>
+<ButtonGroup name=Gamemodes title="GameMode Selection:" >
+    <ButtonGroupItem valueLabel="Doubles" value="Doubles" default />
+    <ButtonGroupItem valueLabel="Standard" value="Standard" />
+</ButtonGroup>
 
 ## <p> <center> <u> Record By Season </u> </center> </p>
 <DataTable data={allTimeRecord} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white totalRow=true >
