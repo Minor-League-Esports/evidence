@@ -12,7 +12,7 @@ to the team on [Discord](https://discord.com/channels/172404472637685760/3235119
 
 ```sql player_page
 SELECT
-  name,
+  NAME,
   salary,
   '/player_page/' || p.member_id as id_link,
   franchise
