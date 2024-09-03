@@ -5,7 +5,6 @@ title: Player Trackers
 <LastRefreshed prefix="Data last updated"/>
 
 ```sql trackers
-
 SELECT
     t.name
     , CASE 
@@ -18,14 +17,18 @@ SELECT
     , t.platform_id as gamertag
 
 FROM trackers t
-
+WHERE t.name = '${inputs.Dropdown.value}'
 ORDER BY
     t.name
-
 ```
 
+```sql dropdown
+select name from trackers
+```
 
-<DataTable data={trackers} rows=20 rowShading=true search=true headerColor=#2a4b82 headerFontColor=white>
+<Dropdown data={dropdown} name=Dropdown value=name defaultValue="OwnerOfTheWhiteSedan" />
+
+<DataTable data={trackers} rows=20 rowShading=true headerColor=#2a4b82 headerFontColor=white>
     <Column id=name />
     <Column id=cleaned_tracker contentType=link linkLabel=platform openInNewTab=true />
     <Column id=gamertag />
