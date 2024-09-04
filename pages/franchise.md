@@ -40,15 +40,11 @@ ON o.name = t.Franchise
 ORDER BY t.Franchise
 ```
 
-
-
-
-<DataTable data={joined_franchises} search=true rows=32 headerColor=#2a4b82 headerFontColor=white link=franchise_link>
+<DataTable data={joined_franchises} search=true rows=32 headerColor=#2a4b82 headerFontColor=white link=Franchise_Link>
   <Column id="Franchise" align=center/>
   <Column id="logo" contentType=image height=40px align=center />
   <Column id="Overall_Record" align=center />
   <Column id="Standard_Record" align=center />
   <Column id="Doubles_Record" align=center />
-  <!-- <Column id="franchise_link" contentType=link linkLabel="Franchise Page" title="Franchise Link" align=center /> -->
 
 </DataTable>
