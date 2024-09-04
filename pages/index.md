@@ -10,98 +10,101 @@ many areas of current, and historical stats (performance, standings, etc).
 If you don't see something here, or are unsure of how to use this tool, reach out
 to the team on [Discord](https://discord.com/channels/172404472637685760/323511951357509642)
 
-```sql player_page
+```sql franchise
 SELECT
-  name,
-  salary,
-  '/player_page/' || p.member_id as id_link,
   franchise
-  from players p
-  left join S17_stats s17
-      on p.member_id = s17.member_id
-group by name, salary, p.member_id, franchise
-LIMIT 4500
+FROM teams
+ORDER BY franchise ASC
 ```
 
-## Player Summaries
-
-<DataTable data={player_page} search=true rows=5 headerColor=#2a4b82 headerFontColor=white>
-  <Column id="name"/>
-  <Column id="salary"/>
-  <Column id="franchise"/>
-  <Column id="id_link" contentType=link linkLabel="Player Page" title="Link to Player Page"/>
-</DataTable>
-
-```sql leagueStats
-select
-    case
-      when s17.skill_group = 'Foundation League' then 1
-      when s17.skill_group = 'Academy League' then 2
-      when s17.skill_group = 'Champion League' then 3
-      when s17.skill_group = 'Master League' then 4
-      when s17.skill_group = 'Premier League' then 5
-    end as league_order,
-    s17.skill_group as league,
-    case
-      when gamemode = 'RL_DOUBLES' then 'Doubles'
-      when gamemode = 'RL_STANDARD' then 'Standard'
-      else gamemode
-    end as game_mode,
-    avg(dpi) as Avg_DPI,
-    avg(gpi) as Avg_GPI,
-    avg(opi) as Avg_OPI,
-    avg(score) as Score_Per_Game,
-    avg(goals) as Goals_Per_Game,
-    sum(goals) as total_goals,
-    avg(assists) as Assists_Per_Game,
-    sum(assists) as total_assists,
-    avg(saves) as Saves_Per_Game,
-    sum(saves) as total_saves,
-    avg(shots) as Shots_Per_Game,
-    avg(goals_against) as goals_against_per_game,
-    avg(shots_against) as shots_against_per_game,
-    sum(goals)/sum(shots) as shooting_pct2
- from players p
-    inner join s17_stats s17
-        on p.member_id = s17.member_id
-group by League, game_mode
-order by league_order
+```sql players
+SELECT 
+name,
+'/player_page/' || p.member_id AS id_link,
+salary,
+skill_group AS league,
+case
+    when skill_group = 'Foundation League' then 1
+    when skill_group = 'Academy League' then 2
+    when skill_group = 'Champion League' then 3
+    when skill_group = 'Master League' then 4
+    when skill_group = 'Premier League' then 5
+  end as league_order,
+franchise,
+SUBSTRING(slot, 7) AS slot,
+doubles_uses,
+standard_uses,
+total_uses,
+current_scrim_points,
+CASE WHEN current_scrim_points >= 30 THEN 'Yes'
+    ELSE 'No'
+    END AS Eligible
+FROM players p
+    INNER JOIN role_usages ru
+        ON p.franchise = ru.team_name
+        AND p.slot = ru.role
+        AND upper(p.skill_group) = concat(ru.league, ' LEAGUE')
+WHERE franchise = '${inputs.Team_Selection.value}'
+AND skill_group LIKE '${inputs.League_Selection}'
+AND slot != 'NONE'
+AND season_number = 17
+ORDER BY league_order DESC, slot ASC
 ```
 
-```sql leagueComparison
-select 
-league,
-game_mode,
-${inputs.Stats.value} as value
-from ${leagueStats}
+```sql team_info
+SELECT 
+Franchise,
+Conference,
+"Super Division",
+Division,
+Code,
+"Primary Color" AS primary_color,
+"Secondary Color" AS secondary_color,
+"Photo URL" AS logo
+FROM teams t
+WHERE t.franchise = '${inputs.Team_Selection.value}'
 ```
 
-## League Averages
+<Tabs>
 
-<Dropdown name=Stats defaultValue=score_per_game>
-    <DropdownOption value=avg_dpi valueLabel=DPI />
-    <DropdownOption value=avg_gpi valueLabel="Sprocket Rating" />
-    <DropdownOption value=avg_opi valueLabel=OPI />
-    <DropdownOption value=score_per_game valueLabel=Score />
-    <DropdownOption value=goals_per_game valueLabel=Goals />
-    <DropdownOption value=total_goals valueLabel="Total Goals" />
-    <DropdownOption value=assists_per_game valueLabel=Assists />
-    <DropdownOption value=total_assists valueLabel="Total Assists" />
-    <DropdownOption value=saves_per_game valueLabel=Saves />
-    <DropdownOption value=total_saves valueLabel="Total Saves" />
-    <DropdownOption value=shots_per_game valueLabel=Shots />
-    <DropdownOption value=goals_against_per_game valueLabel="Goals Against" />
-    <DropdownOption value=shots_against_per_game valueLabel="Shots Against"/>
-    <DropdownOption value=shooting_pct2 valueLabel="Shooting %" />
-</Dropdown>
+  <Tab label="Standings">
+    <ButtonGroup name=League_Selection>
+  
+      <ButtonGroupItem valueLabel="Foundation League" value= "Foundation League" />
+      <ButtonGroupItem valueLabel="Academy League" value= "Academy League" default />
+      <ButtonGroupItem valueLabel="Champion League" value="Champion League" />
+      <ButtonGroupItem valueLabel="Master League" value="Master League" />
+      <ButtonGroupItem valueLabel="Premier League" value="Premier League" />
+    </ButtonGroup>  
+  </Tab>
 
-> Comparitive stats between leagues
-<BarChart data={leagueComparison}
-x=league
-y=value
-series=game_mode
-type=grouped 
-colorPalette={['#0c88fc', '#fd7600']}
-sort=false
-showAllXAxisLabels=true
-/>
+  <Tab label="Eligibility">
+
+    <Dropdown
+      data={franchise}
+      name=Team_Selection
+      value=franchise
+      defaultvalue="Aviators"
+    />
+    <ButtonGroup name=League_Selection>
+      <ButtonGroupItem valueLabel="Foundation League" value= "Foundation League" />
+      <ButtonGroupItem valueLabel="Academy League" value= "Academy League" default />
+      <ButtonGroupItem valueLabel="Champion League" value="Champion League" />
+      <ButtonGroupItem valueLabel="Master League" value="Master League" />
+      <ButtonGroupItem valueLabel="Premier League" value="Premier League" />
+    </ButtonGroup> 
+    
+
+    <DataTable data={players} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white wrapTitles=true>
+      <Column id=slot align=center />
+      <Column id=id_link contentType=link linkLabel=name align=center title=Player />
+      <Column id=salary align=center />
+      <Column id=doubles_uses align=center contentType=colorscale scaleColor={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 4, 5, 6]} />
+      <Column id=standard_uses align=center contentType=colorscale scaleColor={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 6, 7, 8]} />
+      <Column id=total_uses align=center contentType=colorscale scaleColor={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 10, 11, 12]} />
+      <Column id=current_scrim_points align=center contentType=colorscale scaleColor={['#ce5050','white']} colorBreakpoints={[0, 30]}/>
+    </DataTable>
+
+  </Tab>
+
+</Tabs>  
