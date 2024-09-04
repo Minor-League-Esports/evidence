@@ -1,5 +1,6 @@
 ---
-title: S17 Player Stats ---
+title: S17 Player Stats
+---
 
 <Tabs>
 <Tab label="Player Stats">
