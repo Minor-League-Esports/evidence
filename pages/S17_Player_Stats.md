@@ -1,6 +1,5 @@
 ---
-title: S17 Player Stats
----
+title: S17 Player Stats ---
 
 <Tabs>
 <Tab label="Player Stats">
@@ -34,13 +33,14 @@ from playerstats
 ```sql LeaderboardStats
 With playerstats as (
     Select name as Name,
+    '/player_page/' || p.member_id as playerLink,
     salary as Salary,
     team_name as Team,
     s17.skill_group as League,
     CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode,
     count(*) as games_played,
     avg(dpi) as Avg_DPI,
-    avg(gpi) as Avg_GPI,
+    avg(gpi) as "Sprocket Rating",
     avg(opi) as Avg_OPI,
     avg(score) as Score_Per_Game,
     avg(goals) as Goals_Per_Game,
@@ -56,7 +56,7 @@ With playerstats as (
  from players p
     inner join S17_stats s17
         on p.member_id = s17.member_id
-group by name, salary, team_name, League, gamemode)
+group by name, salary, team_name, League, gamemode, p.member_id)
 
 select *
 from playerstats
@@ -64,7 +64,7 @@ where Salary in ${inputs.Salary.value}
 and Team in ${inputs.Team.value}
 and League in ${inputs.League.value}
 and GameMode in ${inputs.GameMode.value}
-order by Score_Per_Game desc
+order by Name ASC
 ```
 
 <Dropdown data={Stats} name=Salary value=Salary multiple=true selectAllByDefault=true />
@@ -78,7 +78,27 @@ order by Score_Per_Game desc
 <Dropdown data={Stats} name=GameMode value=GameMode multiple=true selectAllByDefault=true />
 
 
-<DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white />
+<DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=playerLink >
+            <Column id=Name align=center />
+            <Column id=Salary align=center />
+            <Column id=League align=center />
+            <Column id=GameMode align=center />
+            <Column id=games_played align=center />
+            <Column id="Sprocket Rating" align=center />
+            <Column id=Avg_OPI align=center />
+            <Column id=Avg_DPI align=center />
+            <Column id=Score_Per_Game align=center />
+            <Column id=Goals_Per_Game align=center />
+            <Column id=total_goals align=center />
+            <Column id=Assists_Per_Game align=center />
+            <Column id=total_assists align=center />
+            <Column id=Saves_Per_Game align=center />
+            <Column id=total_saves align=center />
+            <Column id=Shots_Per_Game align=center />
+            <Column id=goals_against_per_game align=center />
+            <Column id=shots_against_per_game align=center />
+            <Column id=shooting_pct2 align=center />
+</DataTable>
 
 </Tab>
 
