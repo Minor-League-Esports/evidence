@@ -65,17 +65,39 @@ FROM teams t
 WHERE t.franchise = '${inputs.Team_Selection.value}'
 ```
 
+```sql basicInfo
+SELECT
+    ranking
+    , Franchise
+    , t.Conference
+    , "Super Division"
+    , Division
+    , Code 
+    , "Primary Color"
+    , "Secondary Color"
+    , "Photo URL"
+    , mode
+    , league
+    , season 
+    , team_wins
+    , team_losses
+FROM S17_standings s17
+    INNER JOIN teams t 
+        on t.franchise = s17.name
+```
+
 <Tabs>
 
   <Tab label="Standings">
+
     <ButtonGroup name=League_Selection>
-  
       <ButtonGroupItem valueLabel="Foundation League" value= "Foundation League" />
       <ButtonGroupItem valueLabel="Academy League" value= "Academy League" default />
       <ButtonGroupItem valueLabel="Champion League" value="Champion League" />
       <ButtonGroupItem valueLabel="Master League" value="Master League" />
       <ButtonGroupItem valueLabel="Premier League" value="Premier League" />
     </ButtonGroup>  
+
   </Tab>
 
   <Tab label="Eligibility">
@@ -86,6 +108,7 @@ WHERE t.franchise = '${inputs.Team_Selection.value}'
       value=franchise
       defaultvalue="Aviators"
     />
+
     <ButtonGroup name=League_Selection>
       <ButtonGroupItem valueLabel="Foundation League" value= "Foundation League" />
       <ButtonGroupItem valueLabel="Academy League" value= "Academy League" default />
