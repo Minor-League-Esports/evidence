@@ -1,5 +1,5 @@
 ---
-title: S17 Player Stats
+title: S17 Stats
 ---
 
 <Tabs>
@@ -159,14 +159,13 @@ where name in ${inputs.Player.value}
 
 <LastRefreshed prefix="Data last updated"/>
 
-<Details title='Instructions'>
+<Details title='Instructions' open>
 
-Below you can use the dropdown menus to select multiple players to compare stats against each other. <b>Please note that nothing will appear until you select the players you would like to compare.</b>
-
+<b>Below you can use the dropdown menus to select multiple players to compare stats against each other. </b>
 
 </Details>
 
-<Dropdown data={Stats} name=Player value=name multiple=true />
+<Dropdown data={Stats} name=Player value=name multiple=true defaultValue={['Ol Dirty Dirty','OwnerOfTheWhiteSedan']} />
 
 <Dropdown name=stats defaultValue=score_per_game>
     <DropdownOption value=avg_dpi valueLabel=DPI />
