@@ -5,6 +5,6 @@
 	export let data;
 </script>
 
-<EvidenceDefaultLayout {data} logo=/mle_banner_logo.png githubRepo=https://github.com/Minor-League-Esports/evidence xProfile=https://twitter.com/MLEsportsGG fullWidth=true>
+<EvidenceDefaultLayout {data} logo=/mle_banner_logo.png githubRepo=https://github.com/Minor-League-Esports/evidence xProfile=https://twitter.com/MLEsportsGG >
 	<slot slot="content" />
 </EvidenceDefaultLayout>
