@@ -67,7 +67,7 @@ WHERE t.franchise = '${inputs.Team_Selection.value}'
 
 <Tabs>
 
-  <Tab label=" S17 Standings">
+  <Tab label=" S17 Conference Standings">
 
     <LastRefreshed prefix="Data last updated"/>
 
