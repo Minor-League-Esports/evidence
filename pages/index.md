@@ -65,6 +65,19 @@ FROM teams t
 WHERE t.franchise = '${inputs.Team_Selection.value}'
 ```
 
+```sql player_page
+SELECT
+  name,
+  salary,
+  '/player_page/' || p.member_id as id_link,
+  franchise
+  from players p
+  left join S17_stats s17
+      on p.member_id = s17.member_id
+group by name, salary, p.member_id, franchise
+LIMIT 4500
+```
+
 <Tabs>
 
   <Tab label=" S17 Conference Standings">
