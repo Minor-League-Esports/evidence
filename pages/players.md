@@ -26,12 +26,30 @@ group by name, salary, p.member_id, franchise
 ```sql playerCount
 SELECT
     salary
+    , skill_group
     , count(*) as totalPlayers
 FROM players p
-GROUP BY salary
+GROUP BY
+    salary
+    , skill_group
 ORDER BY salary
 ```
 
-<BarChart data={playerCount} x=salary y=totalPlayers xAxisTitle="Salaries" title="Number of Players per Salary" labels=true />
+<BarChart
+    data={playerCount}
+    x=salary
+    y=totalPlayers
+    xAxisTitle="Salaries"
+    title="Number of Players per Salary"
+    series=skill_group
+    stackTotalLabel=true
+    colorPalette={[
+        '#cf0d06',
+        '#eb5752',
+        '#e88a87',
+        '#fcdad9',
+        '#1992bd'
+        ]}
+/>
 
 
