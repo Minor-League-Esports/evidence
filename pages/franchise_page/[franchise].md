@@ -29,7 +29,7 @@ WHERE t.franchise = '${params.franchise}'
     p.franchise AS franchise,
     s17.skill_group AS league,
     p.member_id AS member_id,
-    '/player_page/' || p.member_id AS id_link,
+    '/players/' || p.member_id AS id_link,
     t."Photo URL" AS logo,
     t."Primary Color" AS primary_color,
     t."Secondary Color" AS secondary_color,
@@ -79,7 +79,7 @@ WHERE t.franchise = '${params.franchise}'
 ```sql players
 SELECT 
 name,
-'/player_page/' || p.member_id AS id_link,
+'/players/' || p.member_id AS id_link,
 salary,
 skill_group AS league,
 franchise,
@@ -111,7 +111,7 @@ ORDER BY slot ASC
     p.franchise AS franchise,
     p.skill_group AS league,
     p.member_id AS member_id,
-    '/player_page/' || p.member_id AS id_link,
+    '/players/' || p.member_id AS id_link,
     p."Franchise Staff Position" AS staff_position,
     CASE 
         WHEN p."Franchise Staff Position"  = 'Franchise Manager'  AND league = '${inputs.League}' THEN 2
@@ -435,6 +435,14 @@ AND mode = '${inputs.Gamemodes}'
 AND league = '${inputs.League}'
 ORDER BY season ASC
 ```
+
+<LastRefreshed prefix="Data last updated"/>
+
+<center><img src={team_info[0].logo} class="h-32" /></center>
+
+#  <center><Value data={team_info} column=Franchise /> </center>
+
+
 <ButtonGroup name=League title="League Selection:" >
     <ButtonGroupItem valueLabel="Foundation League" value="Foundation League" />
     <ButtonGroupItem valueLabel="Academy League" value="Academy League" default />

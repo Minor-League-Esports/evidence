@@ -34,7 +34,7 @@ from playerstats
 ```sql LeaderboardStats
 With playerstats as (
     Select name as Name,
-    '/player_page/' || p.member_id as playerLink,
+    '/players/' || p.member_id as playerLink,
     salary as Salary,
     team_name as Team,
     s17.skill_group as League,
@@ -129,7 +129,7 @@ With playerstats as (
     CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode,
     count(*) as games_played,
     avg(dpi) as Avg_DPI,
-    avg(gpi) as Avg_GPI,
+    avg(gpi) as sprocket_rating,
     avg(opi) as Avg_OPI,
     avg(score) as Score_Per_Game,
     avg(goals) as Goals_Per_Game,
@@ -169,7 +169,7 @@ where name in ${inputs.Player.value}
 
 <Dropdown name=stats defaultValue=score_per_game>
     <DropdownOption value=avg_dpi valueLabel=DPI />
-    <DropdownOption value=avg_gpi valueLabel="Sprocket Rating" />
+    <DropdownOption value=sprocket_rating valueLabel="Sprocket Rating" />
     <DropdownOption value=avg_opi valueLabel=OPI />
     <DropdownOption value=score_per_game valueLabel=Score />
     <DropdownOption value=goals_per_game valueLabel=Goals />
@@ -215,7 +215,7 @@ select
       else gamemode
     end as game_mode,
     avg(dpi) as Avg_DPI,
-    avg(gpi) as Avg_GPI,
+    avg(gpi) as sprocket_rating,
     avg(opi) as Avg_OPI,
     avg(score) as Score_Per_Game,
     avg(goals) as Goals_Per_Game,
@@ -247,7 +247,7 @@ from ${leagueStats}
 
 <Dropdown name=Stats defaultValue=score_per_game>
     <DropdownOption value=avg_dpi valueLabel="Avg DPI" />
-    <DropdownOption value=avg_gpi valueLabel="Avg Sprocket Rating" />
+    <DropdownOption value=sprocket_rating valueLabel="Avg Sprocket Rating" />
     <DropdownOption value=avg_opi valueLabel="Avg OPI" />
     <DropdownOption value=score_per_game valueLabel="Avg Score" />
     <DropdownOption value=goals_per_game valueLabel="Avg Goals" />
@@ -262,6 +262,11 @@ from ${leagueStats}
     <DropdownOption value=shooting_pct2 valueLabel="Avg Shooting %" />
 </Dropdown>
 
+<Dropdown name=mode defaultValue=Doubles >
+    <DropdownOption value=Doubles />
+    <DropdownOption value=Standard />
+</Dropdown>
+
 > ### {inputs.Stats.label} per League
 <BarChart data={leagueComparison}
 x=league
@@ -274,6 +279,191 @@ showAllXAxisLabels=true
 labels=true
 yFmt=0.00
 />
+
+
+```sql allStats
+select
+    salary,
+    case
+      when s17.skill_group = 'Foundation League' then 1
+      when s17.skill_group = 'Academy League' then 2
+      when s17.skill_group = 'Champion League' then 3
+      when s17.skill_group = 'Master League' then 4
+      when s17.skill_group = 'Premier League' then 5
+    end as league_order,
+    s17.skill_group as league,
+    case
+      when gamemode = 'RL_DOUBLES' then 'Doubles'
+      when gamemode = 'RL_STANDARD' then 'Standard'
+      else gamemode
+    end as game_mode,
+    avg(dpi) as avg_dpi,
+    avg(gpi) as sprocket_rating,
+    avg(opi) as avg_opi,
+    avg(score) as score_per_game,
+    avg(goals) as goals_per_game,
+    sum(goals) as total_goals,
+    avg(assists) as assists_per_game,
+    sum(assists) as total_assists,
+    avg(saves) as saves_per_game,
+    sum(saves) as total_saves,
+    avg(shots) as shots_per_game,
+    avg(goals_against) as goals_against_per_game,
+    avg(shots_against) as shots_against_per_game,
+    sum(goals)/sum(shots) * 100 as shooting_pct2,
+    case
+        when league = 'Foundation League' then ${inputs.Stats.value}
+    end as FLstats,
+    ${inputs.Stats.value} as value
+ from players p
+    inner join s17_stats s17
+        on p.member_id = s17.member_id
+where game_mode = '${inputs.mode.value}'
+group by salary, league, game_mode
+order by salary
+```
+
+```sql statsFL
+select
+    salary,
+    league,
+    game_mode,
+    CASE
+        when league = 'Foundation League' then ${inputs.Stats.value}
+    end as FLstats,
+    CASE
+        when league = 'Academy League' then ${inputs.Stats.value}
+    end as ALstats,
+    CASE
+        when league = 'Champion League' then ${inputs.Stats.value}
+    end as CLstats,
+    CASE
+        when league = 'Master League' then ${inputs.Stats.value}
+    end as MLstats,
+    CASE
+        when league = 'Premier League' then ${inputs.Stats.value}
+    end as PLstats
+from ${allStats}
+where league = 'Foundation League'
+and salary <= 10
+```
+
+```sql statsAL
+select
+    salary,
+    league,
+    game_mode,
+    CASE
+        when league = 'Foundation League' then ${inputs.Stats.value}
+    end as FLstats,
+    CASE
+        when league = 'Academy League' then ${inputs.Stats.value}
+    end as ALstats,
+    CASE
+        when league = 'Champion League' then ${inputs.Stats.value}
+    end as CLstats,
+    CASE
+        when league = 'Master League' then ${inputs.Stats.value}
+    end as MLstats,
+    CASE
+        when league = 'Premier League' then ${inputs.Stats.value}
+    end as PLstats
+from ${allStats}
+where league = 'Academy League'
+and salary >= 10.5
+and salary <= 12.5
+```
+
+```sql statsCL
+select
+    salary,
+    league,
+    game_mode,
+    CASE
+        when league = 'Foundation League' then ${inputs.Stats.value}
+    end as FLstats,
+    CASE
+        when league = 'Academy League' then ${inputs.Stats.value}
+    end as ALstats,
+    CASE
+        when league = 'Champion League' then ${inputs.Stats.value}
+    end as CLstats,
+    CASE
+        when league = 'Master League' then ${inputs.Stats.value}
+    end as MLstats,
+    CASE
+        when league = 'Premier League' then ${inputs.Stats.value}
+    end as PLstats
+from ${allStats}
+where league = 'Champion League'
+and salary >= 13
+and salary <= 15
+```
+
+```sql statsML
+select
+    salary,
+    league,
+    game_mode,
+    CASE
+        when league = 'Foundation League' then ${inputs.Stats.value}
+    end as FLstats,
+    CASE
+        when league = 'Academy League' then ${inputs.Stats.value}
+    end as ALstats,
+    CASE
+        when league = 'Champion League' then ${inputs.Stats.value}
+    end as CLstats,
+    CASE
+        when league = 'Master League' then ${inputs.Stats.value}
+    end as MLstats,
+    CASE
+        when league = 'Premier League' then ${inputs.Stats.value}
+    end as PLstats
+from ${allStats}
+where league = 'Master League'
+and salary >= 15.5
+and salary <= 17.5
+```
+
+```sql statsPL
+select
+    salary,
+    league,
+    game_mode,
+    CASE
+        when league = 'Foundation League' then ${inputs.Stats.value}
+    end as FLstats,
+    CASE
+        when league = 'Academy League' then ${inputs.Stats.value}
+    end as ALstats,
+    CASE
+        when league = 'Champion League' then ${inputs.Stats.value}
+    end as CLstats,
+    CASE
+        when league = 'Master League' then ${inputs.Stats.value}
+    end as MLstats,
+    CASE
+        when league = 'Premier League' then ${inputs.Stats.value}
+    end as PLstats
+from ${allStats}
+where league = 'Premier League'
+and salary >= 18
+```
+
+<Grid cols=2 title=Doubles >
+    <LineChart data={statsFL} x=salary y=FLstats xFmt=#,##0.0 title="Foundation League" labels=true markers=true colorPalette='#4ebeec'
+/>
+    <LineChart data={statsAL} x=salary y=ALstats xFmt=#,##0.0 title="Academy League" labels=true markers=true colorPalette='#0085fa'
+/>
+    <LineChart data={statsCL} x=salary y=CLstats xFmt=#,##0.0 title="Champion League" labels=true markers=true colorPalette='#7e55ce'
+/>
+    <LineChart data={statsML} x=salary y=MLstats xFmt=#,##0.0 title="Master League" labels=true markers=true colorPalette='#d10057'
+/>
+    <LineChart data={statsPL} x=salary y=PLstats xFmt=#,##0.0 title="Premier League" labels=true markers=true colorPalette='#e2b22d'
+/>
+</Grid>
+
 
 </Tab>
 </Tabs>

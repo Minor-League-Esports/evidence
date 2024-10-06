@@ -28,7 +28,7 @@
   primary_color,
   secondary_color
   from playerstats
-  where member_id = '${params.id}'
+  where member_id = '${params.member_id}'
 ```
 
 <LastRefreshed prefix="Data last updated"/>
@@ -69,7 +69,7 @@
  from players p
     inner join S17_stats s17 
         on p.member_id = s17.member_id
-where p.member_id = '${params.id}'
+where p.member_id = '${params.member_id}'
 group by name, league, p.member_id, gamemode
 ),
 leaguestats as (
@@ -175,7 +175,7 @@ from players p
     on r.match_id = m.match_id
   inner join match_groups mg
     on m.match_group_id = mg.match_group_id
-where p.member_id = '${params.id}'
+where p.member_id = '${params.member_id}'
 and parent_group_title = 'Season 17'
 group by name, salary, r.home, r.away, week, home_wins, away_wins, winning_team, game_mode, m.match_id
 ), seriesStats as (
@@ -202,7 +202,7 @@ count(*) as games_played,
 from players p
   inner join S17_stats s17
     on p.member_id = s17.member_id
-where p.member_id = '${params.id}'
+where p.member_id = '${params.member_id}'
 group by p.member_id, team_name, gamemode, match_id
 )
 Select
