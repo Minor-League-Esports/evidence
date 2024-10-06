@@ -451,13 +451,17 @@ where league = 'Premier League'
 and salary >= 18
 ```
 
-
 <Grid cols=2 title=Doubles >
-    <LineChart data={statsFL} x=salary y=FLstats xFmt=#,##0.0 title="Foundation League" labels=true />
-    <LineChart data={statsAL} x=salary y=ALstats xFmt=#,##0.0 title="Academy League" labels=true />
-    <LineChart data={statsCL} x=salary y=CLstats xFmt=#,##0.0 title="Champion League" labels=true />
-    <LineChart data={statsML} x=salary y=MLstats xFmt=#,##0.0 title="Master League" labels=true />
-    <LineChart data={statsPL} x=salary y=PLstats xFmt=#,##0.0 title="Premier League" labels=true />
+    <LineChart data={statsFL} x=salary y=FLstats xFmt=#,##0.0 title="Foundation League" labels=true markers=true colorPalette='#4ebeec'
+/>
+    <LineChart data={statsAL} x=salary y=ALstats xFmt=#,##0.0 title="Academy League" labels=true markers=true colorPalette='#0085fa'
+/>
+    <LineChart data={statsCL} x=salary y=CLstats xFmt=#,##0.0 title="Champion League" labels=true markers=true colorPalette='#7e55ce'
+/>
+    <LineChart data={statsML} x=salary y=MLstats xFmt=#,##0.0 title="Master League" labels=true markers=true colorPalette='#d10057'
+/>
+    <LineChart data={statsPL} x=salary y=PLstats xFmt=#,##0.0 title="Premier League" labels=true markers=true colorPalette='#e2b22d'
+/>
 </Grid>
 
 

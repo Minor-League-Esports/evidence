@@ -44,11 +44,11 @@ ORDER BY salary
     series=skill_group
     stackTotalLabel=true
     colorPalette={[
-        '#cf0d06',
-        '#eb5752',
-        '#e88a87',
-        '#fcdad9',
-        '#1992bd'
+        '#4ebeec',
+        '#0085fa',
+        '#7e55ce',
+        '#d10057',
+        '#e2b22d'
         ]}
 />
 
