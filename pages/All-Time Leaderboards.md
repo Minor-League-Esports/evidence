@@ -64,7 +64,7 @@ order by Name asc
 <Dropdown data={Stats} name=GameMode value=GameMode multiple=true selectAllByDefault=true />
 
 
-<DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white >
+<DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white wrapTitles=true >
     <Column id=Name align=center />
     <Column id=GameMode align=center />
     <Column id='Games Played' align=center />
