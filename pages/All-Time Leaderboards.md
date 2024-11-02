@@ -8,6 +8,7 @@ title: All-Time Leaderboards
 With player_stats as (
     Select name as Name
     ,CASE WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
+    ,games_played
     ,sprocket_rating
     ,opi_per_game
     ,dpi_per_game
@@ -57,7 +58,7 @@ group by Name, gamemode
 
 select *
 from player_stats
-where GameMode in ${inputs.GameMode.value}
+where GameMode in ${inputs.GameMode.value} and "Games Played" >= 30
 order by Name asc
 ```
 
