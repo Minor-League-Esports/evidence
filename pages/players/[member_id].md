@@ -1,5 +1,6 @@
 ```sql basic_info
     Select
+   -- distinct keeps us from getting multiples of the same information in the basic_info table 
     distinct(p.name) as name,
     salary as salary,
     p.franchise,
