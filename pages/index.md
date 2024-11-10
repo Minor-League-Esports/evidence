@@ -1,14 +1,28 @@
----
-title: MLE Homepage
----
+```sql teamLogos
+SELECT 
+franchise,
+'/franchise_page/' || franchise as franchiseLink,
+"Photo URL" as logo
+FROM teams
+ORDER BY franchise ASC
+```
+<div style="width:100%; max-width:700px; margin:auto;">
+<div style="display:flex; flex-direction:row; align-items:center; justify-content:center; flex-wrap:wrap; gap:0.25rem;"> 
+{#each teamLogos as t}
+<a href="{t.franchiseLink}" > <img src={t.logo} class="h-10 w-10" /> </a>
+{/each}
+</div>
+</div>
 
-<LastRefreshed prefix="Data last updated"/>
+
+<p>&nbsp; </p>
+<h1 style="font-size: 40px;"><center><b> MLE Homepage </b></center></h1>
 
 
 Evidence is your gateway into MLE's statistics. Here you will find pages for
 many areas of current, and historical stats (performance, standings, etc).
 If you don't see something here, or are unsure of how to use this tool, reach out
-to the team on [Discord](https://discord.com/channels/172404472637685760/323511951357509642)
+to the team on [Discord](https://discord.com/channels/172404472637685760/323511951357509642).
 
 
 <Tabs>
