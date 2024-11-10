@@ -1,25 +1,25 @@
 ```sql basic_info
     Select
    -- distinct keeps us from getting multiples of the same information in the basic_info table 
-    distinct(p.name) as name,
-    salary as salary,
+    p.name,
+    salary,
     p.franchise,
     s17.skill_group as league,
-    p.member_id as member_id,
+    p.member_id,
     t."Photo URL" as logo,
     t."Primary Color" as primary_color,
     t."Secondary Color" as secondary_color,
     case
        when p."Franchise Staff Position" = 'NA' then 'Player'
        else p."Franchise Staff Position"
-       end as franchise_position,
+       END as franchise_position,
     current_scrim_points,
     CASE 
         WHEN current_scrim_points >= 30 then 'Yes'
         ELSE 'No'
         END AS eligible
  from players p
-    left join S17_stats s17
+    left join (select distinct member_id, skill_group from S17_stats) s17
         on p.member_id = s17.member_id
     left join teams t
         on p.franchise = t.Franchise
