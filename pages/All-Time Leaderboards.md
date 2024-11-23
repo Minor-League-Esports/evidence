@@ -32,7 +32,7 @@ order by Name
 With player_stats as (
     Select name as Name
     ,CASE WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
-    ,sum(games_played) as 'Games Played'
+    ,sum(games_played) as games_played
     ,avg(sprocket_rating) as 'Sprocket Rating'
     ,avg(opi_per_game) as OPI
     ,avg(dpi_per_game) as DPI
@@ -58,17 +58,27 @@ group by Name, gamemode
 
 select *
 from player_stats
-where GameMode in ${inputs.GameMode.value} and "Games Played" >= 30
-order by Name asc
+where GameMode in ${inputs.GameMode.value}
+and games_played >= ${inputs.games_played}
+order by Name asc, games_played desc
 ```
 
 <Dropdown data={Stats} name=GameMode value=GameMode multiple=true selectAllByDefault=true />
 
+<Slider
+    title='Games Played'
+    name=games_played
+    data={Stats}
+    defaultValue=1
+    min=1
+    max=165
+    size=large
+/>
 
 <DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white wrapTitles=true >
     <Column id=Name align=center />
     <Column id=GameMode align=center />
-    <Column id='Games Played' align=center />
+    <Column id='games_played' align=center />
     <Column id='Sprocket Rating' align=center />
     <Column id='OPI' align=center />
     <Column id='DPI' align=center />
