@@ -1,5 +1,5 @@
 ---
-title: All-Time Leaderboards
+title: All-Time Player Stats
 ---
 
 <LastRefreshed prefix="Data last updated"/>
