@@ -6,7 +6,7 @@ title: S17 Playoff Results
 
 ```sql playoffs
 select
-m.home,
+m.home, 
 m.away,
 concat(home_wins::INT, ' - ', away_wins::INT) as series_record,
 case
@@ -18,8 +18,8 @@ from matches m
   inner join match_groups mg
     on m.match_group_id = mg.match_group_id
 where parent_group_title = 'Season 17 Playoffs'
-and league = '${inputs.leagues.value}'
-and game_mode = '${inputs.gamemode.value}'
+and league = '${inputs.leaguesButtons}'
+and game_mode = '${inputs.gamemode}'
 
 ```
 
@@ -30,8 +30,19 @@ game_mode
 from matches m
 ```
 
-<Dropdown data={leagues} name=leagues value=league />
+<ButtonGroup name=leaguesButtons display=tabs>
+    <ButtonGroupItem valueLabel="Foundation League" value="Foundation League" default />
+    <ButtonGroupItem valueLabel="Academy League" value="Academy League" />
+    <ButtonGroupItem valueLabel="Champion League" value="Champion League" />
+    <ButtonGroupItem valueLabel="Master League" value="Master League" />
+    <ButtonGroupItem valueLabel="Premier League" value="Premier League" />
+</ButtonGroup>
 
-<Dropdown data={leagues} name=gamemode value=game_mode />
 
-<DataTable data={playoffs} groupBy=round rowShading=true headerColor=#2a4b82 headerFontColor=white />
+<ButtonGroup name=gamemode display=tabs>
+    <ButtonGroupItem valueLabel="Doubles" value="Doubles" default />
+    <ButtonGroupItem valueLabel="Standard" value="Standard" />
+</ButtonGroup>
+
+
+<DataTable data={playoffs} textAlign=center groupBy=round rowShading=true headerColor=#2a4b82 headerFontColor=white groupType=section/>
