@@ -1,7 +1,6 @@
 ```sql player_page_link
 SELECT
   name,
-  sprocket_player_id,
   salary,
   '/players/' || p.member_id as id_link,
   franchise, 
@@ -10,7 +9,7 @@ SELECT
   from players p
   left join S17_stats s17
       on p.member_id = s17.member_id
-group by name, sprocket_player_id, salary, p.member_id, franchise, current_scrim_points, "Eligible Until"
+group by name, salary, p.member_id, franchise, current_scrim_points, "Eligible Until"
 ```
 
 ## Player Pages
