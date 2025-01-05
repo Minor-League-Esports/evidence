@@ -5,14 +5,11 @@ SELECT
   '/players/' || p.member_id as id_link,
   franchise, 
   p.current_scrim_points,
-  CASE 
-    WHEN current_scrim_points >= 30 then 'Yes'
-    ELSE 'No'
-    END AS eligible
+  "Eligible Until"  
   from players p
   left join S17_stats s17
       on p.member_id = s17.member_id
-group by name, salary, p.member_id, franchise, current_scrim_points
+group by name, salary, p.member_id, franchise, current_scrim_points, "Eligible Until"
 ```
 
 ## Player Pages
@@ -26,7 +23,7 @@ group by name, salary, p.member_id, franchise, current_scrim_points
   <Column id="salary" align=center />
   <Column id="franchise" align=center />
   <Column id=current_scrim_points align=center contentType=colorscale scaleColor={['#ce5050','white']} colorBreakpoints={[0, 30]} />
-  <Column id=eligible align=center />
+  <Column id="Eligible Until" align=center />
 </DataTable>
 
 
