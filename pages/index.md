@@ -336,38 +336,6 @@ FROM teams
 ORDER BY franchise ASC
 ```
 
-```sql players
-SELECT 
-name,
-'/players/' || p.member_id AS id_link,
-salary,
-skill_group AS league,
-case
-    when skill_group = 'Foundation League' then 1
-    when skill_group = 'Academy League' then 2
-    when skill_group = 'Champion League' then 3
-    when skill_group = 'Master League' then 4
-    when skill_group = 'Premier League' then 5
-  end as league_order,
-franchise,
-SUBSTRING(slot, 7) AS slot,
-doubles_uses,
-standard_uses,
-total_uses,
-current_scrim_points,
-"Eligible Until"
-FROM players p
-    INNER JOIN role_usages ru
-        ON p.franchise = ru.team_name
-        AND p.slot = ru.role
-        AND upper(p.skill_group) = concat(ru.league, ' LEAGUE')
-WHERE franchise = '${inputs.Team_Selection.value}'
-AND skill_group LIKE '${inputs.League_Selection}'
-AND slot != 'NONE'
-AND season_number = 17
-ORDER BY league_order DESC, slot ASC
-```
-
 ```sql eligibility
 SELECT 
 name,
@@ -423,14 +391,6 @@ WHERE t.franchise = '${inputs.Team_Selection.value}'
     defaultvalue="Aviators"
 />
 
-<ButtonGroup name=League_Selection>
-      <ButtonGroupItem valueLabel="Foundation League" value= "Foundation League" />
-      <ButtonGroupItem valueLabel="Academy League" value= "Academy League" default />
-      <ButtonGroupItem valueLabel="Champion League" value="Champion League" />
-      <ButtonGroupItem valueLabel="Master League" value="Master League" />
-      <ButtonGroupItem valueLabel="Premier League" value="Premier League" />
-</ButtonGroup> 
-    
 
 <DataTable data={eligibility} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white wrapTitles=true rows=25 >
       <Column id=league align=center />
