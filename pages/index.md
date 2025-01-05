@@ -355,9 +355,7 @@ doubles_uses,
 standard_uses,
 total_uses,
 current_scrim_points,
-CASE WHEN current_scrim_points >= 30 THEN 'Yes'
-    ELSE 'No'
-    END AS Eligible
+"Eligible Until"
 FROM players p
     INNER JOIN role_usages ru
         ON p.franchise = ru.team_name
@@ -368,6 +366,40 @@ AND skill_group LIKE '${inputs.League_Selection}'
 AND slot != 'NONE'
 AND season_number = 17
 ORDER BY league_order DESC, slot ASC
+```
+
+```sql eligibility
+SELECT 
+name,
+'/players/' || p.member_id AS id_link,
+salary,
+skill_group AS league,
+CASE
+    WHEN skill_group = 'Foundation League' THEN 1 
+    WHEN skill_group = 'Academy League' THEN 2 
+    WHEN skill_group = 'Champion League' THEN 3 
+    WHEN skill_group = 'Master League' THEN 4 
+    WHEN skill_group = 'Premier League' THEN 5 
+END as league_order, 
+franchise,
+SUBSTRING(slot, 7) AS slot,
+doubles_uses,
+standard_uses,
+total_uses,
+current_scrim_points,
+CASE WHEN current_scrim_points >= 30 THEN 'Yes'
+    ELSE 'No'
+    END AS Eligible,
+"Eligible Until"
+FROM players p
+    INNER JOIN role_usages ru
+        ON p.franchise = ru.team_name
+        AND p.slot = ru.role
+        AND upper(p.skill_group) = concat(ru.league, ' LEAGUE')
+WHERE franchise = '${inputs.Team_Selection.value}'
+AND slot != 'NONE'
+AND season_number = 17 
+ORDER BY league_order ASC, slot ASC
 ```
 
 ```sql team_info
@@ -384,23 +416,24 @@ FROM teams t
 WHERE t.franchise = '${inputs.Team_Selection.value}'
 ```
 
-    <Dropdown
-      data={franchise}
-      name=Team_Selection
-      value=franchise
-      defaultvalue="Aviators"
-    />
+<Dropdown
+    data={franchise}
+    name=Team_Selection
+    value=franchise
+    defaultvalue="Aviators"
+/>
 
-    <ButtonGroup name=League_Selection>
+<ButtonGroup name=League_Selection>
       <ButtonGroupItem valueLabel="Foundation League" value= "Foundation League" />
       <ButtonGroupItem valueLabel="Academy League" value= "Academy League" default />
       <ButtonGroupItem valueLabel="Champion League" value="Champion League" />
       <ButtonGroupItem valueLabel="Master League" value="Master League" />
       <ButtonGroupItem valueLabel="Premier League" value="Premier League" />
-    </ButtonGroup> 
+</ButtonGroup> 
     
 
-    <DataTable data={players} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white wrapTitles=true>
+<DataTable data={eligibility} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white wrapTitles=true rows=25 >
+      <Column id=league align=center />
       <Column id=slot align=center />
       <Column id=id_link contentType=link linkLabel=name align=center title=Player />
       <Column id=salary align=center />
@@ -408,7 +441,8 @@ WHERE t.franchise = '${inputs.Team_Selection.value}'
       <Column id=standard_uses align=center contentType=colorscale scaleColor={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 6, 7, 8]} />
       <Column id=total_uses align=center contentType=colorscale scaleColor={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 10, 11, 12]} />
       <Column id=current_scrim_points align=center contentType=colorscale scaleColor={['#ce5050','white']} colorBreakpoints={[0, 30]}/>
-    </DataTable>
+      <Column id="Eligible Until" align=center />  
+</DataTable>
 
   </Tab>
 
