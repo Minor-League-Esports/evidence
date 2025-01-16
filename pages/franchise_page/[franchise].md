@@ -173,7 +173,7 @@ ORDER BY franchise_order ASC
 </DataTable>
 
     </Tab>
-    <Tab label="Team Elibility">
+    <Tab label="Team Eligibility">
 
 ```sql eligibility
 SELECT 

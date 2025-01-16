@@ -2,6 +2,20 @@
 title: S17 Stats
 ---
 
+
+```sql dropdown_info
+    Select DISTINCT 
+    name as Name,
+    salary::text as Salary,
+    franchise as Team,
+    p.skill_group as League,
+    CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Standard' END as GameMode
+ from players p
+    left join S17_stats s17
+        on p.member_id = s17.member_id
+```
+
+
 <Tabs>
 <Tab label="Player Stats">
 
@@ -16,20 +30,6 @@ Below you will find all stats for all players in MLE for S17.
 
 </Details>
 
-```sql Stats
-With playerstats as (
-    Select name as Name,
-    salary::text as Salary,
-    team_name as Team,
-    s17.skill_group as League,
-    CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
- from players p
-    inner join S17_stats s17
-        on p.member_id = s17.member_id
-group by name, salary, team_name, League, gamemode)
-select *
-from playerstats
-```
 
 ```sql LeaderboardStats
 With playerstats as (
@@ -68,15 +68,15 @@ and GameMode in ${inputs.GameMode.value}
 order by Name ASC
 ```
 
-<Dropdown data={Stats} name=Salary value=Salary multiple=true selectAllByDefault=true />
+<Dropdown data={dropdown_info} name=Salary value=Salary multiple=true selectAllByDefault=true />
 
-<Dropdown data={Stats} name=Team value=Team multiple=true selectAllByDefault=true />
-
-
-<Dropdown data={Stats} name=League value=League multiple=true selectAllByDefault=true />
+<Dropdown data={dropdown_info} name=Team value=Team multiple=true selectAllByDefault=true />
 
 
-<Dropdown data={Stats} name=GameMode value=GameMode multiple=true selectAllByDefault=true />
+<Dropdown data={dropdown_info} name=League value=League multiple=true selectAllByDefault=true />
+
+
+<Dropdown data={dropdown_info} name=GameMode value=GameMode multiple=true selectAllByDefault=true />
 
 
 <DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=playerLink >
@@ -103,22 +103,87 @@ order by Name ASC
 
 </Tab>
 
+<Tab label="Scrim Stats">
+
+```sql scrimStats
+with scrims as(
+SELECT 
+    p.name
+    , '/players/' || p.member_id as playerLink
+    , member_id
+    , p.salary
+    , CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles'
+        WHEN gamemode = 'RL_STANDARD' THEN 'Standard'
+        ELSE 'Unknown' 
+        END as GameMode
+    , p.skill_group as league
+    , franchise
+    , scrim_games_played
+    , win_percentage
+    , dpi_per_game as dpi
+    , opi_per_game as opi
+    , avg_sprocket_rating as sprocket_rating
+    , score_per_game as score
+    , goals_per_game as goals
+    , assists_per_game as assists
+    , saves_per_game as saves
+    , shots_per_game as shots
+    , avg_goals_against as goals_against
+    , avg_shots_against as shots_against
+    , demos_per_game as demos
+    , current_scrim_points as scrim_points
+    , "Eligible Until" as eligible_until
+FROM avgScrimStats ass 
+    LEFT JOIN players p 
+        ON p.sprocket_player_id = ass.sprocket_player_id)
+SELECT *
+From scrims
+WHERE salary in ${inputs.Salary.value}
+AND league in ${inputs.League.value}
+AND GameMode in ${inputs.GameMode.value}
+AND franchise in ${inputs.Team.value}
+```
+
+<Dropdown data={dropdown_info} name=Salary value=Salary multiple=true selectAllByDefault=true />
+
+<Dropdown data={dropdown_info} name=Team value=Team multiple=true selectAllByDefault=true />
+
+<Dropdown data={dropdown_info} name=League value=League multiple=true selectAllByDefault=true />
+
+<Dropdown data={dropdown_info} name=GameMode value=GameMode multiple=true selectAllByDefault=true />
+
+
+
+>From Last 60 Days
+<DataTable data={scrimStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=playerLink >
+        <Column id=name align=center />
+        <Column id=salary align=center />
+        <Column id=GameMode align=center />
+        <Column id=league align=center />
+        <Column id=scrim_games_played align=center />
+        <Column id=win_percentage align=center />
+        <Column id=sprocket_rating align=center />
+        <Column id=opi align=center />
+        <Column id=dpi align=center />
+        <Column id=score align=ceneter />
+        <Column id=goals align=center />
+        <Column id=assists align=center />
+        <Column id=saves align=center />
+        <Column id=shots align=center />
+        <Column id=goals_against align=center />
+        <Column id=shots_against align=center />
+        <Column id=demos align=center />
+</DataTable>
+
+
+
+
+
+
+</Tab>
+
 <Tab label="Player Comparison">
 
-```sql Stats
-With playerstats as (
-    Select name,
-    salary::text as Salary,
-    team_name as Team,
-    s17.skill_group as League,
-    CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
- from players p
-    inner join S17_stats s17
-        on p.member_id = s17.member_id
-group by name, salary, team_name, League, gamemode)
-select *
-from playerstats
-```
 
 ```sql comparisonStats
 With playerstats as (
@@ -165,7 +230,7 @@ where name in ${inputs.Player.value}
 
 </Details>
 
-<Dropdown data={Stats} name=Player value=name multiple=true defaultValue={['Ol Dirty Dirty','OwnerOfTheWhiteSedan']} />
+<Dropdown data={dropdown_info} name=Player value=name multiple=true defaultValue={['Ol Dirty Dirty','OwnerOfTheWhiteSedan']} />
 
 <Dropdown name=stats defaultValue=score_per_game>
     <DropdownOption value=avg_dpi valueLabel=DPI />
