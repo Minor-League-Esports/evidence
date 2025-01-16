@@ -4,9 +4,17 @@
     p.name,
     salary,
     p.franchise,
-    s17.skill_group as league,
+    p.skill_group as league,
     p.member_id,
     t."Photo URL" as logo,
+    CASE
+        WHEN t."Primary Color" is Null then '#2a4b82'
+        ELSE t."Primary Color"
+        END as primColor,
+    CASE 
+        WHEN t."Secondary Color" is Null then '#2a4b82'
+        ELSE t."Secondary Color"
+        END as secColor,
     t."Primary Color" as primary_color,
     t."Secondary Color" as secondary_color,
     case
@@ -14,10 +22,7 @@
        else p."Franchise Staff Position"
        END as franchise_position,
     current_scrim_points,
-    CASE 
-        WHEN current_scrim_points >= 30 then 'Yes'
-        ELSE 'No'
-        END AS eligible
+    "Eligible Until"
  from players p
     left join (select distinct member_id, skill_group from S17_stats) s17
         on p.member_id = s17.member_id
@@ -38,7 +43,7 @@
     <Column id=league align=center />
     <Column id=franchise_position align=center />
     <Column id=current_scrim_points align=center contentType=colorscale scaleColor={['#ce5050','white']} colorBreakpoints={[0, 30]} />
-    <Column id=eligible align=center />
+    <Column id="Eligible Until" align=center />
 </DataTable>
 
 
@@ -117,7 +122,7 @@ ${inputs.Stats.value} as value
 from ${player_stats}
 ```
 
-<Details title="Player Match Averages">
+<Details title="Season 17 Player Match Averages">
 
 <p>Below you can use the dropdown to choose the statistic you would like to display. </p>
 <p><b>Note:</b> If no information appears then you do not have any statistical data to display. </p>
@@ -144,7 +149,7 @@ x=game_mode
 y=value
 series=name
 type=grouped
-colorPalette={[basic_info[0].primary_color, '#A9A9A9']}
+colorPalette={[basic_info[0].primColor, '#A9A9A9']}
 sort=false
 />
 
@@ -238,7 +243,7 @@ order by week asc
 ```
 
 >Season 17 Stats by Series
-<DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primary_color}' headerFontColor=white compact=true wrapTitles=true>
+<DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primColor}' headerFontColor=white compact=true wrapTitles=true>
     <Column id=week align=center />
     <Column id=game_mode align=center />
     <Column id=franchise_link contentType=link linkLabel=opponent title=Opponent align=center />
