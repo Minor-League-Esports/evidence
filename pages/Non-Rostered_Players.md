@@ -18,8 +18,6 @@ SELECT DISTINCT
         ELSE 'No' 
     END AS Eligible 
 FROM players p
-INNER JOIN S17_stats st
-    ON p.member_id = st.member_id
 WHERE franchise IN ('FA', 'Pend', 'Waivers', 'RFA');
 ```
 
@@ -74,8 +72,6 @@ SELECT DISTINCT
     END AS Eligible,
     "Eligible Until"
 FROM players p
-INNER JOIN S17_stats st
-    ON p.member_id = st.member_id
 WHERE franchise IN ${inputs.Status.value}
     AND p.skill_group in ${inputs.League.value}
     AND salary in ${inputs.Salary.value}
