@@ -116,7 +116,7 @@ order by Name asc
 ```sql SeasonStats_career
 With lifetime_stats as (
     Select name as Name
-    ,'/players/' || p.member_id as playerLink
+    ,'/players/' || ps.member_id as playerLink
     ,CASE WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
     ,season
     ,team_name as Franchise
