@@ -46,7 +46,7 @@ order by Name
 <LastRefreshed prefix="Data last updated"/>
 
 ```sql LeaderboardStats_career
-With player_stats as (
+With lifetime_stats as (
     Select name as Name
     ,'/players/' || ps.member_id as playerLink
     ,CASE WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
@@ -75,7 +75,7 @@ group by Name, gamemode, playerLink
 )
 
 select *
-from player_stats
+from lifetime_stats
 where GameMode like '${inputs.game_mode}'
 and games_played >= ${inputs.games_played}
 order by Name asc
@@ -114,7 +114,7 @@ order by Name asc
 <Tab label="Season Stats">
 
 ```sql SeasonStats_career
-With player_stats as (
+With lifetime_stats as (
     Select name as Name
     ,'/players/' || p.member_id as playerLink
     ,CASE WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
@@ -146,7 +146,7 @@ group by Name, gamemode, season, team_name, skill_group, playerLink
 )
 
 select *
-from player_stats
+from lifetime_stats
 where GameMode like '${inputs.game_mode}'
 and games_played >= ${inputs.games_played}
 and season in ${inputs.season.value}
