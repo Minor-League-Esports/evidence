@@ -2,8 +2,7 @@
 title: All-Time Player Stats
 ---
 
-```sql Stats
-With player_stats as (
+```sql Stats_lifetime
     Select name as Name
     ,CASE WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
     ,season
@@ -22,20 +21,34 @@ With player_stats as (
     ,total_demos_inflicted
     ,total_demos_taken
  from player_stats ps
-)
-select *
-from player_stats
 order by Name
 ```
+
+<ButtonGroup name=game_mode>
+    <ButtonGroupItem valueLabel="Both" value="%" default/>
+    <ButtonGroupItem valueLabel="Doubles" value="Doubles" />
+    <ButtonGroupItem valueLabel="Standard" value="Standard" />
+</ButtonGroup>
+
+<Slider
+    title='Games Played'
+    name=games_played
+    data={Stats_lifetime}
+    defaultValue=1
+    min=1
+    max=165
+    size=full
+/>
 
 <Tabs>
 <Tab label=" Stats">
 
 <LastRefreshed prefix="Data last updated"/>
 
-```sql LeaderboardStats
+```sql LeaderboardStats_career
 With player_stats as (
     Select name as Name
+    ,'/players/' || ps.member_id as playerLink
     ,CASE WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
     ,sum(games_played) as games_played
     ,avg(sprocket_rating) as 'Sprocket Rating'
@@ -58,29 +71,19 @@ With player_stats as (
     ,avg(avg_demos_inflicted) as 'Demos/ G'
     ,avg(avg_demos_taken) as 'Demos Taken/ G'
  from player_stats ps
-group by Name, gamemode
+group by Name, gamemode, playerLink
 )
 
 select *
 from player_stats
-where GameMode in ${inputs.GameMode.value}
+where GameMode like '${inputs.game_mode}'
 and games_played >= ${inputs.games_played}
 order by Name asc
 ```
 
-<Dropdown data={Stats} name=GameMode value=GameMode multiple=true selectAllByDefault=true />
 
-<Slider
-    title='Games Played'
-    name=games_played
-    data={Stats}
-    defaultValue=1
-    min=1
-    max=165
-    size=large
-/>
 
-<DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white >
+<DataTable data={LeaderboardStats_career} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=playerLink>
     <Column id=Name align=center />
     <Column id=GameMode align=center />
     <Column id=games_played align=center />
@@ -110,9 +113,10 @@ order by Name asc
 
 <Tab label="Season Stats">
 
-```sql SeasonStats
+```sql SeasonStats_career
 With player_stats as (
     Select name as Name
+    ,'/players/' || p.member_id as playerLink
     ,CASE WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
     ,season
     ,team_name as Franchise
@@ -138,32 +142,22 @@ With player_stats as (
     ,avg(avg_demos_inflicted) as 'Demos/ G'
     ,avg(avg_demos_taken) as 'Demos Taken/ G'
  from player_stats ps
-group by Name, gamemode, season, team_name, skill_group
+group by Name, gamemode, season, team_name, skill_group, playerLink
 )
 
 select *
 from player_stats
-where GameMode in ${inputs.GameMode.value}
+where GameMode like '${inputs.game_mode}'
 and games_played >= ${inputs.games_played}
 and season in ${inputs.season.value}
 order by Name, season
 ```
 
-<Dropdown data={Stats} name=GameMode value=GameMode multiple=true selectAllByDefault=true />
 
-<Dropdown data={Stats} name=season value=season multiple=true selectAllByDefault=true />
+<Dropdown data={Stats_lifetime} name=season value=season multiple=true selectAllByDefault=true />
 
-<Slider
-    title='Games Played'
-    name=games_played
-    data={Stats}
-    defaultValue=1
-    min=1
-    max=165
-    size=large
-/>
 
-<DataTable data={SeasonStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white >
+<DataTable data={SeasonStats_career} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=playerLink>
     <Column id=Name align=center />
     <Column id=GameMode align=center />
     <Column id='Franchise' align=center />
