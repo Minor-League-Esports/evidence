@@ -111,12 +111,12 @@ SELECT
     p.name
     , '/players/' || p.member_id as playerLink
     , member_id
-    , p.salary
+    , ass.salary
     , CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles'
         WHEN gamemode = 'RL_STANDARD' THEN 'Standard'
         ELSE 'Unknown' 
         END as GameMode
-    , p.skill_group as league
+    , ass.skill_group as league
     , franchise
     , scrim_games_played
     , win_percentage

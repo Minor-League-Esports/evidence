@@ -190,22 +190,14 @@ CASE
 END as league_order, 
 franchise,
 SUBSTRING(slot, 7) AS slot,
-doubles_uses,
-standard_uses,
-total_uses,
 current_scrim_points,
 CASE WHEN current_scrim_points >= 30 THEN 'Yes'
     ELSE 'No'
     END AS Eligible,
 "Eligible Until"
 FROM players p
-    INNER JOIN role_usages ru
-        ON p.franchise = ru.team_name
-        AND p.slot = ru.role
-        AND upper(p.skill_group) = concat(ru.league, ' LEAGUE')
 WHERE franchise = '${params.franchise}'
 AND slot != 'NONE'
-AND season_number = 17 
 ORDER BY league_order ASC, slot ASC
 ```
 
