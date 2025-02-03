@@ -24,8 +24,6 @@
     current_scrim_points,
     "Eligible Until"
  from players p
-    left join (select distinct member_id, skill_group from S17_stats) s17
-        on p.member_id = s17.member_id
     left join teams t
         on p.franchise = t.Franchise
   where p.member_id = '${params.member_id}'
@@ -239,7 +237,7 @@ shooting_pct2
 from seriesStats ss
   inner join seriesRecord sr
     on ss.match_id = sr.match_id
-order by week asc 
+order by week asc
 ```
 
 >Season 17 Stats by Series
