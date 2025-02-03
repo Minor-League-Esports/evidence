@@ -22,7 +22,7 @@ group by name, salary, p.member_id, franchise, current_scrim_points, "Eligible U
   <Column id="name" />
   <Column id="salary" align=center />
   <Column id="franchise" align=center />
-  <Column id=current_scrim_points align=center contentType=colorscale scaleColor={['#ce5050','white']} colorBreakpoints={[0, 30]} />
+  <Column id=current_scrim_points align=center contentType=colorscale colorScale={['#ce5050','white']} colorBreakpoints={[0, 30]} />
   <Column id="Eligible Until" align=center />
 </DataTable>
 
