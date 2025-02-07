@@ -27,7 +27,7 @@ WHERE t.franchise = '${params.franchise}'
     p.name AS name,
     salary AS salary,
     p.franchise AS franchise,
-    s17.skill_group AS league,
+    s18.skill_group AS league,
     p.member_id AS member_id,
     '/players/' || p.member_id AS id_link,
     t."Photo URL" AS logo,
@@ -44,8 +44,8 @@ WHERE t.franchise = '${params.franchise}'
         WHEN p."Franchise Staff Position" = 'Player' THEN 5
         END AS franchise_order
  FROM players p
-    LEFT JOIN S17_stats s17
-        ON p.member_id = s17.member_id
+    LEFT JOIN S18_stats s18
+        ON p.member_id = s18.member_id
     LEFT JOIN teams t
         ON p.franchise = t.Franchise
     )
@@ -99,7 +99,7 @@ FROM players p
 WHERE franchise = '${params.franchise}'
 AND skill_group = '${inputs.League}'
 AND slot != 'NONE'
-AND season_number = 17
+AND season_number = 18
 ORDER BY slot ASC
 ```
 
@@ -205,7 +205,7 @@ FROM players p
         AND upper(p.skill_group) = concat(ru.league, ' LEAGUE')
 WHERE franchise = '${params.franchise}'
 AND slot != 'NONE'
-AND season_number = 17 
+AND season_number = 18 
 ORDER BY league_order ASC, slot ASC
 ```
 
@@ -219,7 +219,7 @@ ORDER BY league_order ASC, slot ASC
 </DataTable>
 
     </Tab>
-    <Tab label="S17 Records">
+    <Tab label="S18 Records">
 
 ```sql team_record
 WITH record AS(
@@ -242,11 +242,11 @@ match_group_title
 FROM matches m
     INNER JOIN match_groups mg
         ON m.match_group_id = mg.match_group_id
-    WHERE parent_group_title = 'Season 17'
+    WHERE parent_group_title = 'Season 18'
     AND home = '${params.franchise}'
     AND league = '${inputs.League}'
     AND game_mode = '${inputs.Gamemodes}'
-    OR parent_group_title = 'Season 17'
+    OR parent_group_title = 'Season 18'
     AND away = '${params.franchise}'
     AND league = '${inputs.League}'
     AND game_mode = '${inputs.Gamemodes}'
@@ -270,11 +270,11 @@ FROM rounds r
         ON m.match_id = r.match_id
     INNER JOIN match_groups mg
         ON mg.match_group_id = m.match_group_id
-WHERE parent_group_title = 'Season 17'
+WHERE parent_group_title = 'Season 18'
     AND r.home = '${params.franchise}'
     AND m.league = '${inputs.League}'
     AND m.game_mode = '${inputs.Gamemodes}'
-    OR parent_group_title = 'Season 17'
+    OR parent_group_title = 'Season 18'
     AND r.away = '${params.franchise}'
     AND m.league = '${inputs.League}'
     AND m.game_mode = '${inputs.Gamemodes}'
@@ -323,7 +323,7 @@ FROM record re
 
 <BigValue data={teamStatistics} value=record /> <BigValue data={teamStatistics} value=series_record /> <BigValue data={teamStatistics} value=goal_differential />
 
->Season 17 Results
+>Season 18 Results
 <DataTable data={team_record} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white >
     <Column id=week align=center />
     <Column id=franchise_link contentType=link linkLabel=opponent title=Opponent align=center />
@@ -333,17 +333,17 @@ FROM record re
 </DataTable>
 
 ```sql teamStatistics
-WITH S17standings AS (
+WITH S18standings AS (
     
     SELECT
         *
         , CASE
-            WHEN s17.mode IN ('Doubles', 'Standard') THEN s17.mode
+            WHEN s18.mode IN ('Doubles', 'Standard') THEN s18.mode
             ELSE 'Overall'
         END AS game_mode
-    FROM S17_standings s17
+    FROM S18_standings s18
     INNER JOIN teams t
-        ON s17.name = t.Franchise
+        ON s18.name = t.Franchise
 
 ), results AS (
 
@@ -364,7 +364,7 @@ WITH S17standings AS (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    ON m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 17'
+	WHERE mg.parent_group_title = 'Season 18'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 		
@@ -387,7 +387,7 @@ WITH S17standings AS (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    ON m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 17'
+	WHERE mg.parent_group_title = 'Season 18'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 
@@ -426,29 +426,29 @@ WITH S17standings AS (
 )
 
 SELECT
-    s17.ranking AS divisional_rank
-    , s17.Franchise AS team_name
-    , s17."Photo URL" AS team_logo
-    , s17.Division AS division
-	, s17."Super Division" AS super_division
-    , s17.Conference
-    , s17.team_wins::INT || ' - ' || s17.team_losses::INT AS record
+    s18.ranking AS divisional_rank
+    , s18.Franchise AS team_name
+    , s18."Photo URL" AS team_logo
+    , s18.Division AS division
+	, s18."Super Division" AS super_division
+    , s18.Conference
+    , s18.team_wins::INT || ' - ' || s18.team_losses::INT AS record
     , sagd.series_wins || ' - ' || sagd.series_loses AS series_record
     , sagd.goals_for
     , sagd.goals_against
     , sagd.goal_diff AS goal_differential
-FROM S17standings s17
+FROM S18standings s18
 INNER JOIN series_and_goal_diff sagd
-    ON s17.Franchise = sagd.team_name
-    AND s17.league = sagd.league
-    AND s17.game_mode = sagd.game_mode
-WHERE s17.conference NOT NULL
-    AND s17.division_name NOT NULL
-    AND s17.league LIKE '${inputs.League}'
-    AND s17.game_mode LIKE '${inputs.Gamemodes}'
+    ON s18.Franchise = sagd.team_name
+    AND s18.league = sagd.league
+    AND s18.game_mode = sagd.game_mode
+WHERE s18.conference NOT NULL
+    AND s18.division_name NOT NULL
+    AND s18.league LIKE '${inputs.League}'
+    AND s18.game_mode LIKE '${inputs.Gamemodes}'
     AND team_name = '${params.franchise}'
 ORDER BY
-    s17.team_wins DESC
+    s18.team_wins DESC
     , sagd.series_wins DESC
     , sagd.goal_diff DESC
     , sagd.goals_for DESC

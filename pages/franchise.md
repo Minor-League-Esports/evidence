@@ -9,7 +9,7 @@ WITH doubles AS (
   SELECT name,
   SUM(team_wins)::INT AS Doubles_Wins,
   SUM(team_losses)::INT AS Doubles_Losses,
-  FROM s17_standings
+  FROM s18_standings
   WHERE mode LIKE 'Doubles' AND NOT (league IS NULL OR conference IS NULL OR division_name IS NULL)
   GROUP BY name 
 ),
@@ -17,7 +17,7 @@ standard AS (
   SELECT name,
   SUM(team_wins)::INT AS Standard_Wins,
   SUM(team_losses)::INT AS Standard_Losses,
-  FROM s17_standings
+  FROM s18_standings
   WHERE mode LIKE 'Standard' AND NOT (league IS NULL OR conference IS NULL OR division_name IS NULL)
   GROUP BY name  
 ),
@@ -25,7 +25,7 @@ overall AS (
   SELECT name,
   SUM(team_wins)::INT AS Overall_Wins,
   SUM(team_losses)::INT as Overall_Losses,
-  FROM s17_Standings
+  FROM s18_Standings
   WHERE NOT (mode IS NULL OR league IS NULL OR conference IS NULL OR division_name IS NULL)
   GROUP BY name 
 )

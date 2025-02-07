@@ -68,7 +68,7 @@ to the team on [Discord](https://discord.com/channels/172404472637685760/3235119
 
 <Tabs>
 
-  <Tab label=" S17 Conference Standings">
+  <Tab label=" S18 Conference Standings">
 
     <LastRefreshed prefix="Data last updated"/>
 
@@ -92,12 +92,12 @@ to the team on [Discord](https://discord.com/channels/172404472637685760/3235119
 ## Blue Conference Standings
 
 ```sql blueconference
-with S17standings as (
+with S18standings as (
     
     SELECT 
     *,
     '/franchise_page/' || t.Franchise AS Franchise_Link,
-    FROM S17_standings st
+    FROM S18_standings st
     INNER JOIN teams t
         ON st.name = t.Franchise
 
@@ -120,7 +120,7 @@ with S17standings as (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 17'
+	WHERE mg.parent_group_title = 'Season 18'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 		
@@ -143,7 +143,7 @@ with S17standings as (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 17'
+	WHERE mg.parent_group_title = 'Season 18'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 
@@ -166,29 +166,29 @@ GROUP BY 1, 2, 3
 )
 
 SELECT
-    s17.ranking AS divisional_rank
-    , s17.Franchise AS team_name
-    , s17."Photo URL" AS team_logo
-    , s17.Division AS division
-    , s17."Super Division" AS super_division
-	, s17.Conference
-    , s17.team_wins::INT || ' - ' || s17.team_losses::INT AS record
+    s18.ranking AS divisional_rank
+    , s18.Franchise AS team_name
+    , s18."Photo URL" AS team_logo
+    , s18.Division AS division
+    , s18."Super Division" AS super_division
+	, s18.Conference
+    , s18.team_wins::INT || ' - ' || s18.team_losses::INT AS record
     , sagd.series_wins || ' - ' || sagd.series_loses AS series_record
     , sagd.goals_for
     , sagd.goals_against
     , sagd.goal_diff AS goal_differential
     , Franchise_Link
-FROM S17standings s17
+FROM S18standings s18
 INNER JOIN series_and_goal_diff sagd
-    ON s17.Franchise = sagd.team_name
-    AND s17.league = sagd.league
-    AND s17.mode = sagd.game_mode
-WHERE s17.Conference = 'BLUE'
-	AND s17.division_name NOT NULL
-    AND s17.league LIKE '${inputs.League_Selection}'
-    AND s17.mode LIKE '${inputs.GameMode_Selection}'
+    ON s18.Franchise = sagd.team_name
+    AND s18.league = sagd.league
+    AND s18.mode = sagd.game_mode
+WHERE s18.Conference = 'BLUE'
+	AND s18.division_name NOT NULL
+    AND s18.league LIKE '${inputs.League_Selection}'
+    AND s18.mode LIKE '${inputs.GameMode_Selection}'
 ORDER BY
-    s17.team_wins DESC
+    s18.team_wins DESC
     , sagd.series_wins DESC
     , sagd.goal_diff DESC
     , sagd.goals_for DESC
@@ -211,12 +211,12 @@ ORDER BY
 ## Orange Conference Standings
 
 ```sql orangeconference
-with S17standings as (
+with S18standings as (
     
     SELECT 
     *,
     '/franchise_page/' || t.Franchise AS Franchise_Link,
-    FROM S17_standings st
+    FROM S18_standings st
     INNER JOIN teams t
         ON st.name = t.Franchise
 
@@ -239,7 +239,7 @@ with S17standings as (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 17'
+	WHERE mg.parent_group_title = 'Season 18'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 		
@@ -262,7 +262,7 @@ with S17standings as (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 17'
+	WHERE mg.parent_group_title = 'Season 18'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 
@@ -285,29 +285,29 @@ GROUP BY 1, 2, 3
 )
 
 SELECT
-    s17.ranking AS divisional_rank
-    , s17.Franchise AS team_name
-    , s17."Photo URL" AS team_logo
-    , s17.Division AS division
-    , s17."Super Division" AS super_division
-	, s17.Conference
-    , s17.team_wins::INT || ' - ' || s17.team_losses::INT AS record
+    s18.ranking AS divisional_rank
+    , s18.Franchise AS team_name
+    , s18."Photo URL" AS team_logo
+    , s18.Division AS division
+    , s18."Super Division" AS super_division
+	, s18.Conference
+    , s18.team_wins::INT || ' - ' || s18.team_losses::INT AS record
     , sagd.series_wins || ' - ' || sagd.series_loses AS series_record
     , sagd.goals_for
     , sagd.goals_against
     , sagd.goal_diff AS goal_differential
     , Franchise_Link
-FROM S17standings s17
+FROM S18standings s18
 INNER JOIN series_and_goal_diff sagd
-    ON s17.Franchise = sagd.team_name
-    AND s17.league = sagd.league
-    AND s17.mode = sagd.game_mode
-WHERE s17.Conference = 'ORANGE'
-    AND s17.division_name NOT NULL
-    AND s17.league LIKE '${inputs.League_Selection}'
-    AND s17.mode LIKE '${inputs.GameMode_Selection}'
+    ON s18.Franchise = sagd.team_name
+    AND s18.league = sagd.league
+    AND s18.mode = sagd.game_mode
+WHERE s18.Conference = 'ORANGE'
+    AND s18.division_name NOT NULL
+    AND s18.league LIKE '${inputs.League_Selection}'
+    AND s18.mode LIKE '${inputs.GameMode_Selection}'
 ORDER BY
-    s17.team_wins DESC
+    s18.team_wins DESC
     , sagd.series_wins DESC
     , sagd.goal_diff DESC
     , sagd.goals_for DESC
@@ -366,7 +366,7 @@ FROM players p
         AND upper(p.skill_group) = concat(ru.league, ' LEAGUE')
 WHERE franchise = '${inputs.Team_Selection.value}'
 AND slot != 'NONE'
-AND season_number = 17 
+AND season_number = 18 
 ORDER BY league_order ASC, slot ASC
 ```
 
@@ -406,7 +406,7 @@ WHERE t.franchise = '${inputs.Team_Selection.value}'
 
   </Tab>
 
-  <Tab label="S17 Matchups">
+  <Tab label="S18 Matchups">
 
 ```sql matches
 WITH weeks AS 
@@ -436,7 +436,7 @@ SELECT
 FROM matches m
 INNER JOIN match_groups mg
 ON m.match_group_id = mg.match_group_id
-WHERE parent_group_title='Season 17'
+WHERE parent_group_title='Season 18'
 AND m.League='${inputs.League_Selection}'
 AND m.game_mode='${inputs.GameMode_Selection}'
 AND Week='${inputs.Week_Selection}'
