@@ -221,7 +221,7 @@ with S18standings as (
         *,
         '/franchise_page/' || t.Franchise AS Franchise_Link,
     FROM S18_standings st
-    LEFT JOIN teams t
+    INNER JOIN teams t
         ON st.name = t.Franchise
 
 ), results AS (
@@ -435,23 +435,11 @@ WITH weeks AS (
         m.away_wins,
         '/franchise_page/' || m.Home AS home_link,
         '/franchise_page/' || m.Away AS away_link,
-        CASE 
-            WHEN mg.match_group_title='Match 1' THEN 'Week 01'
-            WHEN mg.match_group_title='Match 2' THEN 'Week 02'
-            WHEN mg.match_group_title='Match 3' THEN 'Week 03'
-            WHEN mg.match_group_title='Match 4' THEN 'Week 04'
-            WHEN mg.match_group_title='Match 5' THEN 'Week 05'
-            WHEN mg.match_group_title='Match 6' THEN 'Week 06'
-            WHEN mg.match_group_title='Match 7' THEN 'Week 07'
-            WHEN mg.match_group_title='Match 8' THEN 'Week 08'
-            WHEN mg.match_group_title='Match 9' THEN 'Week 09'
-            WHEN mg.match_group_title='Match 10' THEN 'Week 10'
-            ELSE mg.match_group_title
-        END AS Week
+        mg.match_group_title AS Week
 
     FROM matches m
 
-    INNER JOIN match_groups mg
+    LEFT JOIN match_groups mg
         ON m.match_group_id = mg.match_group_id
 
     WHERE parent_group_title = 'Season 18'
@@ -468,6 +456,11 @@ SELECT
     away_link,
 
 FROM weeks
+
+ORDER BY
+    home_wins DESC
+    , away_wins DESC
+    , Home
 ```
 
 <p> 
@@ -494,16 +487,16 @@ FROM weeks
 <p>
 
 <ButtonGroup name=Week_Selection>
-    <ButtonGroupItem valueLabel="Week 1" value= "Week 01" default />
-    <ButtonGroupItem valueLabel="Week 2" value= "Week 02" />
-    <ButtonGroupItem valueLabel="Week 3" value= "Week 03" />
-    <ButtonGroupItem valueLabel="Week 4" value= "Week 04" />
-    <ButtonGroupItem valueLabel="Week 5" value= "Week 05" />
-    <ButtonGroupItem valueLabel="Week 6" value= "Week 06" />
-    <ButtonGroupItem valueLabel="Week 7" value= "Week 07" />
-    <ButtonGroupItem valueLabel="Week 8" value= "Week 08" />
-    <ButtonGroupItem valueLabel="Week 9" value= "Week 09" />
-    <ButtonGroupItem valueLabel="Week 10" value= "Week 10" />
+    <ButtonGroupItem valueLabel="Week 1" value="Match 1" default />
+    <ButtonGroupItem valueLabel="Week 2" value="Match 2" />
+    <ButtonGroupItem valueLabel="Week 3" value="Match 3" />
+    <ButtonGroupItem valueLabel="Week 4" value="Match 4" />
+    <ButtonGroupItem valueLabel="Week 5" value="Match 5" />
+    <ButtonGroupItem valueLabel="Week 6" value="Match 6" />
+    <ButtonGroupItem valueLabel="Week 7" value="Match 7" />
+    <ButtonGroupItem valueLabel="Week 8" value="Match 8" />
+    <ButtonGroupItem valueLabel="Week 9" value="Match 9" />
+    <ButtonGroupItem valueLabel="Week 10" value="Match 10" />
 
 </ButtonGroup>
 
