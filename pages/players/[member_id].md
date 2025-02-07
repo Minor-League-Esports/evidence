@@ -173,7 +173,7 @@ game_mode
 from players p
   inner join S18_stats s18
     on p.member_id = s18.member_id
-  inner join rounds r
+  inner join s18_rounds r
     on s18.match_id = r.match_id
   inner join matches m
     on r.match_id = m.match_id

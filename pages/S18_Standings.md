@@ -52,7 +52,7 @@ with S18standings as (
 		, SUM(r."Home Goals") AS goals_for
 		, SUM(r."Away Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
@@ -75,7 +75,7 @@ with S18standings as (
 		, SUM(r."Away Goals") AS goals_for
 		, SUM(r."Home Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
@@ -204,7 +204,7 @@ with S18standings as (
 		, SUM(r."Home Goals") AS goals_for
 		, SUM(r."Away Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
@@ -227,7 +227,7 @@ with S18standings as (
 		, SUM(r."Away Goals") AS goals_for
 		, SUM(r."Home Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
@@ -320,7 +320,7 @@ with S18standings as (
 		, SUM(r."Home Goals") AS goals_for
 		, SUM(r."Away Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
@@ -343,7 +343,7 @@ with S18standings as (
 		, SUM(r."Away Goals") AS goals_for
 		, SUM(r."Home Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
@@ -456,7 +456,7 @@ with S18standings as (
 		, SUM(r."Home Goals") AS goals_for
 		, SUM(r."Away Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
@@ -479,7 +479,7 @@ with S18standings as (
 		, SUM(r."Away Goals") AS goals_for
 		, SUM(r."Home Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
@@ -680,7 +680,7 @@ with S18standings as (
 		, SUM(r."Home Goals") AS goals_for
 		, SUM(r."Away Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
@@ -703,7 +703,7 @@ with S18standings as (
 		, SUM(r."Away Goals") AS goals_for
 		, SUM(r."Home Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg

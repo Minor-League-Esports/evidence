@@ -265,7 +265,7 @@ CASE
     WHEN r.home = '${params.franchise}' THEN home_goals - away_goals
     WHEN r.away = '${params.franchise}' THEN away_goals - home_goals
     END AS goal_differential
-FROM rounds r
+FROM s18_rounds r
     INNER JOIN matches m
         ON m.match_id = r.match_id
     INNER JOIN match_groups mg
@@ -359,7 +359,7 @@ WITH S18standings AS (
 		, SUM(r."Home Goals") AS goals_for
 		, SUM(r."Away Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
@@ -382,7 +382,7 @@ WITH S18standings AS (
 		, SUM(r."Away Goals") AS goals_for
 		, SUM(r."Home Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg

@@ -115,7 +115,7 @@ with S18standings as (
 		, SUM(r."Home Goals") AS goals_for
 		, SUM(r."Away Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
@@ -138,7 +138,7 @@ with S18standings as (
 		, SUM(r."Away Goals") AS goals_for
 		, SUM(r."Home Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
@@ -149,19 +149,19 @@ with S18standings as (
 
 ), series_and_goal_diff AS (
 
-SELECT
-	league
-	, game_mode
-	, team_name
-	, SUM(wins) AS wins
-	, SUM(loses) AS loses
-	, SUM(series_wins) AS series_wins
-	, SUM(series_loses) AS series_loses
-	, SUM(goals_for) AS goals_for
-	, SUM(goals_against) AS goals_against
-	, SUM(goal_diff) AS goal_diff
-FROM results
-GROUP BY 1, 2, 3 
+    SELECT
+        league
+        , game_mode
+        , team_name
+        , SUM(wins) AS wins
+        , SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins
+        , SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for
+        , SUM(goals_against) AS goals_against
+        , SUM(goal_diff) AS goal_diff
+    FROM results
+    GROUP BY 1, 2, 3 
 
 )
 
@@ -178,15 +178,19 @@ SELECT
     , sagd.goals_against
     , sagd.goal_diff AS goal_differential
     , Franchise_Link
+
 FROM S18standings s18
+
 INNER JOIN series_and_goal_diff sagd
     ON s18.Franchise = sagd.team_name
     AND s18.league = sagd.league
     AND s18.mode = sagd.game_mode
+
 WHERE s18.Conference = 'BLUE'
 	AND s18.division_name NOT NULL
     AND s18.league LIKE '${inputs.League_Selection}'
     AND s18.mode LIKE '${inputs.GameMode_Selection}'
+
 ORDER BY
     s18.team_wins DESC
     , sagd.series_wins DESC
@@ -214,10 +218,10 @@ ORDER BY
 with S18standings as (
     
     SELECT 
-    *,
-    '/franchise_page/' || t.Franchise AS Franchise_Link,
+        *,
+        '/franchise_page/' || t.Franchise AS Franchise_Link,
     FROM S18_standings st
-    INNER JOIN teams t
+    LEFT JOIN teams t
         ON st.name = t.Franchise
 
 ), results AS (
@@ -234,11 +238,11 @@ with S18standings as (
 		, SUM(r."Home Goals") AS goals_for
 		, SUM(r."Away Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
-	    on m.match_group_id = mg.match_group_id
+	    ON m.match_group_id = mg.match_group_id
 	WHERE mg.parent_group_title = 'Season 18'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
@@ -257,30 +261,30 @@ with S18standings as (
 		, SUM(r."Away Goals") AS goals_for
 		, SUM(r."Home Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
-	    on m.match_group_id = mg.match_group_id
+	    ON m.match_group_id = mg.match_group_id
 	WHERE mg.parent_group_title = 'Season 18'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 
 ), series_and_goal_diff AS (
 
-SELECT
-	league
-	, game_mode
-	, team_name
-	, SUM(wins) AS wins
-	, SUM(loses) AS loses
-	, SUM(series_wins) AS series_wins
-	, SUM(series_loses) AS series_loses
-	, SUM(goals_for) AS goals_for
-	, SUM(goals_against) AS goals_against
-	, SUM(goal_diff) AS goal_diff
-FROM results
-GROUP BY 1, 2, 3 
+    SELECT
+        league
+        , game_mode
+        , team_name
+        , SUM(wins) AS wins
+        , SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins
+        , SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for
+        , SUM(goals_against) AS goals_against
+        , SUM(goal_diff) AS goal_diff
+    FROM results
+    GROUP BY 1, 2, 3 
 
 )
 
@@ -297,15 +301,19 @@ SELECT
     , sagd.goals_against
     , sagd.goal_diff AS goal_differential
     , Franchise_Link
+
 FROM S18standings s18
+
 INNER JOIN series_and_goal_diff sagd
     ON s18.Franchise = sagd.team_name
     AND s18.league = sagd.league
     AND s18.mode = sagd.game_mode
+
 WHERE s18.Conference = 'ORANGE'
     AND s18.division_name NOT NULL
     AND s18.league LIKE '${inputs.League_Selection}'
     AND s18.mode LIKE '${inputs.GameMode_Selection}'
+
 ORDER BY
     s18.team_wins DESC
     , sagd.series_wins DESC
@@ -338,49 +346,57 @@ ORDER BY franchise ASC
 
 ```sql eligibility
 SELECT 
-name,
-'/players/' || p.member_id AS id_link,
-salary,
-skill_group AS league,
-CASE
-    WHEN skill_group = 'Foundation League' THEN 1 
-    WHEN skill_group = 'Academy League' THEN 2 
-    WHEN skill_group = 'Champion League' THEN 3 
-    WHEN skill_group = 'Master League' THEN 4 
-    WHEN skill_group = 'Premier League' THEN 5 
-END as league_order, 
-franchise,
-SUBSTRING(slot, 7) AS slot,
-doubles_uses,
-standard_uses,
-total_uses,
-current_scrim_points,
-CASE WHEN current_scrim_points >= 30 THEN 'Yes'
-    ELSE 'No'
+    name,
+    '/players/' || p.member_id AS id_link,
+    salary,
+    skill_group AS league,
+    CASE
+        WHEN skill_group = 'Foundation League' THEN 1 
+        WHEN skill_group = 'Academy League' THEN 2 
+        WHEN skill_group = 'Champion League' THEN 3 
+        WHEN skill_group = 'Master League' THEN 4 
+        WHEN skill_group = 'Premier League' THEN 5 
+    END as league_order, 
+    franchise,
+    SUBSTRING(slot, 7) AS slot,
+    doubles_uses,
+    standard_uses,
+    total_uses,
+    current_scrim_points,
+    CASE WHEN current_scrim_points >= 30 THEN 'Yes'
+        ELSE 'No'
     END AS Eligible,
-"Eligible Until"
+    "Eligible Until"
+
 FROM players p
-    INNER JOIN role_usages ru
-        ON p.franchise = ru.team_name
-        AND p.slot = ru.role
-        AND upper(p.skill_group) = concat(ru.league, ' LEAGUE')
+
+INNER JOIN role_usages ru
+    ON p.franchise = ru.team_name
+    AND p.slot = ru.role
+    AND upper(p.skill_group) = concat(ru.league, ' LEAGUE')
+
 WHERE franchise = '${inputs.Team_Selection.value}'
-AND slot != 'NONE'
-AND season_number = 18 
-ORDER BY league_order ASC, slot ASC
+    AND slot != 'NONE'
+    AND season_number = 18
+
+ORDER BY
+    league_order ASC
+    , slot ASC
 ```
 
 ```sql team_info
 SELECT 
-Franchise,
-Conference,
-"Super Division",
-Division,
-Code,
-"Primary Color" AS primary_color,
-"Secondary Color" AS secondary_color,
-"Photo URL" AS logo
+    Franchise,
+    Conference,
+    "Super Division",
+    Division,
+    Code,
+    "Primary Color" AS primary_color,
+    "Secondary Color" AS secondary_color,
+    "Photo URL" AS logo
+    
 FROM teams t
+
 WHERE t.franchise = '${inputs.Team_Selection.value}'
 ```
 
@@ -409,44 +425,48 @@ WHERE t.franchise = '${inputs.Team_Selection.value}'
   <Tab label="S18 Matchups">
 
 ```sql matches
-WITH weeks AS 
-(
-SELECT 
-  m.Home,
-  m.Away,
-  m.League,
-  m.game_mode,
-  m.home_wins,
-  m.away_wins,
-  '/franchise_page/' || m.Home AS home_link,
-  '/franchise_page/' || m.Away AS away_link,
-  CASE 
-  WHEN mg.match_group_title='Match 1' THEN 'Week 01'
-  WHEN mg.match_group_title='Match 2' THEN 'Week 02'
-  WHEN mg.match_group_title='Match 3' THEN 'Week 03'
-  WHEN mg.match_group_title='Match 4' THEN 'Week 04'
-  WHEN mg.match_group_title='Match 5' THEN 'Week 05'
-  WHEN mg.match_group_title='Match 6' THEN 'Week 06'
-  WHEN mg.match_group_title='Match 7' THEN 'Week 07'
-  WHEN mg.match_group_title='Match 8' THEN 'Week 08'
-  WHEN mg.match_group_title='Match 9' THEN 'Week 09'
-  WHEN mg.match_group_title='Match 10' THEN 'Week 10'
-  ELSE mg.match_group_title
-  END AS Week
-FROM matches m
-INNER JOIN match_groups mg
-ON m.match_group_id = mg.match_group_id
-WHERE parent_group_title='Season 18'
-AND m.League='${inputs.League_Selection}'
-AND m.game_mode='${inputs.GameMode_Selection}'
-AND Week='${inputs.Week_Selection}'
+WITH weeks AS (
+    SELECT 
+        m.Home,
+        m.Away,
+        m.League,
+        m.game_mode,
+        m.home_wins,
+        m.away_wins,
+        '/franchise_page/' || m.Home AS home_link,
+        '/franchise_page/' || m.Away AS away_link,
+        CASE 
+            WHEN mg.match_group_title='Match 1' THEN 'Week 01'
+            WHEN mg.match_group_title='Match 2' THEN 'Week 02'
+            WHEN mg.match_group_title='Match 3' THEN 'Week 03'
+            WHEN mg.match_group_title='Match 4' THEN 'Week 04'
+            WHEN mg.match_group_title='Match 5' THEN 'Week 05'
+            WHEN mg.match_group_title='Match 6' THEN 'Week 06'
+            WHEN mg.match_group_title='Match 7' THEN 'Week 07'
+            WHEN mg.match_group_title='Match 8' THEN 'Week 08'
+            WHEN mg.match_group_title='Match 9' THEN 'Week 09'
+            WHEN mg.match_group_title='Match 10' THEN 'Week 10'
+            ELSE mg.match_group_title
+        END AS Week
+
+    FROM matches m
+
+    INNER JOIN match_groups mg
+        ON m.match_group_id = mg.match_group_id
+
+    WHERE parent_group_title = 'Season 18'
+        AND m.League = '${inputs.League_Selection}'
+        AND m.game_mode = '${inputs.GameMode_Selection}'
+        AND Week = '${inputs.Week_Selection}'
 )
+
 SELECT
-Home,
-home_link,
-home_wins::INT || ' - ' || away_wins::INT AS series_score,
-Away,
-away_link,
+    Home,
+    home_link,
+    home_wins::INT || ' - ' || away_wins::INT AS series_score,
+    Away,
+    away_link,
+
 FROM weeks
 ```
 
