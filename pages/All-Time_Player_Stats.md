@@ -37,7 +37,7 @@ order by Name
     defaultValue=1
     min=1
     max=165
-    size=full
+    size=large
 />
 
 <Tabs>
