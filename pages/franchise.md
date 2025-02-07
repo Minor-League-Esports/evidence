@@ -37,11 +37,11 @@ SELECT
   d.Doubles_Wins::INT || ' - ' || d.Doubles_Losses::INT AS Doubles_Record,
   s.Standard_Wins::INT || ' - ' || s.Standard_Losses::INT AS Standard_Record,
 FROM teams t
-INNER JOIN standard s
+LEFT JOIN standard s
   ON s.name = t.Franchise
-INNER JOIN doubles d 
+LEFT JOIN doubles d 
   ON d.name = t.Franchise
-INNER JOIN overall o
+LEFT JOIN overall o
   ON o.name = t.Franchise
 ORDER BY t.Franchise
 ```
