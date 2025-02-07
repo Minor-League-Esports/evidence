@@ -1,15 +1,70 @@
----
-title: MLE Homepage
----
+```sql teamLogos
+SELECT 
+franchise,
+'/franchise_page/' || franchise as franchiseLink,
+"Photo URL" as logo
+FROM teams
+ORDER BY franchise ASC
+```
+<div style="width:100%; max-width:700px; margin:auto;">
+<div style="display:flex; flex-direction:row; align-items:center; justify-content:center; flex-wrap:wrap; gap:0.25rem;"> 
+{#each teamLogos as t}
+<a href="{t.franchiseLink}" > <img src={t.logo} class="h-10 w-10" /> </a>
+{/each}
+</div>
+</div>
 
-<LastRefreshed prefix="Data last updated"/>
+
+<p>&nbsp; </p>
+<h1 style="font-size: 40px;"><center><b> MLE Homepage </b></center></h1>
 
 
 Evidence is your gateway into MLE's statistics. Here you will find pages for
 many areas of current, and historical stats (performance, standings, etc).
 If you don't see something here, or are unsure of how to use this tool, reach out
-to the team on [Discord](https://discord.com/channels/172404472637685760/323511951357509642)
+to the team on [Discord](https://discord.com/channels/172404472637685760/323511951357509642).
 
+<h2 style="font-size: 25px;"><center><b><u> Season 17 Champions </u></b></center></h2>
+
+<h3 style="font-size: 20px;"><center><b> Doubles: </b></center></h3>
+
+<div style="text-align: center;">
+    <span style="display: inline-flex; align-items: center;">
+        <b>FL:</b> &nbsp;Ducks <img src={teamLogos[7].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+    </span>
+    <span style="display: inline-flex; align-items: center;">
+        <b>AL:</b> &nbsp;Jets <img src={teamLogos[16].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+    </span>
+    <span style="display: inline-flex; align-items: center;">
+        <b>CL:</b> &nbsp;Puffins <img src={teamLogos[22].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+    </span>
+    <span style="display: inline-flex; align-items: center;">
+        <b>ML:</b> &nbsp;Ducks <img src={teamLogos[7].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+    </span>
+    <span style="display: inline-flex; align-items: center;">
+        <b>PL:</b> &nbsp;Rhinos <img src={teamLogos[23].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+    </span>
+</div>
+
+<h3 style="font-size: 20px;"><center><b> Standard: </b></center></h3>
+
+<div style="text-align: center;">
+    <span style="display: inline-flex; align-items: center;">
+        <b>FL:</b> &nbsp;Pirates <img src={teamLogos[21].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+    </span>
+    <span style="display: inline-flex; align-items: center;">
+        <b>AL:</b> &nbsp;Jets <img src={teamLogos[16].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+    </span>
+    <span style="display: inline-flex; align-items: center;">
+        <b>CL:</b> &nbsp;Jets <img src={teamLogos[16].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+    </span>
+    <span style="display: inline-flex; align-items: center;">
+        <b>ML:</b> &nbsp;Aviators <img src={teamLogos[0].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+    </span>
+    <span style="display: inline-flex; align-items: center;">
+        <b>PL:</b> &nbsp;Bulls <img src={teamLogos[3].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+    </span>
+</div>
 
 <Tabs>
 
@@ -281,19 +336,19 @@ FROM teams
 ORDER BY franchise ASC
 ```
 
-```sql players
+```sql eligibility
 SELECT 
 name,
 '/players/' || p.member_id AS id_link,
 salary,
 skill_group AS league,
-case
-    when skill_group = 'Foundation League' then 1
-    when skill_group = 'Academy League' then 2
-    when skill_group = 'Champion League' then 3
-    when skill_group = 'Master League' then 4
-    when skill_group = 'Premier League' then 5
-  end as league_order,
+CASE
+    WHEN skill_group = 'Foundation League' THEN 1 
+    WHEN skill_group = 'Academy League' THEN 2 
+    WHEN skill_group = 'Champion League' THEN 3 
+    WHEN skill_group = 'Master League' THEN 4 
+    WHEN skill_group = 'Premier League' THEN 5 
+END as league_order, 
 franchise,
 SUBSTRING(slot, 7) AS slot,
 doubles_uses,
@@ -302,17 +357,17 @@ total_uses,
 current_scrim_points,
 CASE WHEN current_scrim_points >= 30 THEN 'Yes'
     ELSE 'No'
-    END AS Eligible
+    END AS Eligible,
+"Eligible Until"
 FROM players p
     INNER JOIN role_usages ru
         ON p.franchise = ru.team_name
         AND p.slot = ru.role
         AND upper(p.skill_group) = concat(ru.league, ' LEAGUE')
 WHERE franchise = '${inputs.Team_Selection.value}'
-AND skill_group LIKE '${inputs.League_Selection}'
 AND slot != 'NONE'
-AND season_number = 17
-ORDER BY league_order DESC, slot ASC
+AND season_number = 17 
+ORDER BY league_order ASC, slot ASC
 ```
 
 ```sql team_info
@@ -329,31 +384,25 @@ FROM teams t
 WHERE t.franchise = '${inputs.Team_Selection.value}'
 ```
 
-    <Dropdown
-      data={franchise}
-      name=Team_Selection
-      value=franchise
-      defaultvalue="Aviators"
-    />
+<Dropdown
+    data={franchise}
+    name=Team_Selection
+    value=franchise
+    defaultvalue="Aviators"
+/>
 
-    <ButtonGroup name=League_Selection>
-      <ButtonGroupItem valueLabel="Foundation League" value= "Foundation League" />
-      <ButtonGroupItem valueLabel="Academy League" value= "Academy League" default />
-      <ButtonGroupItem valueLabel="Champion League" value="Champion League" />
-      <ButtonGroupItem valueLabel="Master League" value="Master League" />
-      <ButtonGroupItem valueLabel="Premier League" value="Premier League" />
-    </ButtonGroup> 
-    
 
-    <DataTable data={players} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white wrapTitles=true>
+<DataTable data={eligibility} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white wrapTitles=true rows=25 >
+      <Column id=league align=center />
       <Column id=slot align=center />
       <Column id=id_link contentType=link linkLabel=name align=center title=Player />
       <Column id=salary align=center />
-      <Column id=doubles_uses align=center contentType=colorscale scaleColor={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 4, 5, 6]} />
-      <Column id=standard_uses align=center contentType=colorscale scaleColor={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 6, 7, 8]} />
-      <Column id=total_uses align=center contentType=colorscale scaleColor={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 10, 11, 12]} />
-      <Column id=current_scrim_points align=center contentType=colorscale scaleColor={['#ce5050','white']} colorBreakpoints={[0, 30]}/>
-    </DataTable>
+      <Column id=doubles_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 4, 5, 6]} />
+      <Column id=standard_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 6, 7, 8]} />
+      <Column id=total_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 10, 11, 12]} />
+      <Column id=current_scrim_points align=center contentType=colorscale colorScale={['#ce5050','white']} colorBreakpoints={[0, 30]}/>
+      <Column id="Eligible Until" align=center />  
+</DataTable>
 
   </Tab>
 
@@ -450,3 +499,4 @@ FROM weeks
   </Tab>
 
 </Tabs>
+

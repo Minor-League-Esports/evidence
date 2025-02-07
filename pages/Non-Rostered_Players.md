@@ -18,8 +18,6 @@ SELECT DISTINCT
         ELSE 'No' 
     END AS Eligible 
 FROM players p
-INNER JOIN S17_stats st
-    ON p.member_id = st.member_id
 WHERE franchise IN ('FA', 'Pend', 'Waivers', 'RFA');
 ```
 
@@ -71,10 +69,9 @@ SELECT DISTINCT
     CASE 
         WHEN current_scrim_points >= 30 THEN 'Yes' 
         ELSE 'No' 
-    END AS Eligible
+    END AS Eligible,
+    "Eligible Until"
 FROM players p
-INNER JOIN S17_stats st
-    ON p.member_id = st.member_id
 WHERE franchise IN ${inputs.Status.value}
     AND p.skill_group in ${inputs.League.value}
     AND salary in ${inputs.Salary.value}
@@ -87,5 +84,5 @@ ORDER BY name ASC;
     <Column id=skill_group fmt=varhcar title=League align=center/> 
     <Column id=franchise title="Status" fmt=varchar align=center/> 
     <Column id=salary fmt=int align=center/> 
-    <Column id=Eligible fmt=varchar align=center/> 
+    <Column id="Eligible Until" fmt=varchar align=center/> 
 </DataTable>

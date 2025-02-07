@@ -3,11 +3,13 @@ SELECT
   name,
   salary,
   '/players/' || p.member_id as id_link,
-  franchise
+  franchise, 
+  p.current_scrim_points,
+  "Eligible Until"  
   from players p
   left join S17_stats s17
       on p.member_id = s17.member_id
-group by name, salary, p.member_id, franchise
+group by name, salary, p.member_id, franchise, current_scrim_points, "Eligible Until"
 ```
 
 ## Player Pages
@@ -20,6 +22,8 @@ group by name, salary, p.member_id, franchise
   <Column id="name" />
   <Column id="salary" align=center />
   <Column id="franchise" align=center />
+  <Column id=current_scrim_points align=center contentType=colorscale colorScale={['#ce5050','white']} colorBreakpoints={[0, 30]} />
+  <Column id="Eligible Until" align=center />
 </DataTable>
 
 

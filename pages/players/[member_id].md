@@ -1,34 +1,34 @@
 ```sql basic_info
-  With playerstats as (
     Select
-    p.name as name,
-    salary as salary,
+   -- distinct keeps us from getting multiples of the same information in the basic_info table 
+    p.name,
+    salary,
     p.franchise,
-    s17.skill_group as league,
-    p.member_id as member_id,
+    p.skill_group as league,
+    p.member_id,
     t."Photo URL" as logo,
+    CASE
+        WHEN t."Primary Color" is Null then '#2a4b82'
+        ELSE t."Primary Color"
+        END as primColor,
+    CASE 
+        WHEN t."Secondary Color" is Null then '#2a4b82'
+        ELSE t."Secondary Color"
+        END as secColor,
     t."Primary Color" as primary_color,
     t."Secondary Color" as secondary_color,
     case
        when p."Franchise Staff Position" = 'NA' then 'Player'
        else p."Franchise Staff Position"
-       end as franchise_position
+       END as franchise_position,
+    current_scrim_points,
+    "Eligible Until"
  from players p
-    left join S17_stats s17
+    left join (select distinct member_id, skill_group from S17_stats) s17
         on p.member_id = s17.member_id
     left join teams t
         on p.franchise = t.Franchise
-    )
-  select distinct(name),
-  salary,
-  franchise,
-  logo,
-  league,
-  franchise_position,
-  primary_color,
-  secondary_color
-  from playerstats
-  where member_id = '${params.member_id}'
+  where p.member_id = '${params.member_id}'
 ```
 
 <LastRefreshed prefix="Data last updated"/>
@@ -42,7 +42,11 @@
     <Column id=franchise align=center />
     <Column id=league align=center />
     <Column id=franchise_position align=center />
+    <Column id=current_scrim_points align=center contentType=colorscale scaleColor={['#ce5050','white']} colorBreakpoints={[0, 30]} />
+    <Column id="Eligible Until" align=center />
 </DataTable>
+
+
 
 ```sql player_stats
   With playerstats as (
@@ -118,7 +122,7 @@ ${inputs.Stats.value} as value
 from ${player_stats}
 ```
 
-<Details title="Player Match Averages">
+<Details title="Season 17 Player Match Averages">
 
 <p>Below you can use the dropdown to choose the statistic you would like to display. </p>
 <p><b>Note:</b> If no information appears then you do not have any statistical data to display. </p>
@@ -145,7 +149,7 @@ x=game_mode
 y=value
 series=name
 type=grouped
-colorPalette={[basic_info[0].primary_color, '#A9A9A9']}
+colorPalette={[basic_info[0].primColor, '#A9A9A9']}
 sort=false
 />
 
@@ -239,7 +243,7 @@ order by week asc
 ```
 
 >Season 17 Stats by Series
-<DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primary_color}' headerFontColor=white compact=true wrapTitles=true>
+<DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primColor}' headerFontColor=white compact=true wrapTitles=true>
     <Column id=week align=center />
     <Column id=game_mode align=center />
     <Column id=franchise_link contentType=link linkLabel=opponent title=Opponent align=center />
