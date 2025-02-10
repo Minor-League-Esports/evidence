@@ -346,42 +346,42 @@ ORDER BY franchise ASC
 
 ```sql eligibility
 SELECT 
-    name,
+    p.name,
     '/players/' || p.member_id AS id_link,
-    salary,
-    skill_group AS league,
+    p.salary,
+    p.skill_group AS league,
     CASE
-        WHEN skill_group = 'Foundation League' THEN 1 
-        WHEN skill_group = 'Academy League' THEN 2 
-        WHEN skill_group = 'Champion League' THEN 3 
-        WHEN skill_group = 'Master League' THEN 4 
-        WHEN skill_group = 'Premier League' THEN 5 
+        WHEN p.skill_group = 'Foundation League' THEN 1 
+        WHEN p.skill_group = 'Academy League' THEN 2 
+        WHEN p.skill_group = 'Champion League' THEN 3 
+        WHEN p.skill_group = 'Master League' THEN 4 
+        WHEN p.skill_group = 'Premier League' THEN 5 
     END as league_order, 
-    franchise,
-    SUBSTRING(slot, 7) AS slot,
-    doubles_uses,
-    standard_uses,
-    total_uses,
-    current_scrim_points,
-    CASE WHEN current_scrim_points >= 30 THEN 'Yes'
+    p.franchise,
+    SUBSTRING(p.slot, 7) AS slot,
+    COALESCE(ru.doubles_uses, 0) AS doubles_uses,
+    COALESCE(ru.standard_uses, 0) AS standard_uses,
+    COALESCE(ru.total_uses, 0) AS total_uses,
+    p.current_scrim_points,
+    CASE WHEN p.current_scrim_points >= 30 THEN 'Yes'
         ELSE 'No'
     END AS Eligible,
-    "Eligible Until"
+    p."Eligible Until"
 
 FROM players p
 
-INNER JOIN role_usages ru
+LEFT JOIN role_usages ru
     ON p.franchise = ru.team_name
     AND p.slot = ru.role
-    AND upper(p.skill_group) = concat(ru.league, ' LEAGUE')
+    AND UPPER(p.skill_group) = CONCAT(ru.league, ' LEAGUE')
+    AND ru.season_number = 18
 
-WHERE franchise = '${inputs.Team_Selection.value}'
-    AND slot != 'NONE'
-    AND season_number = 18
+WHERE p.franchise = '${inputs.Team_Selection.value}'
+    AND p.slot LIKE 'PLAYER%'
 
 ORDER BY
     league_order ASC
-    , slot ASC
+    , p.slot ASC
 ```
 
 ```sql team_info
@@ -427,6 +427,7 @@ WHERE t.franchise = '${inputs.Team_Selection.value}'
 ```sql matches
 WITH weeks AS (
     SELECT 
+        m.match_id,
         m.Home,
         m.Away,
         m.League,
@@ -449,6 +450,7 @@ WITH weeks AS (
 )
 
 SELECT
+    match_id,
     Home,
     home_link,
     home_wins::INT || ' - ' || away_wins::INT AS series_score,
@@ -503,6 +505,7 @@ ORDER BY
 </p>
 
 <DataTable data={matches} rows=16 headerColor=#2a4b82 headerFontColor=white>
+  <Column id=match_id align=center title="Match Id" />
   <Column id=home_link contentType=link linkLabel=home align=center title="Home Team" />
   <Column id=series_score align=center/>
   <Column id=away_link contentType=link linkLabel=away align=center title="Away Team" />
