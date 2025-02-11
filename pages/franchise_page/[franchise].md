@@ -53,16 +53,13 @@ SELECT
     p.franchise AS franchise,
     p.skill_group AS league,
     p.member_id AS member_id,
-    '/players/' || p.member_id AS id_link_test,
+    '/players/' || p.member_id AS id_link,
     p."Franchise Staff Position" AS staff_position,
     CASE
         WHEN p."Franchise Staff Position" = 'Captain' THEN 1
-        WHEN p."Franchise Staff Position"  = 'Franchise Manager'  AND league = '${inputs.League}' THEN 2
-        WHEN p."Franchise Staff Position" = 'General Manager' AND league = '${inputs.League}' THEN 3
-        WHEN p."Franchise Staff Position" = 'Assistant General Manager' AND league= '${inputs.League}' THEN 4
-        WHEN p."Franchise Staff Position"  = 'Franchise Manager' THEN 5
-        WHEN p."Franchise Staff Position"  = 'General Manager' THEN 6
-        WHEN p."Franchise Staff Position"  = 'Assistant General Manager' THEN 7
+        WHEN p."Franchise Staff Position"  = 'Franchise Manager' THEN 2
+        WHEN p."Franchise Staff Position" = 'General Manager' THEN 3
+        WHEN p."Franchise Staff Position" = 'Assistant General Manager' THEN 4
     END AS franchise_order
 
 FROM players p
@@ -78,7 +75,7 @@ ORDER BY
     data={staff_members.where(`staff_position = 'Franchise Manager'`)}
     title="Franchise Manager"
     value=name
-    link=id_link_test
+    link=id_link
 />
 <BigValue 
     data={staff_members.where(`staff_position = 'General Manager'`)}
@@ -153,14 +150,8 @@ ORDER BY
 
 {#each leagues as league}
 
-## {league.league_name}
-
-<BigValue
-    data={staff_members.where(`league = '${league.league_name}'`)}
-    value=name
-    title=Captain
-    link=id_link
-/>
+<div style="float:left; font-size:20px;"><b>{league.league_name}</b></div>
+<div style="float:right;"> <b>Captain:</b> <Value data={staff_members.where(`league = '${league.league_name}'`)} column=name /> </div>
 
 <DataTable data={eligibility.where(`skill_group = '${league.league_name}'`)} rowshading=true headerColor={league.color} headerFontColor=white wrapTitles=true>
     <Column id=slot align=center />

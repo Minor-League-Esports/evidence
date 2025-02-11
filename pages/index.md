@@ -335,92 +335,9 @@ ORDER BY
 
   </Tab>
 
-  <Tab label="Player Eligibility">
-
-```sql franchise
-SELECT
-  franchise
-FROM teams
-ORDER BY franchise ASC
-```
-
-```sql eligibility
-SELECT 
-    p.name,
-    '/players/' || p.member_id AS id_link,
-    p.salary,
-    p.skill_group AS league,
-    CASE
-        WHEN p.skill_group = 'Foundation League' THEN 1 
-        WHEN p.skill_group = 'Academy League' THEN 2 
-        WHEN p.skill_group = 'Champion League' THEN 3 
-        WHEN p.skill_group = 'Master League' THEN 4 
-        WHEN p.skill_group = 'Premier League' THEN 5 
-    END as league_order, 
-    p.franchise,
-    SUBSTRING(p.slot, 7) AS slot,
-    COALESCE(ru.doubles_uses, 0) AS doubles_uses,
-    COALESCE(ru.standard_uses, 0) AS standard_uses,
-    COALESCE(ru.total_uses, 0) AS total_uses,
-    p.current_scrim_points,
-    CASE WHEN p.current_scrim_points >= 30 THEN 'Yes'
-        ELSE 'No'
-    END AS Eligible,
-    p."Eligible Until"
-
-FROM players p
-
-LEFT JOIN role_usages ru
-    ON p.franchise = ru.team_name
-    AND p.slot = ru.role
-    AND UPPER(p.skill_group) = CONCAT(ru.league, ' LEAGUE')
-    AND ru.season_number = 18
-
-WHERE p.franchise = '${inputs.Team_Selection.value}'
-    AND p.slot LIKE 'PLAYER%'
-
-ORDER BY
-    league_order ASC
-    , p.slot ASC
-```
-
-```sql team_info
-SELECT 
-    Franchise,
-    Conference,
-    "Super Division",
-    Division,
-    Code,
-    "Primary Color" AS primary_color,
-    "Secondary Color" AS secondary_color,
-    "Photo URL" AS logo
-    
-FROM teams t
-
-WHERE t.franchise = '${inputs.Team_Selection.value}'
-```
-
-<Dropdown
-    data={franchise}
-    name=Team_Selection
-    value=franchise
-    defaultvalue="Aviators"
-/>
 
 
-<DataTable data={eligibility} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white wrapTitles=true rows=25 >
-      <Column id=league align=center />
-      <Column id=slot align=center />
-      <Column id=id_link contentType=link linkLabel=name align=center title=Player />
-      <Column id=salary align=center />
-      <Column id=doubles_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 4, 5, 6]} />
-      <Column id=standard_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 6, 7, 8]} />
-      <Column id=total_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 10, 11, 12]} />
-      <Column id=current_scrim_points align=center contentType=colorscale colorScale={['#ce5050','white']} colorBreakpoints={[0, 30]}/>
-      <Column id="Eligible Until" align=center />  
-</DataTable>
 
-  </Tab>
 
   <Tab label="S18 Matchups">
 
