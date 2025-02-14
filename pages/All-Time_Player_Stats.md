@@ -134,8 +134,8 @@ With lifetime_stats as (
     ,'/players/' || ps.member_id as playerLink
     ,CASE WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
     ,season
+    ,skill_group as 'League'
     ,team_name as Franchise
-    ,skill_group
     ,sum(games_played) as games_played
     ,avg(sprocket_rating) as 'Sprocket Rating'
     ,avg(opi_per_game) as 'OPI'
@@ -157,7 +157,7 @@ With lifetime_stats as (
     ,avg(avg_demos_inflicted) as 'Demos/ G'
     ,avg(avg_demos_taken) as 'Demos Taken/ G'
  from player_stats ps
-group by Name, gamemode, season, team_name, skill_group, playerLink
+group by Name, gamemode, season, team_name, League, playerLink
 )
 
 select *
@@ -165,18 +165,21 @@ from lifetime_stats
 where GameMode like '${inputs.game_mode}'
 and games_played >= ${inputs.games_played}
 and season in ${inputs.season.value}
+and League in ${inputs.League.value}
 order by Name, season
 ```
 
 
 <Dropdown data={dropdown_and_button_group} name=season value=season multiple=true selectAllByDefault=true />
 
+<Dropdown data={Stats_lifetime} name=League value=League multiple=true selectAllByDefault=true />
+
 
 <DataTable data={SeasonStats_career} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=playerLink>
     <Column id=Name align=center />
     <Column id=GameMode align=center />
     <Column id='Franchise' align=center />
-    <Column id='skill_group' align=center />
+    <Column id='League' align=center />
     <Column id='season' align=center />
     <Column id='games_played' align=center />
     <Column id='Sprocket Rating' align=center />
