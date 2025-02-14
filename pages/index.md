@@ -422,7 +422,7 @@ ORDER BY
 </p>
 
 <DataTable data={matches} rows=16 headerColor=#2a4b82 headerFontColor=white>
-  <Column id=match_id align=center title="Match Id" />
+  <!-- <Column id=match_id align=center title="Match Id" /> -->
   <Column id=home_link contentType=link linkLabel=home align=center title="Home Team" />
   <Column id=series_score align=center/>
   <Column id=away_link contentType=link linkLabel=away align=center title="Away Team" />
