@@ -2,27 +2,41 @@
 title: All-Time Player Stats
 ---
 
-```sql Stats_lifetime
-    Select name as Name
-    ,CASE WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
-    ,season
-    ,team_name
-    ,games_played
-    ,skill_group as League
-    ,sprocket_rating
-    ,opi_per_game
-    ,dpi_per_game
-    ,avg_score
-    ,total_goals
-    ,total_assists 
-    ,total_saves
-    ,total_shots
-    ,total_goals_against 
-    ,total_shots_against
-    ,total_demos_inflicted
-    ,total_demos_taken
- from player_stats ps
-order by Name
+```sql dropdown_and_button_group
+    SELECT
+        name AS Name
+        , '/players/' || ps.member_id as playerLink
+        , CASE WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
+        , season
+        , team_name as Franchise
+        , skill_group
+        , SUM(games_played) as games_played
+
+    FROM player_stats ps
+
+    GROUP BY
+        Name
+        , gamemode
+        , playerLink
+        , season
+        , team_name
+        , skill_group
+```
+
+```sql slider
+    SELECT
+        name AS Name
+        , CASE WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
+        , SUM(games_played) as games_played
+
+    FROM player_stats ps
+
+    GROUP BY
+        Name
+        , GameMode
+
+    ORDER BY
+        games_played DESC
 ```
 
 <ButtonGroup name=game_mode>
@@ -34,11 +48,11 @@ order by Name
 <Slider
     title='Games Played'
     name=games_played
-    data={Stats_lifetime}
-    defaultValue=1
-    min=1
-    max=165
     size=full
+    step=1
+    data={slider}
+    min=1
+    maxColumn=games_played
 />
 
 <Tabs>
@@ -156,7 +170,7 @@ order by Name, season
 ```
 
 
-<Dropdown data={Stats_lifetime} name=season value=season multiple=true selectAllByDefault=true />
+<Dropdown data={dropdown_and_button_group} name=season value=season multiple=true selectAllByDefault=true />
 
 <Dropdown data={Stats_lifetime} name=League value=League multiple=true selectAllByDefault=true />
 

@@ -1,5 +1,5 @@
 ---
-title: S17 Stats
+title: S18 Stats
 ---
 
 
@@ -11,8 +11,8 @@ title: S17 Stats
     p.skill_group as League,
     CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Standard' END as GameMode
  from players p
-    left join S17_stats s17
-        on p.member_id = s17.member_id
+    left join S18_stats s18
+        on p.member_id = s18.member_id
 ```
 
 
@@ -23,7 +23,7 @@ title: S17 Stats
 
 <Details title='Instructions'>
 
-Below you will find all stats for all players in MLE for S17.
+Below you will find all stats for all players in MLE for S18.
 - You can use the search bar above the table to search for a specific player.
 - You can also use the drop down menus below to Filter the stats however you see fit.
 - Lastly you can click on the stat column to put stats in ascending or descending order.
@@ -37,7 +37,7 @@ With playerstats as (
     '/players/' || p.member_id as playerLink,
     salary as Salary,
     team_name as Team,
-    s17.skill_group as League,
+    s18.skill_group as League,
     CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode,
     count(*) as games_played,
     avg(dpi) as Avg_DPI,
@@ -55,8 +55,8 @@ With playerstats as (
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
  from players p
-    inner join S17_stats s17
-        on p.member_id = s17.member_id
+    inner join S18_stats s18
+        on p.member_id = s18.member_id
 group by name, salary, team_name, League, gamemode, p.member_id)
 
 select *
@@ -190,7 +190,7 @@ With playerstats as (
     Select name,
     salary as Salary,
     team_name as Team,
-    s17.skill_group as League,
+    s18.skill_group as League,
     CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode,
     count(*) as games_played,
     avg(dpi) as Avg_DPI,
@@ -208,8 +208,8 @@ With playerstats as (
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
  from players p
-    inner join S17_stats s17
-        on p.member_id = s17.member_id
+    inner join S18_stats s18
+        on p.member_id = s18.member_id
 group by name, salary, team_name, League, gamemode)
 
 select 
@@ -267,13 +267,13 @@ sort=false
 ```sql leagueStats
 select
     case
-      when s17.skill_group = 'Foundation League' then 1
-      when s17.skill_group = 'Academy League' then 2
-      when s17.skill_group = 'Champion League' then 3
-      when s17.skill_group = 'Master League' then 4
-      when s17.skill_group = 'Premier League' then 5
+      when s18.skill_group = 'Foundation League' then 1
+      when s18.skill_group = 'Academy League' then 2
+      when s18.skill_group = 'Champion League' then 3
+      when s18.skill_group = 'Master League' then 4
+      when s18.skill_group = 'Premier League' then 5
     end as league_order,
-    s17.skill_group as league,
+    s18.skill_group as league,
     case
       when gamemode = 'RL_DOUBLES' then 'Doubles'
       when gamemode = 'RL_STANDARD' then 'Standard'
@@ -294,8 +294,8 @@ select
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) * 100 as shooting_pct2
  from players p
-    inner join s17_stats s17
-        on p.member_id = s17.member_id
+    inner join s18_stats s18
+        on p.member_id = s18.member_id
 group by League, game_mode
 order by league_order
 ```
@@ -350,13 +350,13 @@ yFmt=0.00
 select
     salary,
     case
-      when s17.skill_group = 'Foundation League' then 1
-      when s17.skill_group = 'Academy League' then 2
-      when s17.skill_group = 'Champion League' then 3
-      when s17.skill_group = 'Master League' then 4
-      when s17.skill_group = 'Premier League' then 5
+      when s18.skill_group = 'Foundation League' then 1
+      when s18.skill_group = 'Academy League' then 2
+      when s18.skill_group = 'Champion League' then 3
+      when s18.skill_group = 'Master League' then 4
+      when s18.skill_group = 'Premier League' then 5
     end as league_order,
-    s17.skill_group as league,
+    s18.skill_group as league,
     case
       when gamemode = 'RL_DOUBLES' then 'Doubles'
       when gamemode = 'RL_STANDARD' then 'Standard'
@@ -381,8 +381,8 @@ select
     end as FLstats,
     ${inputs.Stats.value} as value
  from players p
-    inner join s17_stats s17
-        on p.member_id = s17.member_id
+    inner join s18_stats s18
+        on p.member_id = s18.member_id
 where game_mode = '${inputs.mode.value}'
 group by salary, league, game_mode
 order by salary
@@ -488,7 +488,7 @@ select
 from ${allStats}
 where league = 'Master League'
 and salary >= 15.5
-and salary <= 17.5
+and salary <= 18.5
 ```
 
 ```sql statsPL

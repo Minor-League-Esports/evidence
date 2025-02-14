@@ -7,8 +7,8 @@ SELECT
   p.current_scrim_points,
   "Eligible Until"  
   from players p
-  left join S17_stats s17
-      on p.member_id = s17.member_id
+  left join S18_stats s18
+      on p.member_id = s18.member_id
 group by name, salary, p.member_id, franchise, current_scrim_points, "Eligible Until"
 ```
 

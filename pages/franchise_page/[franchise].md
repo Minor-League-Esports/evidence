@@ -1,225 +1,179 @@
 ```sql team_info
 SELECT 
-Franchise,
-Conference,
-"Super Division",
-Division,
-Code,
-"Primary Color" AS primary_color,
-"Secondary Color" AS secondary_color,
-"Photo URL" AS logo
+    Franchise,
+    Conference,
+    "Super Division",
+    Division,
+    Code,
+    "Primary Color" AS primary_color,
+    "Secondary Color" AS secondary_color,
+    "Photo URL" AS logo
 FROM teams t
 WHERE t.franchise = '${params.franchise}'
 ```
 
-<Tabs>
-    <Tab label="Franchise Info">
-
 <LastRefreshed prefix="Data last updated"/>
-
 <center><img src={team_info[0].logo} class="h-32" /></center>
 
 #  <center><Value data={team_info} column=Franchise /> </center>
 
-```sql staff_members
-  WITH playerstats AS (
-    SELECT
-    p.name AS name,
-    salary AS salary,
-    p.franchise AS franchise,
-    s17.skill_group AS league,
-    p.member_id AS member_id,
-    '/players/' || p.member_id AS id_link,
-    t."Photo URL" AS logo,
-    t."Primary Color" AS primary_color,
-    t."Secondary Color" AS secondary_color,
-    CASE
-       WHEN p."Franchise Staff Position" = 'NA' THEN 'Player'
-       ELSE p."Franchise Staff Position"
-       END AS franchise_position,
-    CASE WHEN p."Franchise Staff Position" = 'Franchise Manager' THEN 1
-        WHEN p."Franchise Staff Position" = 'General Manager' THEN 2
-        WHEN p."Franchise Staff Position" = 'Assistant General Manager' THEN 3
-        WHEN p."Franchise Staff Position" = 'Captain' THEN 4
-        WHEN p."Franchise Staff Position" = 'Player' THEN 5
-        END AS franchise_order
- FROM players p
-    LEFT JOIN S17_stats s17
-        ON p.member_id = s17.member_id
-    LEFT JOIN teams t
-        ON p.franchise = t.Franchise
-    )
-  SELECT DISTINCT(name),
-  salary,
-  franchise,
-  logo,
-  league,
-  id_link,
-  franchise_position,
-  primary_color,
-  secondary_color
-  FROM playerstats
-  WHERE franchise = '${params.franchise}'
-  AND franchise_position = 'Franchise Manager' OR
-  franchise = '${params.franchise}'
-  AND franchise_position = 'General Manager' OR
-  franchise = '${params.franchise}'
-  AND franchise_position = 'Assistant General Manager'
-  ORDER BY franchise_order ASC
-```
+```sql leagues
+SELECT
+    l.league_name
+    , l.color
+    , l.league_photo_url
+    , l.max_salary
+    , COUNT(*) AS num_players
 
-> Franchise Leadership
-<DataTable data={staff_members} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white >
-    <Column id=id_link contentType=link linkLabel=name align=center title=Player />
-    <Column id=salary align=center />
-    <Column id=league align=center />
-    <Column id=franchise_position align=center />
-</DataTable>
-
-```sql players
-SELECT 
-name,
-'/players/' || p.member_id AS id_link,
-salary,
-skill_group AS league,
-franchise,
-SUBSTRING(slot, 7) AS slot,
-doubles_uses,
-standard_uses,
-total_uses,
-current_scrim_points,
-CASE WHEN current_scrim_points >= 30 THEN 'Yes'
-    ELSE 'No'
-    END AS Eligible
 FROM players p
-    INNER JOIN role_usages ru
-        ON p.franchise = ru.team_name
-        AND p.slot = ru.role
-        AND upper(p.skill_group) = concat(ru.league, ' LEAGUE')
-WHERE franchise = '${params.franchise}'
-AND skill_group = '${inputs.League}'
-AND slot != 'NONE'
-AND season_number = 17
-ORDER BY slot ASC
+
+INNER JOIN leagues l
+    ON p.skill_group = l.league_name
+
+WHERE p.franchise = '${params.franchise}'
+
+GROUP BY
+    l.league_name
+    , p.skill_group
+    , l.skill_group_id
+    , l.color
+    , l.league_photo_url
+    , l.max_salary
+
+HAVING num_players > 1
+
+ORDER BY
+    l.skill_group_id DESC
 ```
 
-```sql captain
-  WITH captain_search AS (
-    SELECT
+```sql staff_members
+
+SELECT
     p.name AS name,
-    salary AS salary,
     p.franchise AS franchise,
     p.skill_group AS league,
     p.member_id AS member_id,
     '/players/' || p.member_id AS id_link,
     p."Franchise Staff Position" AS staff_position,
-    CASE 
-        WHEN p."Franchise Staff Position"  = 'Franchise Manager'  AND league = '${inputs.League}' THEN 2
-        WHEN p."Franchise Staff Position" = 'General Manager' AND league = '${inputs.League}' THEN 3
-        WHEN p."Franchise Staff Position" = 'Assistant General Manager' AND league= '${inputs.League}' THEN 4
+    CASE
         WHEN p."Franchise Staff Position" = 'Captain' THEN 1
-        WHEN p."Franchise Staff Position"  = 'Franchise Manager' THEN 5
-        WHEN p."Franchise Staff Position"  = 'General Manager' THEN 6
-        WHEN p."Franchise Staff Position"  = 'Assistant General Manager' THEN 7
-        END AS franchise_order
- FROM players p
-    )
-  SELECT 
-  DISTINCT(name),
-  salary,
-  franchise_order,
-  franchise,
-  league,
-  id_link,
-  staff_position
+        WHEN p."Franchise Staff Position"  = 'Franchise Manager' THEN 2
+        WHEN p."Franchise Staff Position" = 'General Manager' THEN 3
+        WHEN p."Franchise Staff Position" = 'Assistant General Manager' THEN 4
+    END AS franchise_order
 
-  FROM captain_search
+FROM players p
 
-  WHERE franchise = '${params.franchise}'
-  AND league = '${inputs.League}'
-  AND staff_position = 'Captain'
-  OR
-  franchise = '${params.franchise}'
-  AND staff_position = 'Franchise Manager'
-  OR
-  franchise = '${params.franchise}'
-  AND staff_position = 'General Manager'
-  OR
-  franchise = '${params.franchise}'
-  AND staff_position = 'Assistant General Manager'
+WHERE franchise = '${params.franchise}'
+    AND p."Franchise Staff Position" IS NOT NULL
 
-ORDER BY franchise_order ASC
+ORDER BY
+    franchise_order
 ```
 
-<ButtonGroup name=League title="League Selection:" >
-    <ButtonGroupItem valueLabel="Foundation League" value="Foundation League" />
-    <ButtonGroupItem valueLabel="Academy League" value="Academy League" default />
-    <ButtonGroupItem valueLabel="Champion League" value="Champion League" />
-    <ButtonGroupItem valueLabel="Master League" value="Master League" />
-    <ButtonGroupItem valueLabel="Premier League" value="Premier League" />
-</ButtonGroup>
+<BigValue 
+    data={staff_members.where(`staff_position = 'Franchise Manager'`)}
+    title="Franchise Manager"
+    value=name
+    link=id_link
+/>
+<BigValue 
+    data={staff_members.where(`staff_position = 'General Manager'`)}
+    title="General Manager"
+    value=name
+    link=id_link
+    emptySet=warn
+    emptyMessage='GM Not Assigned'
+/>
+<BigValue 
+    data={staff_members.where(`staff_position = 'Assistant General Manager'`)}
+    title="Assistant General Manager"
+    value=name
+    link=id_link
+    emptySet=warn
+    emptyMessage='AGM Not Assigned'
+/>
+<BigValue 
+    data={staff_members.where(`staff_position = 'Assistant General Manager' OFFSET 1`)}
+    title="Assistant General Manager"
+    value=name
+    link=id_link
+    emptySet=warn
+    emptyMessage='Second AGM Not Assigned'
+/>
 
-<BigValue data={captain} value=name title=Captain: />
 
-> Franchise Players
-<DataTable data={players} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white wrapTitles=true>
-    <Column id=slot align=center />
-    <Column id=id_link contentType=link linkLabel=name align=center title=Player />
-    <Column id=salary align=center />
-    <Column id=doubles_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 4, 5, 6]} />
-    <Column id=standard_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 6, 7, 8]} />
-    <Column id=total_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 10, 11, 12]} />
-    <Column id=current_scrim_points align=center contentType=colorscale colorScale={['#ce5050','white']} colorBreakpoints={[0, 30]}/>
-</DataTable>
+<Tabs>
+    <Tab label="Players">
 
-    </Tab>
-    <Tab label="Team Eligibility">
 
 ```sql eligibility
 SELECT 
-name,
-'/players/' || p.member_id AS id_link,
-salary,
-skill_group AS league,
-CASE
-    WHEN skill_group = 'Foundation League' THEN 1 
-    WHEN skill_group = 'Academy League' THEN 2 
-    WHEN skill_group = 'Champion League' THEN 3 
-    WHEN skill_group = 'Master League' THEN 4 
-    WHEN skill_group = 'Premier League' THEN 5 
-END as league_order, 
-franchise,
-SUBSTRING(slot, 7) AS slot,
-doubles_uses,
-standard_uses,
-total_uses,
-current_scrim_points,
-CASE WHEN current_scrim_points >= 30 THEN 'Yes'
-    ELSE 'No'
+    p.name,
+    '/players/' || p.member_id AS id_link,
+    p.salary,
+    p.skill_group,
+    CASE
+        WHEN p.skill_group = 'Foundation League' THEN 1 
+        WHEN p.skill_group = 'Academy League' THEN 2 
+        WHEN p.skill_group = 'Champion League' THEN 3 
+        WHEN p.skill_group = 'Master League' THEN 4 
+        WHEN p.skill_group = 'Premier League' THEN 5 
+    END as league_order, 
+    p.franchise,
+    SUBSTRING(p.slot, 7) AS slot,
+    COALESCE(ru.doubles_uses, 0) AS doubles_uses,
+    COALESCE(ru.standard_uses, 0) AS standard_uses,
+    COALESCE(ru.total_uses, 0) AS total_uses,
+    p.current_scrim_points,
+    CASE WHEN p.current_scrim_points >= 30 THEN 'Yes'
+        ELSE 'No'
     END AS Eligible,
-"Eligible Until"
+    p."Eligible Until"
+
 FROM players p
-    INNER JOIN role_usages ru
-        ON p.franchise = ru.team_name
-        AND p.slot = ru.role
-        AND upper(p.skill_group) = concat(ru.league, ' LEAGUE')
-WHERE franchise = '${params.franchise}'
-AND slot != 'NONE'
-AND season_number = 17 
-ORDER BY league_order ASC, slot ASC
+
+LEFT JOIN role_usages ru
+    ON p.franchise = ru.team_name
+    AND p.slot = ru.role
+    AND UPPER(p.skill_group) = CONCAT(ru.league, ' LEAGUE')
+    AND ru.season_number = 18
+
+WHERE p.franchise = '${params.franchise}'
+    AND p.slot LIKE 'PLAYER%'
+
+ORDER BY
+    league_order
+    , p.slot
 ```
 
-<DataTable data={eligibility} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white wrapTitles=true rows=25>
-    <Column id=league align=center />
+
+{#each leagues as league}
+
+<div style="float:left; font-size:20px;"><b>{league.league_name}</b></div>
+<div style="float:right;"> <b>Captain:</b> <Value data={staff_members.where(`league = '${league.league_name}'`)} column=name /> </div>
+
+<DataTable data={eligibility.where(`skill_group = '${league.league_name}'`)} rowshading=true headerColor={league.color} headerFontColor=white wrapTitles=true>
     <Column id=slot align=center />
     <Column id=id_link contentType=link linkLabel=name align=center title=Player />
-    <Column id=salary align=center />
+    <Column id=salary align=center fmt=##.0/>
+    <Column id=doubles_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 4, 5, 6]} />
+    <Column id=standard_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 6, 7, 8]} />
+    <Column id=total_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 10, 11, 12]} />    
     <Column id=current_scrim_points align=center contentType=colorscale colorScale={['#ce5050','white']} colorBreakpoints={[0, 30]}/>
     <Column id="Eligible Until" align=center />
 </DataTable>
 
-    </Tab>
-    <Tab label="S17 Records">
+
+{/each}
+
+</Tab>
+
+
+
+
+
+<Tab label="S18 Records">
 
 ```sql team_record
 WITH record AS(
@@ -242,11 +196,11 @@ match_group_title
 FROM matches m
     INNER JOIN match_groups mg
         ON m.match_group_id = mg.match_group_id
-    WHERE parent_group_title = 'Season 17'
+    WHERE parent_group_title = 'Season 18'
     AND home = '${params.franchise}'
     AND league = '${inputs.League}'
     AND game_mode = '${inputs.Gamemodes}'
-    OR parent_group_title = 'Season 17'
+    OR parent_group_title = 'Season 18'
     AND away = '${params.franchise}'
     AND league = '${inputs.League}'
     AND game_mode = '${inputs.Gamemodes}'
@@ -265,16 +219,16 @@ CASE
     WHEN r.home = '${params.franchise}' THEN home_goals - away_goals
     WHEN r.away = '${params.franchise}' THEN away_goals - home_goals
     END AS goal_differential
-FROM rounds r
+FROM s18_rounds r
     INNER JOIN matches m
         ON m.match_id = r.match_id
     INNER JOIN match_groups mg
         ON mg.match_group_id = m.match_group_id
-WHERE parent_group_title = 'Season 17'
+WHERE parent_group_title = 'Season 18'
     AND r.home = '${params.franchise}'
     AND m.league = '${inputs.League}'
     AND m.game_mode = '${inputs.Gamemodes}'
-    OR parent_group_title = 'Season 17'
+    OR parent_group_title = 'Season 18'
     AND r.away = '${params.franchise}'
     AND m.league = '${inputs.League}'
     AND m.game_mode = '${inputs.Gamemodes}'
@@ -301,11 +255,6 @@ FROM record re
         ON re.home = gd.home AND re.away = gd.away
 ```
 
-<LastRefreshed prefix="Data last updated"/>
-
-<center><img src={team_info[0].logo} class="h-32" /></center>
-
-#  <center><Value data={team_info} column=Franchise /> </center>
 
 <ButtonGroup name=League title="League Selection:" >
     <ButtonGroupItem valueLabel="Foundation League" value="Foundation League" />
@@ -323,7 +272,7 @@ FROM record re
 
 <BigValue data={teamStatistics} value=record /> <BigValue data={teamStatistics} value=series_record /> <BigValue data={teamStatistics} value=goal_differential />
 
->Season 17 Results
+>Season 18 Results
 <DataTable data={team_record} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white >
     <Column id=week align=center />
     <Column id=franchise_link contentType=link linkLabel=opponent title=Opponent align=center />
@@ -333,17 +282,17 @@ FROM record re
 </DataTable>
 
 ```sql teamStatistics
-WITH S17standings AS (
+WITH S18standings AS (
     
     SELECT
         *
         , CASE
-            WHEN s17.mode IN ('Doubles', 'Standard') THEN s17.mode
+            WHEN s18.mode IN ('Doubles', 'Standard') THEN s18.mode
             ELSE 'Overall'
         END AS game_mode
-    FROM S17_standings s17
+    FROM S18_standings s18
     INNER JOIN teams t
-        ON s17.name = t.Franchise
+        ON s18.name = t.Franchise
 
 ), results AS (
 
@@ -359,12 +308,12 @@ WITH S17standings AS (
 		, SUM(r."Home Goals") AS goals_for
 		, SUM(r."Away Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    ON m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 17'
+	WHERE mg.parent_group_title = 'Season 18'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 		
@@ -382,12 +331,12 @@ WITH S17standings AS (
 		, SUM(r."Away Goals") AS goals_for
 		, SUM(r."Home Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM rounds r
+	FROM s18_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    ON m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 17'
+	WHERE mg.parent_group_title = 'Season 18'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 
@@ -426,29 +375,29 @@ WITH S17standings AS (
 )
 
 SELECT
-    s17.ranking AS divisional_rank
-    , s17.Franchise AS team_name
-    , s17."Photo URL" AS team_logo
-    , s17.Division AS division
-	, s17."Super Division" AS super_division
-    , s17.Conference
-    , s17.team_wins::INT || ' - ' || s17.team_losses::INT AS record
+    s18.ranking AS divisional_rank
+    , s18.Franchise AS team_name
+    , s18."Photo URL" AS team_logo
+    , s18.Division AS division
+	, s18."Super Division" AS super_division
+    , s18.Conference
+    , s18.team_wins::INT || ' - ' || s18.team_losses::INT AS record
     , sagd.series_wins || ' - ' || sagd.series_loses AS series_record
     , sagd.goals_for
     , sagd.goals_against
     , sagd.goal_diff AS goal_differential
-FROM S17standings s17
+FROM S18standings s18
 INNER JOIN series_and_goal_diff sagd
-    ON s17.Franchise = sagd.team_name
-    AND s17.league = sagd.league
-    AND s17.game_mode = sagd.game_mode
-WHERE s17.conference NOT NULL
-    AND s17.division_name NOT NULL
-    AND s17.league LIKE '${inputs.League}'
-    AND s17.game_mode LIKE '${inputs.Gamemodes}'
+    ON s18.Franchise = sagd.team_name
+    AND s18.league = sagd.league
+    AND s18.game_mode = sagd.game_mode
+WHERE s18.conference NOT NULL
+    AND s18.division_name NOT NULL
+    AND s18.league LIKE '${inputs.League}'
+    AND s18.game_mode LIKE '${inputs.Gamemodes}'
     AND team_name = '${params.franchise}'
 ORDER BY
-    s17.team_wins DESC
+    s18.team_wins DESC
     , sagd.series_wins DESC
     , sagd.goal_diff DESC
     , sagd.goals_for DESC
@@ -482,12 +431,6 @@ AND league = '${inputs.League}'
 ORDER BY season ASC
 ```
 
-<LastRefreshed prefix="Data last updated"/>
-
-<center><img src={team_info[0].logo} class="h-32" /></center>
-
-#  <center><Value data={team_info} column=Franchise /> </center>
-
 
 <ButtonGroup name=League title="League Selection:" >
     <ButtonGroupItem valueLabel="Foundation League" value="Foundation League" />
@@ -497,7 +440,7 @@ ORDER BY season ASC
     <ButtonGroupItem valueLabel="Premier League" value="Premier League" />
 </ButtonGroup>
 
->
+
 <ButtonGroup name=Gamemodes title="GameMode Selection:" >
     <ButtonGroupItem valueLabel="Doubles" value="Doubles" default />
     <ButtonGroupItem valueLabel="Standard" value="Standard" />

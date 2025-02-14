@@ -9,7 +9,7 @@ WITH doubles AS (
   SELECT name,
   SUM(team_wins)::INT AS Doubles_Wins,
   SUM(team_losses)::INT AS Doubles_Losses,
-  FROM s17_standings
+  FROM s18_standings
   WHERE mode LIKE 'Doubles' AND NOT (league IS NULL OR conference IS NULL OR division_name IS NULL)
   GROUP BY name 
 ),
@@ -17,7 +17,7 @@ standard AS (
   SELECT name,
   SUM(team_wins)::INT AS Standard_Wins,
   SUM(team_losses)::INT AS Standard_Losses,
-  FROM s17_standings
+  FROM s18_standings
   WHERE mode LIKE 'Standard' AND NOT (league IS NULL OR conference IS NULL OR division_name IS NULL)
   GROUP BY name  
 ),
@@ -25,7 +25,7 @@ overall AS (
   SELECT name,
   SUM(team_wins)::INT AS Overall_Wins,
   SUM(team_losses)::INT as Overall_Losses,
-  FROM s17_Standings
+  FROM s18_Standings
   WHERE NOT (mode IS NULL OR league IS NULL OR conference IS NULL OR division_name IS NULL)
   GROUP BY name 
 )
@@ -37,11 +37,11 @@ SELECT
   d.Doubles_Wins::INT || ' - ' || d.Doubles_Losses::INT AS Doubles_Record,
   s.Standard_Wins::INT || ' - ' || s.Standard_Losses::INT AS Standard_Record,
 FROM teams t
-INNER JOIN standard s
+LEFT JOIN standard s
   ON s.name = t.Franchise
-INNER JOIN doubles d 
+LEFT JOIN doubles d 
   ON d.name = t.Franchise
-INNER JOIN overall o
+LEFT JOIN overall o
   ON o.name = t.Franchise
 ORDER BY t.Franchise
 ```
