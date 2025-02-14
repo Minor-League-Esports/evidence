@@ -75,13 +75,11 @@ ORDER BY
     data={staff_members.where(`staff_position = 'Franchise Manager'`)}
     title="Franchise Manager"
     value=name
-    link=id_link
 />
 <BigValue 
     data={staff_members.where(`staff_position = 'General Manager'`)}
     title="General Manager"
     value=name
-    link=id_link
     emptySet=warn
     emptyMessage='GM Not Assigned'
 />
@@ -89,7 +87,6 @@ ORDER BY
     data={staff_members.where(`staff_position = 'Assistant General Manager'`)}
     title="Assistant General Manager"
     value=name
-    link=id_link
     emptySet=warn
     emptyMessage='AGM Not Assigned'
 />
@@ -97,7 +94,6 @@ ORDER BY
     data={staff_members.where(`staff_position = 'Assistant General Manager' OFFSET 1`)}
     title="Assistant General Manager"
     value=name
-    link=id_link
     emptySet=warn
     emptyMessage='Second AGM Not Assigned'
 />
