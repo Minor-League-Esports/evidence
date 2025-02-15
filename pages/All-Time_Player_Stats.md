@@ -172,8 +172,7 @@ order by Name, season
 
 <Dropdown data={dropdown_and_button_group} name=season value=season multiple=true selectAllByDefault=true />
 
-<Dropdown data={Stats_lifetime} name=League value=League multiple=true selectAllByDefault=true />
-
+<Dropdown data={dropdown_and_button_group} name=League value=skill_group multiple=true selectAllByDefault=true />
 
 <DataTable data={SeasonStats_career} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=playerLink>
     <Column id=Name align=center />
