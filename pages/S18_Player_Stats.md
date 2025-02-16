@@ -50,7 +50,7 @@ Below you will find all stats for all players in MLE for S18.
 
 ```sql LeaderboardStats
 
-Select
+SELECT
     p.name AS name,
     '/players/' || p.member_id AS playerLink,
     p.salary,
