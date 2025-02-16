@@ -4,15 +4,32 @@ title: S18 Stats
 
 
 ```sql dropdown_info
-    Select DISTINCT 
-    name as Name,
-    salary::text as Salary,
-    franchise as Team,
-    p.skill_group as League,
-    CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Standard' END as GameMode
- from players p
-    left join S18_stats s18
-        on p.member_id = s18.member_id
+
+SELECT DISTINCT 
+    p.name
+    , p.salary::TEXT AS salary
+    , s18.team_name AS team
+    , s18.skill_group AS league
+    , CASE
+        WHEN s18.gamemode = 'RL_DOUBLES' THEN 'Doubles'
+        WHEN s18.gamemode = 'RL_STANDARD' THEN 'Standard'
+        ELSE 'Unknown'
+    END AS game_mode
+    , mg.match_group_title AS week
+
+FROM S18_stats s18
+
+LEFT JOIN players p
+    ON s18.member_id = p.member_id
+
+LEFT JOIN matches m
+    ON s18.match_id = m.match_id
+
+LEFT JOIN match_groups mg
+    ON m.match_group_id = mg.match_group_id
+
+WHERE mg.parent_group_title = 'Season 18'
+
 ```
 
 
@@ -32,73 +49,94 @@ Below you will find all stats for all players in MLE for S18.
 
 
 ```sql LeaderboardStats
-With playerstats as (
-    Select name as Name,
-    '/players/' || p.member_id as playerLink,
-    salary as Salary,
-    team_name as Team,
-    s18.skill_group as League,
-    CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode,
-    count(*) as games_played,
-    avg(dpi) as Avg_DPI,
-    avg(gpi) as "Sprocket Rating",
-    avg(opi) as Avg_OPI,
-    avg(score) as Score_Per_Game,
-    avg(goals) as Goals_Per_Game,
-    sum(goals) as total_goals,
-    avg(assists) as Assists_Per_Game,
-    sum(assists) as total_assists,
-    avg(saves) as Saves_Per_Game,
-    sum(saves) as total_saves,
-    avg(shots) as Shots_Per_Game,
-    avg(goals_against) as goals_against_per_game,
-    avg(shots_against) as shots_against_per_game,
-    sum(goals)/sum(shots) as shooting_pct2
- from players p
-    inner join S18_stats s18
-        on p.member_id = s18.member_id
-group by name, salary, team_name, League, gamemode, p.member_id)
 
-select *
-from playerstats
-where Salary in ${inputs.Salary.value}
-and Team in ${inputs.Team.value}
-and League in ${inputs.League.value}
-and GameMode in ${inputs.GameMode.value}
-order by Name ASC
+Select
+    p.name AS name,
+    '/players/' || p.member_id AS playerLink,
+    p.salary,
+    s18.team_name AS team,
+    s18.skill_group AS league,
+    CASE
+        WHEN s18.gamemode = 'RL_DOUBLES' THEN 'Doubles'
+        WHEN s18.gamemode = 'RL_STANDARD' THEN 'Standard'
+        ELSE 'Unknown'
+    END AS game_mode,
+    COUNT(*) AS games_played,
+    AVG(dpi) AS Avg_DPI,
+    AVG(gpi) AS "Sprocket Rating",
+    AVG(opi) AS Avg_OPI,
+    AVG(score) AS Score_Per_Game,
+    AVG(goals) AS Goals_Per_Game,
+    SUM(goals) AS total_goals,
+    AVG(assists) AS Assists_Per_Game,
+    SUM(assists) AS total_assists,
+    AVG(saves) AS Saves_Per_Game,
+    SUM(saves) AS total_saves,
+    AVG(shots) AS Shots_Per_Game,
+    AVG(goals_against) AS goals_against_per_game,
+    AVG(shots_against) AS shots_against_per_game,
+    SUM(goals) / SUM(shots) AS shooting_pct2
+
+FROM S18_stats s18
+
+INNER JOIN players p
+    ON s18.member_id = p.member_id
+
+LEFT JOIN matches m
+    ON s18.match_id = m.match_id
+
+LEFT JOIN match_groups mg
+    ON m.match_group_id = mg.match_group_id
+
+WHERE p.salary IN ${inputs.Salary.value}
+    AND s18.team_name IN ${inputs.Team.value}
+    AND s18.skill_group IN ${inputs.League.value}
+    AND game_mode IN ${inputs.GameMode.value}
+    AND mg.match_group_title IN ${inputs.Week.value}
+
+GROUP BY
+    p.name
+    , p.salary
+    , s18.team_name
+    , s18.skill_group
+    , s18.gamemode
+    , p.member_id
+
+ORDER BY
+    p.name
+
 ```
 
-<Dropdown data={dropdown_info} name=Salary value=Salary multiple=true selectAllByDefault=true />
+<Dropdown data={dropdown_info} name=Salary value=salary multiple=true selectAllByDefault=true />
 
-<Dropdown data={dropdown_info} name=Team value=Team multiple=true selectAllByDefault=true />
+<Dropdown data={dropdown_info} name=Team value=team multiple=true selectAllByDefault=true />
 
+<Dropdown data={dropdown_info} name=League value=league multiple=true selectAllByDefault=true />
 
-<Dropdown data={dropdown_info} name=League value=League multiple=true selectAllByDefault=true />
+<Dropdown data={dropdown_info} name=GameMode value=game_mode multiple=true selectAllByDefault=true />
 
-
-<Dropdown data={dropdown_info} name=GameMode value=GameMode multiple=true selectAllByDefault=true />
-
+<Dropdown data={dropdown_info} name=Week value=week multiple=true selectAllByDefault=true />
 
 <DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=playerLink >
-            <Column id=Name align=center />
-            <Column id=Salary align=center />
-            <Column id=League align=center />
-            <Column id=GameMode align=center />
-            <Column id=games_played align=center />
-            <Column id="Sprocket Rating" align=center />
-            <Column id=Avg_OPI align=center />
-            <Column id=Avg_DPI align=center />
-            <Column id=Score_Per_Game align=center />
-            <Column id=Goals_Per_Game align=center />
-            <Column id=total_goals align=center />
-            <Column id=Assists_Per_Game align=center />
-            <Column id=total_assists align=center />
-            <Column id=Saves_Per_Game align=center />
-            <Column id=total_saves align=center />
-            <Column id=Shots_Per_Game align=center />
-            <Column id=goals_against_per_game align=center />
-            <Column id=shots_against_per_game align=center />
-            <Column id=shooting_pct2 align=center />
+    <Column id=name align=center />
+    <Column id=salary align=center />
+    <Column id=league align=center />
+    <Column id=game_mode align=center />
+    <Column id=games_played align=center />
+    <Column id="Sprocket Rating" align=center />
+    <Column id=Avg_OPI align=center />
+    <Column id=Avg_DPI align=center />
+    <Column id=Score_Per_Game align=center />
+    <Column id=Goals_Per_Game align=center />
+    <Column id=total_goals align=center />
+    <Column id=Assists_Per_Game align=center />
+    <Column id=total_assists align=center />
+    <Column id=Saves_Per_Game align=center />
+    <Column id=total_saves align=center />
+    <Column id=Shots_Per_Game align=center />
+    <Column id=goals_against_per_game align=center />
+    <Column id=shots_against_per_game align=center />
+    <Column id=shooting_pct2 align=center />
 </DataTable>
 
 </Tab>
