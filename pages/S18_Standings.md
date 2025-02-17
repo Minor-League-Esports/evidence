@@ -2,25 +2,38 @@
 title: S18 Standings
 ---
 
+## Filters 
+
+<ButtonGroup name=League>
+      <ButtonGroupItem valueLabel="Foundation League" value= "Foundation League" />
+      <ButtonGroupItem valueLabel="Academy League" value= "Academy League" default />
+      <ButtonGroupItem valueLabel="Champion League" value="Champion League" />
+      <ButtonGroupItem valueLabel="Master League" value="Master League" />
+      <ButtonGroupItem valueLabel="Premier League" value="Premier League" />
+</ButtonGroup>
+
+
+<ButtonGroup name=Game>
+    <ButtonGroupItem valueLabel="Doubles" value="Doubles" default />
+    <ButtonGroupItem valueLabel="Standard" value="Standard" />
+    <ButtonGroupItem valueLabel="Overall" value="Overall" />
+</ButtonGroup>
+
+<Dropdown name=GameMode >
+    <DropdownOption valueLabel="Doubles" value="Doubles"/>
+    <DropdownOption valueLabel="Standard" value="Standard"/>
+    <DropdownOption valueLabel="Overall" value="Overall" />
+</Dropdown>
+
+
+```sql test
+select *
+from S18_standings st
+```
 <Tabs>
 <Tab label="Overall Standings">
 	
 <LastRefreshed prefix="Data last updated"/>
-
-## Filters
-
-<Dropdown name=League>
-    <DropdownOption valueLabel="Foundation League" value="Foundation League"/>
-    <DropdownOption valueLabel="Academy League" value="Academy League"/>
-    <DropdownOption valueLabel="Champion League" value="Champion League"/>
-    <DropdownOption valueLabel="Master League" value="Master League"/>
-    <DropdownOption valueLabel="Premier League" value="Premier League"/>
-</Dropdown>
-
-<Dropdown name=GameMode>
-    <DropdownOption valueLabel="Doubles" value="Doubles"/>
-    <DropdownOption valueLabel="Standard" value="Standard"/>
-</Dropdown>
 
 
 ## Overall Standings
@@ -137,7 +150,7 @@ INNER JOIN series_and_goal_diff sagd
     AND s18.game_mode = sagd.game_mode
 WHERE s18.conference NOT NULL
     AND s18.division_name NOT NULL
-    AND s18.league LIKE '${inputs.League.value}'
+    AND s18.league LIKE '${inputs.League}'
     AND s18.game_mode LIKE '${inputs.GameMode.value}'
 ORDER BY
     s18.team_wins DESC
@@ -163,21 +176,6 @@ ORDER BY
 <Tab label="S18 Conference Standings">
 
 <LastRefreshed prefix="Data last updated"/>
-
-## Filters
-
-<Dropdown name=League>
-    <DropdownOption valueLabel="Foundation League" value="Foundation League"/>
-    <DropdownOption valueLabel="Academy League" value="Academy League"/>
-    <DropdownOption valueLabel="Champion League" value="Champion League"/>
-    <DropdownOption valueLabel="Master League" value="Master League"/>
-    <DropdownOption valueLabel="Premier League" value="Premier League"/>
-</Dropdown>
-
-<Dropdown name=GameMode>
-    <DropdownOption valueLabel="Doubles" value="Doubles"/>
-    <DropdownOption valueLabel="Standard" value="Standard"/>
-</Dropdown>
 
 
 ## Blue Conference Standings
@@ -273,7 +271,7 @@ INNER JOIN series_and_goal_diff sagd
     AND s18.mode = sagd.game_mode
 WHERE s18.Conference = 'BLUE'
 	AND s18.division_name NOT NULL
-    AND s18.league LIKE '${inputs.League.value}'
+    AND s18.league LIKE '${inputs.League}'
     AND s18.mode LIKE '${inputs.GameMode.value}'
 ORDER BY
     s18.team_wins DESC
@@ -389,7 +387,7 @@ INNER JOIN series_and_goal_diff sagd
     AND s18.mode = sagd.game_mode
 WHERE s18.Conference = 'ORANGE'
     AND s18.division_name NOT NULL
-    AND s18.league LIKE '${inputs.League.value}'
+    AND s18.league LIKE '${inputs.League}'
     AND s18.mode LIKE '${inputs.GameMode.value}'
 ORDER BY
     s18.team_wins DESC
@@ -417,21 +415,6 @@ ORDER BY
 <Tab label="S18 Super Division Standings">
 
 <LastRefreshed prefix="Data last updated"/>
-
-## Filters
-
-<Dropdown name=League>
-    <DropdownOption valueLabel="Foundation League" value="Foundation League"/>
-    <DropdownOption valueLabel="Academy League" value="Academy League"/>
-    <DropdownOption valueLabel="Champion League" value="Champion League"/>
-    <DropdownOption valueLabel="Master League" value="Master League"/>
-    <DropdownOption valueLabel="Premier League" value="Premier League"/>
-</Dropdown>
-
-<Dropdown name=GameMode>
-    <DropdownOption valueLabel="Doubles" value="Doubles"/>
-    <DropdownOption valueLabel="Standard" value="Standard"/>
-</Dropdown>
 
 
 ```sql super_division_standings
@@ -538,7 +521,7 @@ with S18standings as (
 		AND s18.mode = sagd.game_mode
 	WHERE s18.Conference NOT NULL
 		AND s18.division_name NOT NULL
-		AND s18.league LIKE '${inputs.League.value}'
+		AND s18.league LIKE '${inputs.League}'
 		AND s18.mode LIKE '${inputs.GameMode.value}'
 )
 
@@ -568,7 +551,7 @@ SELECT
 FROM teams t
 INNER JOIN S18_standings s18
 	ON t.Franchise = s18.name
-WHERE s18.league LIKE '${inputs.League.value}'
+WHERE s18.league LIKE '${inputs.League}'
 ORDER BY
 	t.Conference
 	, t."Super Division"
@@ -603,7 +586,7 @@ ORDER BY
 					<tbody>
 					
 						{#each super_division_standings as s}
-							{#if  s.conference === c.Conference && sd.super_division === s.super_division && s.league === inputs.League.value}
+							{#if  s.conference === c.Conference && sd.super_division === s.super_division && s.league === inputs.League}
 								<tr> 
 									<td> {s.super_division_rank} </td>
 									<td> {s.divisional_rank} </td>
@@ -640,22 +623,6 @@ ORDER BY
 <Tab label="S18 Divisional Standings">
 
 <LastRefreshed prefix="Data last updated"/>
-
-
-## Filters
-
-<Dropdown name=League>
-    <DropdownOption valueLabel="Foundation League" value="Foundation League"/>
-    <DropdownOption valueLabel="Academy League" value="Academy League"/>
-    <DropdownOption valueLabel="Champion League" value="Champion League"/>
-    <DropdownOption valueLabel="Master League" value="Master League"/>
-    <DropdownOption valueLabel="Premier League" value="Premier League"/>
-</Dropdown>
-
-<Dropdown name=GameMode>
-    <DropdownOption valueLabel="Doubles" value="Doubles"/>
-    <DropdownOption valueLabel="Standard" value="Standard"/>
-</Dropdown>
 
 
 ```sql divisional_standings
@@ -754,7 +721,7 @@ INNER JOIN series_and_goal_diff sagd
     AND s18.mode = sagd.game_mode
 WHERE s18.Conference NOT NULL
 	AND s18.division_name NOT NULL
-	AND s18.league LIKE '${inputs.League.value}'
+	AND s18.league LIKE '${inputs.League}'
     AND s18.mode LIKE '${inputs.GameMode.value}'
 ORDER BY
 	s18.ranking
@@ -782,7 +749,7 @@ SELECT
 FROM teams t
 INNER JOIN S18_standings s18
 	ON t.Franchise = s18.name
-WHERE s18.league LIKE '${inputs.League.value}'
+WHERE s18.league LIKE '${inputs.League}'
 ORDER BY
 	t.Conference
 	, t."Super Division"
@@ -817,7 +784,7 @@ ORDER BY
 					<tbody>
 					
 						{#each divisional_standings as s}
-							{#if  s.conference === c.Conference && s.division === d.div_name && s.league === inputs.League.value}
+							{#if  s.conference === c.Conference && s.division === d.div_name && s.league === inputs.League}
 								<tr> 
 									<td> {s.divisional_rank} </td>
 									<td> {s.team_name} </td>
