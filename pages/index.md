@@ -86,6 +86,7 @@ to the team on [Discord](https://discord.com/channels/172404472637685760/3235119
 <ButtonGroup name=GameMode_Selection>
       <ButtonGroupItem valueLabel="Doubles" value= "Doubles" default/>
       <ButtonGroupItem valueLabel="Standard" value= "Standard" />
+      <ButtonGroupItem valueLabel="Overall" value= "Overall" />
     </ButtonGroup>
 </p>
 
@@ -95,11 +96,15 @@ to the team on [Discord](https://discord.com/channels/172404472637685760/3235119
 with S18standings as (
     
     SELECT 
-    *,
-    '/franchise_page/' || t.Franchise AS Franchise_Link,
-    FROM S18_standings st
+    *
+    , '/franchise_page/' || t.Franchise AS Franchise_Link
+   , CASE
+            WHEN s18.mode IN ('Doubles', 'Standard') THEN s18.mode
+            ELSE 'Overall'
+        END AS game_mode
+    FROM S18_standings s18
     INNER JOIN teams t
-        ON st.name = t.Franchise
+        ON s18.name = t.Franchise
 
 ), results AS (
 
@@ -161,7 +166,24 @@ with S18standings as (
         , SUM(goals_against) AS goals_against
         , SUM(goal_diff) AS goal_diff
     FROM results
-    GROUP BY 1, 2, 3 
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        league
+        , 'Overall' AS game_mode
+        , team_name
+        , SUM(wins) AS wins
+        , SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins
+        , SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for
+        , SUM(goals_against) AS goals_against
+        , SUM(goal_diff) AS goal_diff
+    FROM results
+    GROUP BY 1, 2, 3
+
 
 )
 
@@ -177,20 +199,15 @@ SELECT
     , sagd.goals_for
     , sagd.goals_against
     , sagd.goal_diff AS goal_differential
-    , Franchise_Link
-
 FROM S18standings s18
-
 INNER JOIN series_and_goal_diff sagd
     ON s18.Franchise = sagd.team_name
     AND s18.league = sagd.league
-    AND s18.mode = sagd.game_mode
-
+    AND s18.game_mode = sagd.game_mode
 WHERE s18.Conference = 'BLUE'
 	AND s18.division_name NOT NULL
     AND s18.league LIKE '${inputs.League_Selection}'
-    AND s18.mode LIKE '${inputs.GameMode_Selection}'
-
+    AND s18.game_mode LIKE '${inputs.GameMode_Selection}'
 ORDER BY
     s18.team_wins DESC
     , sagd.series_wins DESC
@@ -218,11 +235,15 @@ ORDER BY
 with S18standings as (
     
     SELECT 
-        *,
-        '/franchise_page/' || t.Franchise AS Franchise_Link,
-    FROM S18_standings st
+        *
+        , '/franchise_page/' || t.Franchise AS Franchise_Link
+        , CASE
+            WHEN s18.mode IN ('Doubles', 'Standard') THEN s18.mode
+            ELSE 'Overall'
+        END AS game_mode
+    FROM S18_standings s18
     INNER JOIN teams t
-        ON st.name = t.Franchise
+        ON s18.name = t.Franchise
 
 ), results AS (
 
@@ -242,7 +263,7 @@ with S18standings as (
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
-	    ON m.match_group_id = mg.match_group_id
+	    on m.match_group_id = mg.match_group_id
 	WHERE mg.parent_group_title = 'Season 18'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
@@ -265,14 +286,14 @@ with S18standings as (
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
-	    ON m.match_group_id = mg.match_group_id
+	    on m.match_group_id = mg.match_group_id
 	WHERE mg.parent_group_title = 'Season 18'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 
 ), series_and_goal_diff AS (
 
-    SELECT
+ SELECT
         league
         , game_mode
         , team_name
@@ -284,8 +305,23 @@ with S18standings as (
         , SUM(goals_against) AS goals_against
         , SUM(goal_diff) AS goal_diff
     FROM results
-    GROUP BY 1, 2, 3 
+    GROUP BY 1, 2, 3
 
+    UNION ALL
+
+    SELECT
+        league
+        , 'Overall' AS game_mode
+        , team_name
+        , SUM(wins) AS wins
+        , SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins
+        , SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for
+        , SUM(goals_against) AS goals_against
+        , SUM(goal_diff) AS goal_diff
+    FROM results
+    GROUP BY 1, 2, 3
 )
 
 SELECT
@@ -300,20 +336,15 @@ SELECT
     , sagd.goals_for
     , sagd.goals_against
     , sagd.goal_diff AS goal_differential
-    , Franchise_Link
-
 FROM S18standings s18
-
 INNER JOIN series_and_goal_diff sagd
     ON s18.Franchise = sagd.team_name
     AND s18.league = sagd.league
-    AND s18.mode = sagd.game_mode
-
+    AND s18.game_mode = sagd.game_mode
 WHERE s18.Conference = 'ORANGE'
     AND s18.division_name NOT NULL
-    AND s18.league LIKE '${inputs.League_Selection}'
-    AND s18.mode LIKE '${inputs.GameMode_Selection}'
-
+     AND s18.league LIKE '${inputs.League_Selection}'
+    AND s18.game_mode LIKE '${inputs.GameMode_Selection}'
 ORDER BY
     s18.team_wins DESC
     , sagd.series_wins DESC

@@ -13,23 +13,13 @@ title: S18 Standings
 </ButtonGroup>
 
 
-<ButtonGroup name=Game>
+<ButtonGroup name=GameMode>
     <ButtonGroupItem valueLabel="Doubles" value="Doubles" default />
     <ButtonGroupItem valueLabel="Standard" value="Standard" />
     <ButtonGroupItem valueLabel="Overall" value="Overall" />
 </ButtonGroup>
 
-<Dropdown name=GameMode >
-    <DropdownOption valueLabel="Doubles" value="Doubles"/>
-    <DropdownOption valueLabel="Standard" value="Standard"/>
-    <DropdownOption valueLabel="Overall" value="Overall" />
-</Dropdown>
 
-
-```sql test
-select *
-from S18_standings st
-```
 <Tabs>
 <Tab label="Overall Standings">
 	
@@ -151,7 +141,7 @@ INNER JOIN series_and_goal_diff sagd
 WHERE s18.conference NOT NULL
     AND s18.division_name NOT NULL
     AND s18.league LIKE '${inputs.League}'
-    AND s18.game_mode LIKE '${inputs.GameMode.value}'
+    AND s18.game_mode LIKE '${inputs.GameMode}'
 ORDER BY
     s18.team_wins DESC
     , sagd.series_wins DESC
@@ -184,9 +174,13 @@ ORDER BY
 with S18standings as (
     
     SELECT *
-    FROM S18_standings st
+        , CASE
+            WHEN s18.mode IN ('Doubles', 'Standard') THEN s18.mode
+            ELSE 'Overall'
+        END AS game_mode
+    FROM S18_standings s18
     INNER JOIN teams t
-        ON st.name = t.Franchise
+        ON s18.name = t.Franchise
 
 ), results AS (
 
@@ -236,19 +230,36 @@ with S18standings as (
 
 ), series_and_goal_diff AS (
 
-SELECT
-	league
-	, game_mode
-	, team_name
-	, SUM(wins) AS wins
-	, SUM(loses) AS loses
-	, SUM(series_wins) AS series_wins
-	, SUM(series_loses) AS series_loses
-	, SUM(goals_for) AS goals_for
-	, SUM(goals_against) AS goals_against
-	, SUM(goal_diff) AS goal_diff
-FROM results
-GROUP BY 1, 2, 3 
+    SELECT
+        league
+        , game_mode
+        , team_name
+        , SUM(wins) AS wins
+        , SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins
+        , SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for
+        , SUM(goals_against) AS goals_against
+        , SUM(goal_diff) AS goal_diff
+    FROM results
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        league
+        , 'Overall' AS game_mode
+        , team_name
+        , SUM(wins) AS wins
+        , SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins
+        , SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for
+        , SUM(goals_against) AS goals_against
+        , SUM(goal_diff) AS goal_diff
+    FROM results
+    GROUP BY 1, 2, 3
+
 
 )
 
@@ -268,11 +279,11 @@ FROM S18standings s18
 INNER JOIN series_and_goal_diff sagd
     ON s18.Franchise = sagd.team_name
     AND s18.league = sagd.league
-    AND s18.mode = sagd.game_mode
+    AND s18.game_mode = sagd.game_mode
 WHERE s18.Conference = 'BLUE'
 	AND s18.division_name NOT NULL
     AND s18.league LIKE '${inputs.League}'
-    AND s18.mode LIKE '${inputs.GameMode.value}'
+    AND s18.game_mode LIKE '${inputs.GameMode}'
 ORDER BY
     s18.team_wins DESC
     , sagd.series_wins DESC
@@ -300,9 +311,13 @@ ORDER BY
 with S18standings as (
     
     SELECT *
-    FROM S18_standings st
+        , CASE
+            WHEN s18.mode IN ('Doubles', 'Standard') THEN s18.mode
+            ELSE 'Overall'
+        END AS game_mode
+    FROM S18_standings s18
     INNER JOIN teams t
-        ON st.name = t.Franchise
+        ON s18.name = t.Franchise
 
 ), results AS (
 
@@ -352,20 +367,35 @@ with S18standings as (
 
 ), series_and_goal_diff AS (
 
-SELECT
-	league
-	, game_mode
-	, team_name
-	, SUM(wins) AS wins
-	, SUM(loses) AS loses
-	, SUM(series_wins) AS series_wins
-	, SUM(series_loses) AS series_loses
-	, SUM(goals_for) AS goals_for
-	, SUM(goals_against) AS goals_against
-	, SUM(goal_diff) AS goal_diff
-FROM results
-GROUP BY 1, 2, 3 
+ SELECT
+        league
+        , game_mode
+        , team_name
+        , SUM(wins) AS wins
+        , SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins
+        , SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for
+        , SUM(goals_against) AS goals_against
+        , SUM(goal_diff) AS goal_diff
+    FROM results
+    GROUP BY 1, 2, 3
 
+    UNION ALL
+
+    SELECT
+        league
+        , 'Overall' AS game_mode
+        , team_name
+        , SUM(wins) AS wins
+        , SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins
+        , SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for
+        , SUM(goals_against) AS goals_against
+        , SUM(goal_diff) AS goal_diff
+    FROM results
+    GROUP BY 1, 2, 3
 )
 
 SELECT
@@ -384,11 +414,11 @@ FROM S18standings s18
 INNER JOIN series_and_goal_diff sagd
     ON s18.Franchise = sagd.team_name
     AND s18.league = sagd.league
-    AND s18.mode = sagd.game_mode
+    AND s18.game_mode = sagd.game_mode
 WHERE s18.Conference = 'ORANGE'
     AND s18.division_name NOT NULL
     AND s18.league LIKE '${inputs.League}'
-    AND s18.mode LIKE '${inputs.GameMode.value}'
+    AND s18.game_mode LIKE '${inputs.GameMode}'
 ORDER BY
     s18.team_wins DESC
     , sagd.series_wins DESC
@@ -421,9 +451,13 @@ ORDER BY
 with S18standings as (
     
     SELECT *
-    FROM S18_standings st
+        , CASE
+            WHEN s18.mode IN ('Doubles', 'Standard') THEN s18.mode
+            ELSE 'Overall'
+        END AS game_mode
+    FROM S18_standings s18
     INNER JOIN teams t
-        ON st.name = t.Franchise
+        ON s18.name = t.Franchise
 
 ), results AS (
 
@@ -474,18 +508,34 @@ with S18standings as (
 ), series_and_goal_diff AS (
 
 	SELECT
-		league
-		, game_mode
-		, team_name
-		, SUM(wins) AS wins
-		, SUM(loses) AS loses
-		, SUM(series_wins) AS series_wins
-		, SUM(series_loses) AS series_loses
-		, SUM(goals_for) AS goals_for
-		, SUM(goals_against) AS goals_against
-		, SUM(goal_diff) AS goal_diff
-	FROM results
-	GROUP BY 1, 2, 3
+        league
+        , game_mode
+        , team_name
+        , SUM(wins) AS wins
+        , SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins
+        , SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for
+        , SUM(goals_against) AS goals_against
+        , SUM(goal_diff) AS goal_diff
+    FROM results
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        league
+        , 'Overall' AS game_mode
+        , team_name
+        , SUM(wins) AS wins
+        , SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins
+        , SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for
+        , SUM(goals_against) AS goals_against
+        , SUM(goal_diff) AS goal_diff
+    FROM results
+    GROUP BY 1, 2, 3
 
 ), staging AS (
 
@@ -518,11 +568,11 @@ with S18standings as (
 	INNER JOIN series_and_goal_diff sagd
 		ON s18.Franchise = sagd.team_name
 		AND s18.league = sagd.league
-		AND s18.mode = sagd.game_mode
+		AND s18.game_mode = sagd.game_mode
 	WHERE s18.Conference NOT NULL
 		AND s18.division_name NOT NULL
 		AND s18.league LIKE '${inputs.League}'
-		AND s18.mode LIKE '${inputs.GameMode.value}'
+		AND s18.game_mode LIKE '${inputs.GameMode}'
 )
 
 SELECT
@@ -628,10 +678,14 @@ ORDER BY
 ```sql divisional_standings
 with S18standings as (
     
-    SELECT *
-    FROM S18_standings st
+   SELECT *
+        , CASE
+            WHEN s18.mode IN ('Doubles', 'Standard') THEN s18.mode
+            ELSE 'Overall'
+        END AS game_mode
+    FROM S18_standings s18
     INNER JOIN teams t
-        ON st.name = t.Franchise
+        ON s18.name = t.Franchise
 
 ), results AS (
 
@@ -682,18 +736,34 @@ with S18standings as (
 ), series_and_goal_diff AS (
 
 	SELECT
-		league
-		, game_mode
-		, team_name
-		, SUM(wins) AS wins
-		, SUM(loses) AS loses
-		, SUM(series_wins) AS series_wins
-		, SUM(series_loses) AS series_loses
-		, SUM(goals_for) AS goals_for
-		, SUM(goals_against) AS goals_against
-		, SUM(goal_diff) AS goal_diff
-	FROM results
-	GROUP BY 1, 2, 3
+        league
+        , game_mode
+        , team_name
+        , SUM(wins) AS wins
+        , SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins
+        , SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for
+        , SUM(goals_against) AS goals_against
+        , SUM(goal_diff) AS goal_diff
+    FROM results
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        league
+        , 'Overall' AS game_mode
+        , team_name
+        , SUM(wins) AS wins
+        , SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins
+        , SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for
+        , SUM(goals_against) AS goals_against
+        , SUM(goal_diff) AS goal_diff
+    FROM results
+    GROUP BY 1, 2, 3
 
 )
 
@@ -718,11 +788,11 @@ FROM S18standings s18
 INNER JOIN series_and_goal_diff sagd
     ON s18.Franchise = sagd.team_name
     AND s18.league = sagd.league
-    AND s18.mode = sagd.game_mode
+    AND s18.game_mode = sagd.game_mode
 WHERE s18.Conference NOT NULL
 	AND s18.division_name NOT NULL
 	AND s18.league LIKE '${inputs.League}'
-    AND s18.mode LIKE '${inputs.GameMode.value}'
+    AND s18.game_mode LIKE '${inputs.GameMode}'
 ORDER BY
 	s18.ranking
     , s18.team_wins DESC
