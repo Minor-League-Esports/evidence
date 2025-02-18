@@ -71,6 +71,105 @@ ORDER BY
     franchise_order
 ```
 
+```sql affordance
+
+WITH eligibility AS (
+	SELECT 
+	    p.name,
+	    '/players/' || p.member_id AS id_link,
+	    p.salary,
+	    p.skill_group,
+	    CASE
+	        WHEN p.skill_group = 'Foundation League' THEN 1 
+	        WHEN p.skill_group = 'Academy League' THEN 2 
+	        WHEN p.skill_group = 'Champion League' THEN 3 
+	        WHEN p.skill_group = 'Master League' THEN 4 
+	        WHEN p.skill_group = 'Premier League' THEN 5 
+	    END as league_order, 
+	    p.franchise,
+	    SUBSTRING(p.slot, 7) AS slot,
+	    COALESCE(ru.doubles_uses, 0) AS doubles_uses,
+	    COALESCE(ru.standard_uses, 0) AS standard_uses,
+	    COALESCE(ru.total_uses, 0) AS total_uses,
+	    p.current_scrim_points,
+	    CASE WHEN p.current_scrim_points >= 30 THEN 'Yes'
+	        ELSE 'No'
+	    END AS Eligible,
+	    p."Eligible Until"
+	
+	FROM players p
+	
+	LEFT JOIN role_usages ru
+	    ON p.franchise = ru.team_name
+	    AND p.slot = ru.role
+	    AND UPPER(p.skill_group) = CONCAT(ru.league, ' LEAGUE')
+	    AND ru.season_number = 18
+	
+	WHERE p.slot LIKE 'PLAYER%'
+	
+	ORDER BY
+	    league_order
+	    , p.slot
+
+), top_sals AS (
+
+	SELECT
+		franchise
+		, skill_group
+		, salary
+		, ROW_NUMBER() OVER(PARTITION BY franchise, skill_group ORDER BY salary DESC) AS salary_rank
+	FROM eligibility
+	ORDER BY
+		franchise
+		, skill_group
+		, salary DESC
+
+), can_sign AS (
+
+	SELECT DISTINCT
+	    s.franchise
+	    , s.skill_group
+	    , l.max_salary - SUM(s.salary) OVER(PARTITION BY s.franchise, s.skill_group) AS remaining_salary
+    	, CASE
+			WHEN remaining_salary >= 0 THEN TRUE
+			ELSE FALSE
+		END AS can_sign_player
+	
+	FROM top_sals AS s
+	
+	INNER JOIN leagues l
+	    ON s.skill_group = l.league_name
+	
+	WHERE s.salary_rank <= 5
+	
+)
+
+
+
+SELECT DISTINCT
+    s.franchise
+    , s.skill_group AS league
+    , c.remaining_salary
+    , l.max_salary - SUM(s.salary) OVER(PARTITION BY s.franchise, s.skill_group) AS remaining_sal
+	, CASE
+		WHEN c.can_sign_player THEN remaining_sal::STRING
+		ELSE 'Over Cap'
+	END AS can_afford
+
+FROM top_sals AS s
+
+INNER JOIN leagues l
+    ON s.skill_group = l.league_name
+    
+LEFT JOIN can_sign c
+	ON s.franchise = c.franchise
+	AND s.skill_group = c.skill_group
+
+WHERE s.salary_rank <= 4
+    AND s.franchise = '${params.franchise}'
+
+```
+
 <BigValue 
     data={staff_members.where(`staff_position = 'Franchise Manager'`)}
     title="Franchise Manager"
@@ -146,8 +245,9 @@ ORDER BY
 
 {#each leagues as league}
 
-<div style="float:left; font-size:20px;"><b>{league.league_name}</b></div>
-<div style="float:right;"> <b>Captain:</b> <Value data={staff_members.where(`league = '${league.league_name}'`)} column=name /> </div>
+<div style="float:left; font-size:21px; display:inline-block;"><b>{league.league_name}</b></div>
+<div style="float:right; display:inline-block;"> <b>Can Afford:</b> <Value data={affordance.where(`league = '${league.league_name}'`)} column=can_afford /> </div>
+<div style="float:right; padding:0 50px; display:inline-block;"> <b>Captain:</b> <Value data={staff_members.where(`league = '${league.league_name}'`)} column=name /> </div>
 
 <DataTable data={eligibility.where(`skill_group = '${league.league_name}'`)} rowshading=true headerColor={league.color} headerFontColor=white wrapTitles=true>
     <Column id=slot align=center />
