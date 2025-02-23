@@ -153,7 +153,7 @@ SELECT
     , CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles'
         WHEN gamemode = 'RL_STANDARD' THEN 'Standard'
         ELSE 'Unknown' 
-        END as GameMode
+        END as game_mode
     , p.skill_group as league
     , franchise
     , scrim_games_played
@@ -178,7 +178,7 @@ SELECT *
 From scrims
 WHERE salary in ${inputs.Salary.value}
 AND league in ${inputs.League.value}
-AND GameMode in ${inputs.GameMode.value}
+AND game_mode in ${inputs.GameMode.value}
 AND franchise in ${inputs.Team.value}
 ```
 
@@ -188,7 +188,7 @@ AND franchise in ${inputs.Team.value}
 
 <Dropdown data={dropdown_info} name=League value=League multiple=true selectAllByDefault=true />
 
-<Dropdown data={dropdown_info} name=GameMode value=GameMode multiple=true selectAllByDefault=true />
+<Dropdown data={dropdown_info} name=GameMode value=game_mode multiple=true selectAllByDefault=true />
 
 
 
@@ -196,7 +196,7 @@ AND franchise in ${inputs.Team.value}
 <DataTable data={scrimStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=playerLink >
         <Column id=name align=center />
         <Column id=salary align=center />
-        <Column id=GameMode align=center />
+        <Column id=game_mode align=center />
         <Column id=league align=center />
         <Column id=scrim_games_played align=center />
         <Column id=win_percentage align=center />
