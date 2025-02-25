@@ -200,6 +200,7 @@ SELECT
     , s18."Photo URL" AS team_logo
     , s18.Division AS division
     , s18."Super Division" AS super_division
+    , '/franchise_page/' || s18.Franchise AS Franchise_Link
 	, s18.Conference
     , s18.team_wins::INT || ' - ' || s18.team_losses::INT AS record
     , sagd.series_wins || ' - ' || sagd.series_loses AS series_record
@@ -225,7 +226,7 @@ ORDER BY
 
 	## {c.Conference} Conference
 
-	<DataTable data={conference_standings.where(`LOWER(conference) = LOWER('${c.Conference}')`)} rows=16 rowShading=true headerColor={c.conference_color} wrapTitles=true>
+	<DataTable data={conference_standings.where(`LOWER(conference) = LOWER('${c.Conference}')`)} rows=16 rowShading=true headerColor={c.conference_color} wrapTitles=true link=Franchise_Link>
 		<Column id=divisional_rank align=center />
 		<Column id=team_name align=center />
 		<Column id=team_logo contentType=image height=25px align=center />
