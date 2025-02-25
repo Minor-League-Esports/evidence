@@ -164,6 +164,7 @@ SELECT
     , s18."Photo URL" AS team_logo
     , s18.Division AS division
 	, s18."Super Division" AS super_division
+	, '/franchise_page/' || s18.Franchise AS Franchise_Link
     , s18.Conference
     , s18.team_wins::INT || ' - ' || s18.team_losses::INT AS record
 	, s18.team_wins::FLOAT / (s18.team_wins + s18.team_losses) AS win_pct2
@@ -188,7 +189,7 @@ ORDER BY
     , sagd.goals_for DESC
 ```
 
-<DataTable data={overallStandings} rows=32 rowShading=true wrapTitles=true headerColor=#2a4b82 headerFontColor=white>
+<DataTable data={overallStandings} rows=32 rowShading=true wrapTitles=true headerColor=#2a4b82 headerFontColor=white link=Franchise_Link>
     <Column id=team_name align=center />
     <Column id=team_logo contentType=image height=25px align=center />
     <Column id=conference align=center />
@@ -308,6 +309,7 @@ SELECT
     , s18."Photo URL" AS team_logo
     , s18.Division AS division
     , s18."Super Division" AS super_division
+	, '/franchise_page/' || s18.Franchise AS Franchise_Link
 	, s18.Conference
     , s18.team_wins::INT || ' - ' || s18.team_losses::INT AS record
     , sagd.series_wins || ' - ' || sagd.series_loses AS series_record
@@ -333,7 +335,7 @@ ORDER BY
 
 	# {c.Conference} Conference
 
-	<DataTable data={conference_standings.where(`LOWER(conference) = LOWER('${c.Conference}')`)} rows=16 rowShading=true headerColor={c.conference_color} wrapTitles=true>
+	<DataTable data={conference_standings.where(`LOWER(conference) = LOWER('${c.Conference}')`)} rows=16 rowShading=true headerColor={c.conference_color} wrapTitles=true link=Franchise_Link>
 		<Column id=divisional_rank align=center />
 		<Column id=team_name align=center />
 		<Column id=team_logo contentType=image height=25px align=center />
@@ -454,6 +456,7 @@ with S18standings as (
 		, s18."Photo URL" AS team_logo
 		, s18.Division AS division
 		, s18."Super Division" AS super_division
+		, '/franchise_page/' || s18.Franchise AS Franchise_Link
 		, CASE
 			WHEN s18.Conference = 'BLUE' THEN 'Blue'
 			WHEN s18.Conference = 'ORANGE' THEN 'Orange'
@@ -502,7 +505,7 @@ ORDER BY
 
 			## {sd.super_division} Super Division
 
-			<DataTable data={super_division_standings.where(`super_division = '${sd.super_division}'`)} rows=8 rowShading=true headerColor={c.conference_color} wrapTitles=true>
+			<DataTable data={super_division_standings.where(`super_division = '${sd.super_division}'`)} rows=8 rowShading=true headerColor={c.conference_color} wrapTitles=true link=Franchise_Link>
 				<Column id=super_division_rank align=center />
 				<Column id=divisional_rank align=center />
 				<Column id=team_name align=center />
@@ -626,6 +629,7 @@ SELECT
     , s18."Photo URL" AS team_logo
     , s18.Division AS division
     , s18."Super Division" AS super_division
+	, '/franchise_page/' || s18.Franchise AS Franchise_Link
 	, CASE
 		WHEN s18.Conference = 'BLUE' THEN 'Blue'
 		WHEN s18.Conference = 'ORANGE' THEN 'Orange'
@@ -665,7 +669,7 @@ ORDER BY
 
 			## {d.div_name} Division
 
-			<DataTable data={divisional_standings.where(`division = '${d.div_name}'`)} rows=4 rowShading=true headerColor={c.conference_color} wrapTitles=true>
+			<DataTable data={divisional_standings.where(`division = '${d.div_name}'`)} rows=4 rowShading=true headerColor={c.conference_color} wrapTitles=true link=Franchise_Link>
 				<Column id=divisional_rank align=center />
 				<Column id=team_name align=center />
 				<Column id=team_logo contentType=image height=25px align=center />

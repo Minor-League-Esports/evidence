@@ -61,7 +61,8 @@ WHERE franchise IN ${inputs.Status.value}
 ```sql PWTable
 SELECT DISTINCT 
     name, 
-    p.member_id, 
+    p.member_id,
+    '/players/' || p.member_id as id_link, 
     franchise, 
     current_scrim_points, 
     replace(p.skill_group, 'League', '') as skill_group,
@@ -79,7 +80,7 @@ WHERE franchise IN ${inputs.Status.value}
 ORDER BY name ASC;
 ```
 
-<DataTable data={PWTable} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white> 
+<DataTable data={PWTable} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=id_link> 
     <Column id=name align=center/> 
     <Column id=skill_group fmt=varhcar title=League align=center/> 
     <Column id=franchise title="Status" fmt=varchar align=center/> 
