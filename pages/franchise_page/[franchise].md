@@ -152,8 +152,8 @@ SELECT DISTINCT
     , c.remaining_salary
     , l.max_salary - SUM(s.salary) OVER(PARTITION BY s.franchise, s.skill_group) AS remaining_sal
 	, CASE
-		WHEN c.can_sign_player THEN remaining_sal::STRING
-		ELSE 'Over Cap'
+		WHEN remaining_sal THEN remaining_sal::STRING
+        ELSE '0.0'
 	END AS can_afford
 
 FROM top_sals AS s
@@ -165,7 +165,7 @@ LEFT JOIN can_sign c
 	ON s.franchise = c.franchise
 	AND s.skill_group = c.skill_group
 
-WHERE s.salary_rank <= 4
+WHERE s.salary_rank <= 5
     AND s.franchise = '${params.franchise}'
 
 ```
@@ -246,7 +246,7 @@ ORDER BY
 {#each leagues as league}
 
 <div style="float:left; font-size:21px; display:inline-block;"><b>{league.league_name}</b></div>
-<div style="float:right; display:inline-block;"> <b>Can Afford:</b> <Value data={affordance.where(`league = '${league.league_name}'`)} column=can_afford /> </div>
+<div style="float:right; display:inline-block;"> <b>Salary Available:</b> <Value data={affordance.where(`league = '${league.league_name}'`)} column=can_afford /> </div>
 <div style="float:right; padding:0 50px; display:inline-block;"> <b>Captain:</b> <Value data={staff_members.where(`league = '${league.league_name}'`)} column=name /> </div>
 
 <DataTable data={eligibility.where(`skill_group = '${league.league_name}'`)} rowshading=true headerColor={league.color} headerFontColor=white wrapTitles=true>
