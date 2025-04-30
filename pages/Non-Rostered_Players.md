@@ -21,7 +21,7 @@ FROM players p
 WHERE franchise IN ('FA', 'Pend', 'Waivers', 'RFA');
 ```
 
-<Dropdown data={PWDropdown} name=League value=skill_group multiple=true selectAllByDefault=true />
+<Dropdown data={PWDropdown} name=League value=skill_group multiple=true defaultValue="Foundation League" />
 
 <Dropdown data={PWDropdown} name=Salary value=salary multiple=true selectAllByDefault=true />
 
