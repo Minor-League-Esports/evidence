@@ -13,7 +13,9 @@
 3. [Git](https://git-scm.com/downloads)
     - Git is the basis of all version control, allowing multiple developers to work on the same project at once.
     - If downloading on Windows, make sure to select the "Add to PATH" option when installing.
-
+4. [Node](https://nodejs.org/en/download)
+    - Node.js is a cross-platform JavaScript runtime environment that allows developers to execute JavaScript code outside of a web browser.
+    - This will allow VSCode to run a local version of Evidence from your terminal.
 
 
 ### Evidence Setup
