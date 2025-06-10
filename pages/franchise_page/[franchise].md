@@ -151,11 +151,8 @@ SELECT DISTINCT
     , s.skill_group AS league
     , c.remaining_salary
     , l.max_salary - SUM(s.salary) OVER(PARTITION BY s.franchise, s.skill_group) AS remaining_sal
-	, CASE
-		WHEN c.can_sign_player THEN remaining_sal::STRING
-		ELSE 'Over Cap'
-	END AS can_afford
-
+	, remaining_sal::STRING AS can_afford
+    
 FROM top_sals AS s
 
 INNER JOIN leagues l
