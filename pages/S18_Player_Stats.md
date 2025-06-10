@@ -61,6 +61,13 @@ SELECT
         WHEN s18.gamemode = 'RL_STANDARD' THEN 'Standard'
         ELSE 'Unknown'
     END AS game_mode,
+    SUM(
+        CASE
+            WHEN (s18.team_name = m.home AND s18.home_won) 
+                OR (s18.team_name = m.away AND NOT s18.home_won) THEN 1
+            ELSE 0
+        END
+        )/COUNT(*) AS win_pct,
     COUNT(*) AS games_played,
     AVG(dpi) AS Avg_DPI,
     AVG(gpi) AS "Sprocket Rating",
@@ -75,7 +82,7 @@ SELECT
     AVG(shots) AS Shots_Per_Game,
     AVG(goals_against) AS goals_against_per_game,
     AVG(shots_against) AS shots_against_per_game,
-    SUM(goals) / SUM(shots) AS shooting_pct2
+    SUM(goals) / SUM(shots) AS shooting_pct2,
 
 FROM S18_stats s18
 
@@ -123,6 +130,7 @@ ORDER BY
     <Column id=league align=center />
     <Column id=game_mode align=center />
     <Column id=games_played align=center />
+    <Column id=win_pct align=center title="Win %"/>
     <Column id="Sprocket Rating" align=center />
     <Column id=Avg_OPI align=center />
     <Column id=Avg_DPI align=center />
