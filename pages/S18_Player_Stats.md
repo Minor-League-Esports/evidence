@@ -82,7 +82,7 @@ SELECT
     AVG(shots) AS Shots_Per_Game,
     AVG(goals_against) AS goals_against_per_game,
     AVG(shots_against) AS shots_against_per_game,
-    SUM(goals) / SUM(shots) AS shooting_pct2,
+    SUM(goals) / SUM(shots) AS shooting_pct
 
 FROM S18_stats s18
 
@@ -144,7 +144,7 @@ ORDER BY
     <Column id=Shots_Per_Game align=center />
     <Column id=goals_against_per_game align=center />
     <Column id=shots_against_per_game align=center />
-    <Column id=shooting_pct2 align=center />
+    <Column id=shooting_pct align=center title="Shot %"/>
 </DataTable>
 
 </Tab>
