@@ -24,25 +24,25 @@ many areas of current, and historical stats (performance, standings, etc).
 If you don't see something here, or are unsure of how to use this tool, reach out
 to the team on [Discord](https://discord.com/channels/172404472637685760/323511951357509642).
 
-<h2 style="font-size: 25px;"><center><b><u> Season 17 Champions </u></b></center></h2>
+<h2 style="font-size: 25px;"><center><b><u> Season 18 Champions </u></b></center></h2>
 
 <h3 style="font-size: 20px;"><center><b> Doubles: </b></center></h3>
 
 <div style="text-align: center;">
     <span style="display: inline-flex; align-items: center;">
-        <b>FL:</b> &nbsp;Ducks <img src={teamLogos[7].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>FL:</b> &nbsp;Flames <img src={teamLogos[11].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>AL:</b> &nbsp;Jets <img src={teamLogos[16].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>AL:</b> &nbsp;Hurricanes <img src={teamLogos[15].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>CL:</b> &nbsp;Puffins <img src={teamLogos[22].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>CL:</b> &nbsp;Tyrants <img src={teamLogos[29].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
     </span>
     <span style="display: inline-flex; align-items: center;">
         <b>ML:</b> &nbsp;Ducks <img src={teamLogos[7].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>PL:</b> &nbsp;Rhinos <img src={teamLogos[23].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>PL:</b> &nbsp;Bulls <img src={teamLogos[3].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
     </span>
 </div>
 
@@ -50,19 +50,19 @@ to the team on [Discord](https://discord.com/channels/172404472637685760/3235119
 
 <div style="text-align: center;">
     <span style="display: inline-flex; align-items: center;">
-        <b>FL:</b> &nbsp;Pirates <img src={teamLogos[21].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>FL:</b> &nbsp;Flames <img src={teamLogos[11].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>AL:</b> &nbsp;Jets <img src={teamLogos[16].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>AL:</b> &nbsp;Bulls <img src={teamLogos[3].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>CL:</b> &nbsp;Jets <img src={teamLogos[16].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>CL:</b> &nbsp;Flames <img src={teamLogos[11].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>ML:</b> &nbsp;Aviators <img src={teamLogos[0].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>ML:</b> &nbsp;Ducks <img src={teamLogos[7].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>PL:</b> &nbsp;Bulls <img src={teamLogos[3].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>PL:</b> &nbsp;Shadow <img src={teamLogos[25].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
     </span>
 </div>
 
