@@ -70,3 +70,6 @@ plugins:
     "@evidence-dev/csv": { }
     "@evidence-dev/duckdb": { }
     "@evidence-dev/postgres": { }
+
+deployment:
+  basePath: /evidence
