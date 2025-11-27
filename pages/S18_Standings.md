@@ -164,7 +164,7 @@ SELECT
     , s18."Photo URL" AS team_logo
     , s18.Division AS division
 	, s18."Super Division" AS super_division
-	, '/franchise_page/' || s18.Franchise AS Franchise_Link
+	, 'franchise_page/' || s18.Franchise AS Franchise_Link
     , s18.Conference
     , s18.team_wins::INT || ' - ' || s18.team_losses::INT AS record
 	, s18.team_wins::FLOAT / (s18.team_wins + s18.team_losses) AS win_pct2
@@ -309,7 +309,7 @@ SELECT
     , s18."Photo URL" AS team_logo
     , s18.Division AS division
     , s18."Super Division" AS super_division
-	, '/franchise_page/' || s18.Franchise AS Franchise_Link
+	, 'franchise_page/' || s18.Franchise AS Franchise_Link
 	, s18.Conference
     , s18.team_wins::INT || ' - ' || s18.team_losses::INT AS record
     , sagd.series_wins || ' - ' || sagd.series_loses AS series_record
@@ -456,7 +456,7 @@ with S18standings as (
 		, s18."Photo URL" AS team_logo
 		, s18.Division AS division
 		, s18."Super Division" AS super_division
-		, '/franchise_page/' || s18.Franchise AS Franchise_Link
+		, 'franchise_page/' || s18.Franchise AS Franchise_Link
 		, CASE
 			WHEN s18.Conference = 'BLUE' THEN 'Blue'
 			WHEN s18.Conference = 'ORANGE' THEN 'Orange'
@@ -629,7 +629,7 @@ SELECT
     , s18."Photo URL" AS team_logo
     , s18.Division AS division
     , s18."Super Division" AS super_division
-	, '/franchise_page/' || s18.Franchise AS Franchise_Link
+	, 'franchise_page/' || s18.Franchise AS Franchise_Link
 	, CASE
 		WHEN s18.Conference = 'BLUE' THEN 'Blue'
 		WHEN s18.Conference = 'ORANGE' THEN 'Orange'
