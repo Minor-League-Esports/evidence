@@ -5,7 +5,7 @@ title: All-Time Player Stats
 ```sql dropdown_and_button_group
     SELECT
         name AS Name
-        , '/players/' || ps.member_id as playerLink
+        , 'players/' || ps.member_id as playerLink
         , CASE WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
         , season
         , team_name as Franchise
@@ -63,7 +63,7 @@ title: All-Time Player Stats
 ```sql LeaderboardStats_career
 With lifetime_stats as (
     Select name as Name
-    ,'/players/' || ps.member_id as playerLink
+    ,'players/' || ps.member_id as playerLink
     ,CASE WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
     ,sum(games_played) as games_played
     ,avg(sprocket_rating) as 'Sprocket Rating'
@@ -131,7 +131,7 @@ order by Name asc
 ```sql SeasonStats_career
 With lifetime_stats as (
     Select name as Name
-    ,'/players/' || ps.member_id as playerLink
+    ,'players/' || ps.member_id as playerLink
     ,CASE WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
     ,season
     ,skill_group as 'League'

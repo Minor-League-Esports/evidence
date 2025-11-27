@@ -2,7 +2,7 @@
 SELECT
   name,
   salary,
-  '/players/' || p.member_id as id_link,
+    'players/' || p.member_id as id_link,
   franchise, 
   p.current_scrim_points,
   "Eligible Until"  

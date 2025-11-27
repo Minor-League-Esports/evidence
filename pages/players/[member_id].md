@@ -218,7 +218,7 @@ case
   when home = '${basic_info[0].franchise}' then away
   else home
   end as opponent,
-'/franchise_page/' || opponent as franchise_link,
+'franchise_page/' || opponent as franchise_link,
 games_played,
 record,
 series_result,
