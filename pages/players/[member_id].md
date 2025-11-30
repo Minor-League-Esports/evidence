@@ -6,7 +6,7 @@
     p.franchise,
     p.skill_group as league,
     p.member_id,
-    t."Photo URL" as logo,
+    -- t."Photo URL" as logo,
     CASE
         WHEN t."Primary Color" is Null then '#2a4b82'
         ELSE t."Primary Color"
@@ -33,7 +33,7 @@
 
 <LastRefreshed prefix="Data last updated"/>
 
-<center><img src={basic_info[0].logo} class="h-16" /></center>
+<center><!-- <img src={basic_info[0].logo} class="h-16" /> --></center>
 
 # <center> <Value data={basic_info} column=name /> </center>
 
