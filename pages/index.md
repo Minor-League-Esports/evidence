@@ -2,14 +2,14 @@
 SELECT 
 franchise,
 'franchise_page/' || franchise as franchiseLink,
-"Photo URL" as logo
+-- "Photo URL" as logo
 FROM teams
 ORDER BY franchise ASC
 ```
 <div style="width:100%; max-width:700px; margin:auto;">
 <div style="display:flex; flex-direction:row; align-items:center; justify-content:center; flex-wrap:wrap; gap:0.25rem;"> 
 {#each teamLogos as t}
-<a href="{t.franchiseLink}" > <img src={t.logo} class="h-10 w-10" /> </a>
+<a href="{t.franchiseLink}" > <!-- <img src={t.logo} class="h-10 w-10" /> --> </a>
 {/each}
 </div>
 </div>
@@ -30,19 +30,19 @@ to the team on [Discord](https://discord.com/channels/172404472637685760/3235119
 
 <div style="text-align: center;">
     <span style="display: inline-flex; align-items: center;">
-        <b>FL:</b> &nbsp;Flames <img src={teamLogos[11].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>FL:</b> &nbsp;Flames <!-- <img src={teamLogos[11].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" /> -->
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>AL:</b> &nbsp;Hurricanes <img src={teamLogos[15].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>AL:</b> &nbsp;Hurricanes <!-- <img src={teamLogos[15].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" /> -->
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>CL:</b> &nbsp;Tyrants <img src={teamLogos[29].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>CL:</b> &nbsp;Tyrants <!-- <img src={teamLogos[29].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" /> -->
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>ML:</b> &nbsp;Ducks <img src={teamLogos[7].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>ML:</b> &nbsp;Ducks <!-- <img src={teamLogos[7].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" /> -->
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>PL:</b> &nbsp;Bulls <img src={teamLogos[3].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>PL:</b> &nbsp;Bulls <!-- <img src={teamLogos[3].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" /> -->
     </span>
 </div>
 
@@ -50,19 +50,19 @@ to the team on [Discord](https://discord.com/channels/172404472637685760/3235119
 
 <div style="text-align: center;">
     <span style="display: inline-flex; align-items: center;">
-        <b>FL:</b> &nbsp;Flames <img src={teamLogos[11].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>FL:</b> &nbsp;Flames <!-- <img src={teamLogos[11].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" /> -->
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>AL:</b> &nbsp;Bulls <img src={teamLogos[3].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>AL:</b> &nbsp;Bulls <!-- <img src={teamLogos[3].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" /> -->
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>CL:</b> &nbsp;Flames <img src={teamLogos[11].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>CL:</b> &nbsp;Flames <!-- <img src={teamLogos[11].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" /> -->
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>ML:</b> &nbsp;Ducks <img src={teamLogos[7].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>ML:</b> &nbsp;Ducks <!-- <img src={teamLogos[7].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" /> -->
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>PL:</b> &nbsp;Shadow <img src={teamLogos[25].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>PL:</b> &nbsp;Shadow <!-- <img src={teamLogos[25].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" /> -->
     </span>
 </div>
 
@@ -197,10 +197,10 @@ with S18standings as (
 SELECT
     s18.ranking AS divisional_rank
     , s18.Franchise AS team_name
-    , s18."Photo URL" AS team_logo
+    -- , s18."Photo URL" AS team_logo
     , s18.Division AS division
     , s18."Super Division" AS super_division
-    , 'franchise_page/' || s18.Franchise AS Franchise_Link
+        -- 'Photo URL' as logo
 	, s18.Conference
     , s18.team_wins::INT || ' - ' || s18.team_losses::INT AS record
     , sagd.series_wins || ' - ' || sagd.series_loses AS series_record
@@ -228,8 +228,8 @@ ORDER BY
 
 	<DataTable data={conference_standings.where(`LOWER(conference) = LOWER('${c.Conference}')`)} rows=16 rowShading=true headerColor={c.conference_color} wrapTitles=true link=Franchise_Link>
 		<Column id=divisional_rank align=center />
-		<Column id=team_name align=center />
-		<Column id=team_logo contentType=image height=25px align=center />
+        <Column id=team_name align=center />
+        <!-- <Column id=team_logo contentType=image height=25px align=center /> -->
 		<Column id=super_division align=center />
 		<Column id=division align=center />
 		<Column id=record align=center />
