@@ -1,3 +1,3 @@
  SELECT * FROM read_parquet(
-        'https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s18/rounds_s18.parquet'
+        'https://sprocket-public-datasets.nyc3.cdn.digitaloceanspaces.com/datasets/rounds_s18.parquet'
     )

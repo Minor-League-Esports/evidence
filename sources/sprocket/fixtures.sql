@@ -1,3 +1,3 @@
 SELECT * FROM read_parquet(
-        'https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/schedules/fixtures.parquet'
+        'https://sprocket-public-datasets.nyc3.cdn.digitaloceanspaces.com/datasets/fixtures.parquet'
     )
