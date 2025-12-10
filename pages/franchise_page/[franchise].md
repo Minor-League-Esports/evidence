@@ -7,13 +7,13 @@ SELECT
     Code,
     "Primary Color" AS primary_color,
     "Secondary Color" AS secondary_color,
-    -- "Photo URL" AS logo
+    "Photo URL" AS logo
 FROM teams t
 WHERE t.franchise = '${params.franchise}'
 ```
 
 <LastRefreshed prefix="Data last updated"/>
-<center><!-- <img src={team_info[0].logo} class="h-32" /> --></center>
+<center><img src={team_info[0].logo} class="h-32" /></center>
 
 #  <center><Value data={team_info} column=Franchise /> </center>
 
@@ -475,7 +475,7 @@ WITH S18standings AS (
 SELECT
     s18.ranking AS divisional_rank
     , s18.Franchise AS team_name
-    -- , s18."Photo URL" AS team_logo
+    , s18."Photo URL" AS team_logo
     , s18.Division AS division
 	, s18."Super Division" AS super_division
     , s18.Conference

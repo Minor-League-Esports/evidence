@@ -160,8 +160,8 @@ with S18standings as (
 
 SELECT
     s18.ranking AS divisional_rank
-	, s18.Franchise AS team_name
-	-- , s18."Photo URL" AS team_logo
+    , s18.Franchise AS team_name
+    , s18."Photo URL" AS team_logo
     , s18.Division AS division
 	, s18."Super Division" AS super_division
 	, 'franchise_page/' || s18.Franchise AS Franchise_Link
@@ -190,8 +190,8 @@ ORDER BY
 ```
 
 <DataTable data={overallStandings} rows=32 rowShading=true wrapTitles=true headerColor=#2a4b82 headerFontColor=white link=Franchise_Link>
-	<Column id=team_name align=center />
-	<!-- <Column id=team_logo contentType=image height=25px align=center /> -->
+    <Column id=team_name align=center />
+    <Column id=team_logo contentType=image height=25px align=center />
     <Column id=conference align=center />
 	<Column id=super_division align=center />
     <Column id=division align=center />
@@ -306,7 +306,7 @@ with S18standings as (
 SELECT
     s18.ranking AS divisional_rank
     , s18.Franchise AS team_name
-    
+    , s18."Photo URL" AS team_logo
     , s18.Division AS division
     , s18."Super Division" AS super_division
 	, 'franchise_page/' || s18.Franchise AS Franchise_Link
@@ -338,7 +338,7 @@ ORDER BY
 	<DataTable data={conference_standings.where(`LOWER(conference) = LOWER('${c.Conference}')`)} rows=16 rowShading=true headerColor={c.conference_color} wrapTitles=true link=Franchise_Link>
 		<Column id=divisional_rank align=center />
 		<Column id=team_name align=center />
-		<!-- <Column id=team_logo contentType=image height=25px align=center /> -->
+		<Column id=team_logo contentType=image height=25px align=center />
 		<Column id=super_division align=center />
 		<Column id=division align=center />
 		<Column id=record align=center />
@@ -453,7 +453,7 @@ with S18standings as (
 	SELECT
 		s18.ranking AS divisional_rank
 		, s18.Franchise AS team_name
-		-- , s18."Photo URL" AS team_logo
+		, s18."Photo URL" AS team_logo
 		, s18.Division AS division
 		, s18."Super Division" AS super_division
 		, 'franchise_page/' || s18.Franchise AS Franchise_Link
@@ -509,7 +509,7 @@ ORDER BY
 				<Column id=super_division_rank align=center />
 				<Column id=divisional_rank align=center />
 				<Column id=team_name align=center />
-				<!-- <Column id=team_logo contentType=image height=25px align=center /> -->
+				<Column id=team_logo contentType=image height=25px align=center />
 				<Column id=division align=center />
 				<Column id=record align=center />
 				<Column id=series_record align=center />
@@ -625,8 +625,8 @@ with S18standings as (
 
 SELECT
     s18.ranking AS divisional_rank
-	, s18.Franchise AS team_name
-	-- , s18."Photo URL" AS team_logo
+    , s18.Franchise AS team_name
+    , s18."Photo URL" AS team_logo
     , s18.Division AS division
     , s18."Super Division" AS super_division
 	, 'franchise_page/' || s18.Franchise AS Franchise_Link
@@ -672,7 +672,7 @@ ORDER BY
 			<DataTable data={divisional_standings.where(`division = '${d.div_name}'`)} rows=4 rowShading=true headerColor={c.conference_color} wrapTitles=true link=Franchise_Link>
 				<Column id=divisional_rank align=center />
 				<Column id=team_name align=center />
-				<!-- <Column id=team_logo contentType=image height=25px align=center /> -->
+				<Column id=team_logo contentType=image height=25px align=center />
 				<Column id=super_division align=center />
 				<Column id=record align=center />
 				<Column id=series_record align=center />
