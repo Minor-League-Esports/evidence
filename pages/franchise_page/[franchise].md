@@ -13,7 +13,10 @@ WHERE t.franchise = '${params.franchise}'
 ```
 
 <LastRefreshed prefix="Data last updated"/>
-<center><img src={team_info[0].logo} class="h-32" /></center>
+
+{#if team_info[0]?.logo}
+<center><img class="h-32" alt="Team Logo" style="content: url({team_info[0].logo}); object-fit: contain;" /></center>
+{/if}
 
 #  <center><Value data={team_info} column=Franchise /> </center>
 

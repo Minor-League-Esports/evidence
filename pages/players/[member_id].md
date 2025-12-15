@@ -33,7 +33,9 @@
 
 <LastRefreshed prefix="Data last updated"/>
 
-<center><img src={basic_info[0].logo} class="h-16" /></center>
+{#if basic_info[0].logo}
+<center><img class="h-16" alt="Team Logo" style="content: url({basic_info[0].logo}); object-fit: contain;" /></center>
+{/if}
 
 # <center> <Value data={basic_info} column=name /> </center>
 
