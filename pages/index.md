@@ -8,8 +8,12 @@ ORDER BY franchise ASC
 ```
 <div style="width:100%; max-width:700px; margin:auto;">
 <div style="display:flex; flex-direction:row; align-items:center; justify-content:center; flex-wrap:wrap; gap:0.25rem;"> 
-{#each teamLogos as t}
-<a href="{t.franchiseLink}" > <img src={t.logo} class="h-10 w-10" /> </a>
+{#each teamLogos || [] as t}
+<a href="{t.franchiseLink}" > 
+  {#if t.logo}
+    <img class="h-10 w-10" alt={t.franchise} style="content: url({t.logo}); object-fit: contain;" /> 
+  {/if}
+</a>
 {/each}
 </div>
 </div>
@@ -30,19 +34,19 @@ to the team on [Discord](https://discord.com/channels/172404472637685760/3235119
 
 <div style="text-align: center;">
     <span style="display: inline-flex; align-items: center;">
-        <b>FL:</b> &nbsp;Flames <img src={teamLogos[11].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>FL:</b> &nbsp;Flames {#if teamLogos?.[11]?.logo}<img class="h-10" alt="Flames" style="content: url('{teamLogos[11].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>AL:</b> &nbsp;Hurricanes <img src={teamLogos[15].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>AL:</b> &nbsp;Hurricanes {#if teamLogos?.[15]?.logo}<img class="h-10" alt="Hurricanes" style="content: url('{teamLogos[15].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>CL:</b> &nbsp;Tyrants <img src={teamLogos[29].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>CL:</b> &nbsp;Tyrants {#if teamLogos?.[29]?.logo}<img class="h-10" alt="Tyrants" style="content: url('{teamLogos[29].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>ML:</b> &nbsp;Ducks <img src={teamLogos[7].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>ML:</b> &nbsp;Ducks {#if teamLogos?.[7]?.logo}<img class="h-10" alt="Ducks" style="content: url('{teamLogos[7].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>PL:</b> &nbsp;Bulls <img src={teamLogos[3].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>PL:</b> &nbsp;Bulls {#if teamLogos?.[3]?.logo}<img class="h-10" alt="Bulls" style="content: url('{teamLogos[3].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
     </span>
 </div>
 
@@ -50,19 +54,19 @@ to the team on [Discord](https://discord.com/channels/172404472637685760/3235119
 
 <div style="text-align: center;">
     <span style="display: inline-flex; align-items: center;">
-        <b>FL:</b> &nbsp;Flames <img src={teamLogos[11].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>FL:</b> &nbsp;Flames {#if teamLogos?.[11]?.logo}<img class="h-10" alt="Flames" style="content: url('{teamLogos[11].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>AL:</b> &nbsp;Bulls <img src={teamLogos[3].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>AL:</b> &nbsp;Bulls {#if teamLogos?.[3]?.logo}<img class="h-10" alt="Bulls" style="content: url('{teamLogos[3].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>CL:</b> &nbsp;Flames <img src={teamLogos[11].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>CL:</b> &nbsp;Flames {#if teamLogos?.[11]?.logo}<img class="h-10" alt="Flames" style="content: url('{teamLogos[11].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>ML:</b> &nbsp;Ducks <img src={teamLogos[7].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>ML:</b> &nbsp;Ducks {#if teamLogos?.[7]?.logo}<img class="h-10" alt="Ducks" style="content: url('{teamLogos[7].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
     </span>
     <span style="display: inline-flex; align-items: center;">
-        <b>PL:</b> &nbsp;Shadow <img src={teamLogos[25].logo} class="h-10" style="vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />
+        <b>PL:</b> &nbsp;Shadow {#if teamLogos?.[25]?.logo}<img class="h-10" alt="Shadow" style="content: url('{teamLogos[25].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
     </span>
 </div>
 
