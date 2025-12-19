@@ -2,7 +2,7 @@
   "name": "my-evidence-project",
   "version": "0.0.1",
   "scripts": {
-    "build": "EVIDENCE_BUILD_DIR=./build/evidence evidence build",
+    "build": "cross-env EVIDENCE_BASE_URL=/evidence/ EVIDENCE_BUILD_DIR=./build/evidence evidence build",
     "build:strict": "evidence build:strict",
     "dev": "evidence dev --open /",
     "test": "evidence build",
@@ -33,5 +33,8 @@
     "jsonwebtoken": "9.0.0",
     "trim@<0.0.3": ">0.0.3",
     "sqlite3": "5.1.5"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0"
   }
 }
