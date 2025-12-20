@@ -42,7 +42,7 @@
       - Note that you wont need to do this again in the future, your "Start Evidence" should now work and open up in your browser as expected!
 4. Build Evidence Locally
     - There are a few things you will need to do in your terminal before creating a PR.
-      - To ensure things work properly run: `npm install cross-env --save-dev in your` terminal.
+      - To ensure things work properly run: `npm install cross-env --save-dev in your` terminal (this only needs to be run once).
     - To ensure your changes don't break the build you will need to build evidence locally and check to make sure everything works
       - `npm run build`
     - This should build Evidence locally, but note it will take some time (~30 minutes or so). If your build fails locally it will fail in prod. If you need help figuring out why your build is failing reach out to OwnerOfTheWhiteSedan or Ol Dirty Dirty. 
