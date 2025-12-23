@@ -52,7 +52,7 @@ Below you will find all stats for all players in MLE for S18.
 
 SELECT
     p.name AS name,
-    'players/' || p.member_id AS playerLink,
+    '/players/' || CAST(p.member_id AS INTEGER) AS playerLink,
     p.salary,
     s18.team_name AS team,
     s18.skill_group AS league,
@@ -155,7 +155,7 @@ ORDER BY
 with scrims as(
 SELECT 
     p.name
-    , 'players/' || p.member_id as playerLink
+    , '/players/' || CAST(p.member_id AS INTEGER) as playerLink
     , member_id
     , p.salary
     , CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles'
