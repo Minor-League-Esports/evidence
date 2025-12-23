@@ -62,7 +62,7 @@ WHERE franchise IN ${inputs.Status.value}
 SELECT DISTINCT 
     name, 
     p.member_id,
-    'players/' || p.member_id as id_link, 
+    'players/' || CAST(p.member_id AS INTEGER) as id_link, 
     franchise, 
     current_scrim_points, 
     replace(p.skill_group, 'League', '') as skill_group,

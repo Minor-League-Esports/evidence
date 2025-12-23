@@ -44,7 +44,7 @@
     <Column id=franchise align=center />
     <Column id=league align=center />
     <Column id=franchise_position align=center />
-    <Column id=current_scrim_points align=center contentType=colorscale scaleColor={['#ce5050','white']} colorBreakpoints={[0, 30]} />
+    <Column id=current_scrim_points align=center contentType=colorscale colorScale={['#ce5050','white']} colorBreakpoints={[0, 30]} />
     <Column id="Eligible Until" align=center />
 </DataTable>
 
