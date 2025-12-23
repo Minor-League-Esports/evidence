@@ -72,4 +72,4 @@ plugins:
     "@evidence-dev/postgres": { }
 
 deployment:
-  basePath: /evidence
+  basePath: /
