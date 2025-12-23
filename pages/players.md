@@ -1,14 +1,14 @@
 ```sql player_page_link
 SELECT
-  name,
-  salary,
-    'players/' || p.member_id as id_link,
-  franchise, 
-  p.current_scrim_points,
-  "Eligible Until"  
-  from players p
-  left join S18_stats s18
-      on p.member_id = s18.member_id
+    name,
+    salary,
+    '/players/' || CAST(p.member_id AS INTEGER) as id_link,
+    franchise, 
+    p.current_scrim_points,
+    "Eligible Until"  
+from players p
+left join S18_stats s18
+    on p.member_id = s18.member_id
 group by name, salary, p.member_id, franchise, current_scrim_points, "Eligible Until"
 ```
 

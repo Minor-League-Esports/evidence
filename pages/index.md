@@ -1,7 +1,7 @@
 ```sql teamLogos
 SELECT 
 franchise,
-'franchise_page/' || franchise as franchiseLink,
+'/franchise_page/' || franchise as franchiseLink,
 "Photo URL" as logo
 FROM teams
 ORDER BY franchise ASC
@@ -204,7 +204,7 @@ SELECT
     , s18."Photo URL" AS team_logo
     , s18.Division AS division
     , s18."Super Division" AS super_division
-    , 'franchise_page/' || s18.Franchise AS Franchise_Link
+    , '/franchise_page/' || s18.Franchise AS Franchise_Link
 	, s18.Conference
     , s18.team_wins::INT || ' - ' || s18.team_losses::INT AS record
     , sagd.series_wins || ' - ' || sagd.series_loses AS series_record
@@ -263,8 +263,8 @@ WITH weeks AS (
         m.game_mode,
         m.home_wins,
         m.away_wins,
-        'franchise_page/' || m.Home AS home_link,
-        'franchise_page/' || m.Away AS away_link,
+        '/franchise_page/' || m.Home AS home_link,
+        '/franchise_page/' || m.Away AS away_link,
         mg.match_group_title AS Week
 
     FROM matches m

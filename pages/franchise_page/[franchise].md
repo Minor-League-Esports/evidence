@@ -56,7 +56,7 @@ SELECT
     p.franchise AS franchise,
     p.skill_group AS league,
     p.member_id AS member_id,
-        'players/' || p.member_id AS id_link,
+        '/players/' || CAST(p.member_id AS INTEGER) AS id_link,
     p."Franchise Staff Position" AS staff_position,
     CASE
         WHEN p."Franchise Staff Position" = 'Captain' THEN 1
@@ -79,8 +79,8 @@ ORDER BY
 WITH eligibility AS (
 	SELECT 
 	    p.name,
-        'players/' || p.member_id AS id_link,
-        'players/' || p.member_id AS id_link,
+        '/players/' || CAST(p.member_id AS INTEGER) AS id_link,
+        '/players/' || CAST(p.member_id AS INTEGER) AS id_link,
 	    p.salary,
 	    p.skill_group,
 	    CASE
@@ -209,8 +209,8 @@ WHERE s.salary_rank <= 4
 ```sql eligibility
 SELECT 
     p.name,
-    'players/' || p.member_id AS id_link,
-        'players/' || p.member_id AS id_link,
+    '/players/' || CAST(p.member_id AS INTEGER) AS id_link,
+        '/players/' || CAST(p.member_id AS INTEGER) AS id_link,
     p.salary,
     p.skill_group,
     CASE
@@ -285,7 +285,7 @@ CASE
   WHEN home = '${params.franchise}' THEN away
   ELSE home
   END AS opponent,
-'franchise_page/' || opponent AS franchise_link,
+'/franchise_page/' || opponent AS franchise_link,
 league,
 game_mode,
 home_wins,

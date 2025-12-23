@@ -31,7 +31,7 @@ overall AS (
 )
 SELECT
   t.Franchise,
-  'franchise_page/' || t.Franchise AS Franchise_Link,
+  '/franchise_page/' || t.Franchise AS Franchise_Link,
   t."Photo URL" AS logo,
   o.Overall_Wins::INT || ' - ' || o.Overall_Losses::INT AS Overall_Record,
   d.Doubles_Wins::INT || ' - ' || d.Doubles_Losses::INT AS Doubles_Record,
