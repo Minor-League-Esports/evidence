@@ -244,7 +244,7 @@ from seriesStats ss
 order by week asc 
 ```
 
->Season 18 Stats by Series
+Season 18 Stats by Series
 <DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primColor}' headerFontColor=white compact=true wrapTitles=true>
     <Column id=week align=center />
     <Column id=game_mode align=center />

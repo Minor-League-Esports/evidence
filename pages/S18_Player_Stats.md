@@ -149,85 +149,6 @@ ORDER BY
 
 </Tab>
 
-<Tab label="Scrim Stats">
-
-```sql scrimStats
-with scrims as(
-SELECT 
-    p.name
-    , '/players/' || CAST(p.member_id AS INTEGER) as playerLink
-    , member_id
-    , p.salary
-    , CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles'
-        WHEN gamemode = 'RL_STANDARD' THEN 'Standard'
-        ELSE 'Unknown' 
-        END as game_mode
-    , p.skill_group as league
-    , franchise
-    , scrim_games_played
-    , win_percentage
-    , dpi_per_game as dpi
-    , opi_per_game as opi
-    , avg_sprocket_rating as sprocket_rating
-    , score_per_game as score
-    , goals_per_game as goals
-    , assists_per_game as assists
-    , saves_per_game as saves
-    , shots_per_game as shots
-    , avg_goals_against as goals_against
-    , avg_shots_against as shots_against
-    , demos_per_game as demos
-    , current_scrim_points as scrim_points
-    , "Eligible Until" as eligible_until
-FROM avgScrimStats ass 
-    LEFT JOIN players p 
-        ON p.sprocket_player_id = ass.sprocket_player_id)
-SELECT *
-From scrims
-WHERE salary in ${inputs.Salary.value}
-AND league in ${inputs.League.value}
-AND game_mode in ${inputs.GameMode.value}
-AND franchise in ${inputs.Team.value}
-```
-
-<Dropdown data={dropdown_info} name=Salary value=Salary multiple=true selectAllByDefault=true />
-
-<Dropdown data={dropdown_info} name=Team value=Team multiple=true selectAllByDefault=true />
-
-<Dropdown data={dropdown_info} name=League value=League multiple=true selectAllByDefault=true />
-
-<Dropdown data={dropdown_info} name=GameMode value=game_mode multiple=true selectAllByDefault=true />
-
-
-
->From Last 60 Days
-<DataTable data={scrimStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=playerLink >
-        <Column id=name align=center />
-        <Column id=salary align=center />
-        <Column id=game_mode align=center />
-        <Column id=league align=center />
-        <Column id=scrim_games_played align=center />
-        <Column id=win_percentage align=center />
-        <Column id=sprocket_rating align=center />
-        <Column id=opi align=center />
-        <Column id=dpi align=center />
-        <Column id=score align=ceneter />
-        <Column id=goals align=center />
-        <Column id=assists align=center />
-        <Column id=saves align=center />
-        <Column id=shots align=center />
-        <Column id=goals_against align=center />
-        <Column id=shots_against align=center />
-        <Column id=demos align=center />
-</DataTable>
-
-
-
-
-
-
-</Tab>
-
 <Tab label="Player Comparison">
 
 
@@ -295,7 +216,7 @@ where name in ${inputs.Player.value}
     <DropdownOption value=shooting_pct2 valueLabel="Shooting %" />
 </Dropdown>
 
-> Comparitive stats between players
+**Comparitive Stats between Players**
 <BarChart 
 data={comparisonStats}
 x=GameMode
@@ -378,7 +299,7 @@ from ${leagueStats}
     <DropdownOption value=Standard />
 </Dropdown>
 
-> ### {inputs.Stats.label} per League
+ ### {inputs.Stats.label} per League
 <BarChart data={leagueComparison}
 x=league
 y=value

@@ -1,0 +1,100 @@
+---
+title: Scrim Stats
+---
+
+<LastRefreshed prefix="Data last updated"/>
+
+<Details title='Instructions' open>
+
+Below you will find stats for scrims in MLE for S18 in the last 60 days.
+- You can use the search bar above the table to search for a specific player.
+- You can also use the drop down menus below to Filter the stats however you see fit.
+- Lastly you can click on the stat column to put stats in ascending or descending order.
+
+</Details>
+
+```sql dropdown_info
+
+SELECT DISTINCT 
+    p.franchise AS team
+    , ass.name
+    , ass.salary::TEXT AS salary
+    , ass.skill_group AS league
+    , CASE
+        WHEN ass.gamemode = 'RL_DOUBLES' THEN 'Doubles'
+        WHEN ass.gamemode = 'RL_STANDARD' THEN 'Standard'
+        ELSE 'Unknown'
+    END AS game_mode
+
+FROM avgScrimStats ass
+LEFT JOIN players p
+        ON p.sprocket_player_id = ass.sprocket_player_id
+
+```
+
+```sql scrimStats
+SELECT 
+    p.name
+    , '/players/' || CAST(p.member_id AS INTEGER) as playerLink
+    , p.member_id
+    , p.salary
+    , CASE WHEN ass.gamemode = 'RL_DOUBLES' THEN 'Doubles'
+        WHEN ass.gamemode = 'RL_STANDARD' THEN 'Standard'
+        ELSE 'Unknown' 
+        END as game_mode
+    , ass.skill_group as league
+    , p.franchise
+    , ass.scrim_games_played AS games_played
+    , ass.win_percentage AS win_pct
+    , ass.dpi_per_game as dpi
+    , ass.opi_per_game as opi
+    , ass.avg_sprocket_rating as sprocket_rating
+    , ass.score_per_game as score
+    , ass.goals_per_game as goals
+    , ass.assists_per_game as assists
+    , ass.saves_per_game as saves
+    , ass.shots_per_game as shots
+    , ass.avg_goals_against as goals_against
+    , ass.avg_shots_against as shots_against
+    , ass.demos_per_game as demos
+    , p.current_scrim_points as scrim_points
+    , p."Eligible Until" as eligible_until
+FROM avgScrimStats ass 
+    LEFT JOIN players p 
+        ON p.sprocket_player_id = ass.sprocket_player_id
+WHERE p.salary in ${inputs.Salary.value}
+AND ass.skill_group in ${inputs.League.value}
+AND game_mode in ${inputs.GameMode.value}
+AND p.franchise in ${inputs.Team.value}
+```
+
+<Dropdown data={dropdown_info} name=Salary value=Salary multiple=true selectAllByDefault=true />
+
+<Dropdown data={dropdown_info} name=Team value=Team multiple=true selectAllByDefault=true />
+
+<Dropdown data={dropdown_info} name=League value=League multiple=true selectAllByDefault=true />
+
+<Dropdown data={dropdown_info} name=GameMode value=game_mode multiple=true selectAllByDefault=true />
+
+
+
+## Scrim Stats from last 60 Days
+<DataTable data={scrimStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=playerLink >
+        <Column id=name align=center />
+        <Column id=salary align=center />
+        <Column id=game_mode align=center />
+        <Column id=league align=center />
+        <Column id=games_played align=center />
+        <Column id=win_pct align=center />
+        <Column id=sprocket_rating align=center />
+        <Column id=opi align=center />
+        <Column id=dpi align=center />
+        <Column id=score align=ceneter />
+        <Column id=goals align=center />
+        <Column id=assists align=center />
+        <Column id=saves align=center />
+        <Column id=shots align=center />
+        <Column id=goals_against align=center />
+        <Column id=shots_against align=center />
+        <Column id=demos align=center />
+</DataTable>

@@ -63,7 +63,7 @@ ORDER BY
 <Tabs>
 <Tab label="Overall Standings">
 
-## Overall Standings
+# Overall Standings
 
 ```sql overallStandings
 with S18standings as (
