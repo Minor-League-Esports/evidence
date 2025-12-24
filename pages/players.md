@@ -6,13 +6,15 @@ SELECT
     franchise, 
     p.current_scrim_points,
     "Eligible Until"  
-from players p
-left join S18_stats s18
-    on p.member_id = s18.member_id
-group by name, salary, p.member_id, franchise, current_scrim_points, "Eligible Until"
+FROM players p
+LEFT JOIN S18_stats s18
+    ON p.member_id = s18.member_id
+WHERE salary <= 21.0 --filtering out TestUser1 & TestUser2 which have > 21.0 salaries
+AND NOT franchise = 'FP'
+GROUP BY name, salary, p.member_id, franchise, current_scrim_points, "Eligible Until"
 ```
 
-## Player Pages
+## Active Player Pages
 
 
 <LastRefreshed prefix="Data last updated"/>
@@ -33,6 +35,8 @@ SELECT
     , skill_group
     , count(*) as totalPlayers
 FROM players p
+WHERE salary <= 21.0 --filtering out TestUser1 & TestUser2 which have > 21.0 salaries
+AND NOT franchise = 'FP'
 GROUP BY
     salary
     , skill_group

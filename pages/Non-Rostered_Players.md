@@ -29,7 +29,7 @@ WHERE franchise IN ('FA', 'Pend', 'Waivers', 'RFA');
 
 <Dropdown data={PWDropdown} name=Status value=franchise multiple=true selectAllByDefault=true />
 
->
+
 ```sql PWChart
 select
     franchise, 
