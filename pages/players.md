@@ -20,7 +20,7 @@ GROUP BY name, salary, p.member_id, franchise, current_scrim_points, "Eligible U
 <LastRefreshed prefix="Data last updated"/>
 
 
-<DataTable data={player_page_link} search=true rows=10 headerColor=#2a4b82 headerFontColor=white link=id_link >
+<DataTable data={player_page_link} search=true rows=3 headerColor=#2a4b82 headerFontColor=white link=id_link >
   <Column id="name" />
   <Column id="salary" align=center />
   <Column id="franchise" align=center />

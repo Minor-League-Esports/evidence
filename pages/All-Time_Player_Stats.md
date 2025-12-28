@@ -98,7 +98,7 @@ order by Name asc
 
 
 
-<DataTable data={LeaderboardStats_career} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=playerLink>
+<DataTable data={LeaderboardStats_career} rows=3 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=playerLink>
     <Column id=Name align=center />
     <Column id=GameMode align=center />
     <Column id=games_played align=center />

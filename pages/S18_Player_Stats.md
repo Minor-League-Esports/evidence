@@ -124,7 +124,7 @@ ORDER BY
 
 <Dropdown data={dropdown_info} name=Week value=week multiple=true selectAllByDefault=true />
 
-<DataTable data={LeaderboardStats} rows=20 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=playerLink >
+<DataTable data={LeaderboardStats} rows=3 search=true rowShading=true headerColor=#2a4b82 headerFontColor=white link=playerLink >
     <Column id=name align=center />
     <Column id=salary align=center />
     <Column id=league align=center />
