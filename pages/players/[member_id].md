@@ -6,6 +6,7 @@
     p.franchise,
     p.skill_group as league,
     p.member_id,
+    p.sprocket_player_id,
     t."Photo URL" as logo,
     CASE
         WHEN t."Primary Color" is Null then '#2a4b82'
@@ -48,7 +49,55 @@
     <Column id="Eligible Until" align=center />
 </DataTable>
 
+```sql scrim_decay
+WITH player_scrims AS (
+    SELECT
+        s.*,
+        s.scrim_created_at + INTERVAL 30 DAY AS "expiry_date"
+    FROM total_scrim_stats s
+    --The scrim stats does not include the member_id so we must grab the other binding feature from the basic info query
+    WHERE s.sprocket_player_id = (
+        SELECT sprocket_player_id
+        FROM ${basic_info}
+        WHERE member_id = '${params.member_id}'
+        LIMIT 1
+    )
+)
 
+SELECT
+    *,
+    SUM(scrim_points_earned) OVER (
+        ORDER BY scrim_created_at DESC
+    ) as points
+FROM player_scrims
+WHERE CAST("expiry_date" AS DATE) > CURRENT_DATE
+ORDER BY scrim_created_at ASC;
+```
+
+<Details title="Active Scrim Eligibility">
+  <p>The chart below displays your scrim point decay.  That is, the number of scrim points you have from today until you have no scrim points remaining.  You are not eligible to play once your number of scrim points drops below 30.</p>
+</Details>
+
+<!-- Evidence's default line chart configuration applies date labels to the x-axis with the day of date only. -->
+<LineChart 
+    data={scrim_decay}
+    x="expiry_date"
+    y="points"
+    title="Scrim Point Decay"
+    xAxisTitle="Date"
+    yAxisTitle="Scrim Points"
+    
+    echartsOptions={{
+      xAxis:{
+        type: 'time',
+        axisLabel: {
+          formatter: '{yyyy}-{MM}-{dd}'
+        }
+      }
+    }}
+>
+    <ReferenceLine y=30 label="Eligibility Line" />
+</LineChart>
 
 ```sql player_stats
   With playerstats as (
