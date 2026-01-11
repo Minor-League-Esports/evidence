@@ -50,40 +50,53 @@
 </DataTable>
 
 ```sql scrim_decay
-WITH player_scrims AS (
+WITH player_scrims as (
     SELECT
-        s.*,
+        s.scrim_created_at,
+        s.scrim_points_earned,
         s.scrim_created_at + INTERVAL 30 DAY AS "expiry_date"
     FROM total_scrim_stats s
     --The scrim stats does not include the member_id so we must grab the other binding feature from the basic info query
     WHERE s.sprocket_player_id = (
         SELECT sprocket_player_id
         FROM ${basic_info}
-        WHERE member_id = '${params.member_id}'
-        LIMIT 1
     )
+),
+--Retrieve the current date AND the next 30 days
+dates AS (
+    SELECT CURRENT_DATE + (i - 1) * INTERVAL '1 day' AS "eval_date"
+    FROM RANGE(0, 31) AS t(i)
+),
+--Iteratre through each day
+points_by_day AS (
+    SELECT
+        d.eval_date,
+        COALESCE(SUM(s.scrim_points_earned),0) AS points
+    FROM dates d
+    LEFT JOIN player_scrims s
+        ON s.scrim_created_at <= d.eval_date
+        AND s.expiry_date > d.eval_date
+    GROUP BY d.eval_date
+    ORDER BY d.eval_date
 )
 
-SELECT
-    *,
-    SUM(scrim_points_earned) OVER (
-        ORDER BY scrim_created_at DESC
-    ) as points
-FROM player_scrims
-WHERE CAST("expiry_date" AS DATE) > CURRENT_DATE
-ORDER BY scrim_created_at ASC;
+SELECT 
+    *
+FROM points_by_day
 ```
 
 <Details title="Active Scrim Eligibility">
-  <p>The chart below displays your scrim point decay.  That is, the number of scrim points you have from today until you have no scrim points remaining.  You are not eligible to play once your number of scrim points drops below 30.</p>
+  <p>The chart below displays your scrim point decay from today and over the next 30 days.  That is, the number of scrim points remaining on each day over this timeframe.  You are not eligible for league play once your number of scrim points drops below 30.</p>
 </Details>
 
 <!-- Evidence's default line chart configuration applies date labels to the x-axis with the day of date only. -->
 <LineChart 
     data={scrim_decay}
-    x="expiry_date"
+    x="eval_date"
     y="points"
-    title="Scrim Point Decay"
+    yMin=0
+    yMax={Math.max(100, basic_info[0].current_scrim_points+20)}
+    title={`${basic_info[0].name} - Scrim Point Decay (Next 30 Days)`}
     xAxisTitle="Date"
     yAxisTitle="Scrim Points"
     
@@ -91,12 +104,14 @@ ORDER BY scrim_created_at ASC;
       xAxis:{
         type: 'time',
         axisLabel: {
-          formatter: '{yyyy}-{MM}-{dd}'
+          formatter: '{dd} {MMM}'
         }
       }
     }}
 >
     <ReferenceLine y=30 label="Eligibility Line" />
+    <ReferenceArea yMin=30 label=Eligible color=positive/>
+    <ReferenceArea yMax=30 label=Ineligible color=negative/>
 </LineChart>
 
 ```sql player_stats
