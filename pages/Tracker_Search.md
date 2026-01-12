@@ -23,7 +23,7 @@ ORDER BY
 
 
 
-<DataTable data={trackers} rows=10 rowShading=true headerColor=#2a4b82 headerFontColor=white search=true>
+<DataTable data={trackers} rows=25 rowShading=true headerColor=#2a4b82 headerFontColor=white search=true>
     <Column id=name />
     <Column id=cleaned_tracker contentType=link linkLabel=platform openInNewTab=true />
     <Column id=gamertag />
