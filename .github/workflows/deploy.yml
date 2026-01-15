@@ -6,6 +6,10 @@ on:
     - cron: '0 */2 * * *'
   push:
     branches: 'main' # or whichever branch you want to deploy from
+  repository_dispatch:
+    types: [dataset-build] # triggered from SprocketBot/datasets
+  workflow_dispatch:
+    # manual trigger through actions
 
 jobs:
   build:
