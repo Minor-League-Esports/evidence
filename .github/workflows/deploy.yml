@@ -1,9 +1,9 @@
 name: Deploy to GitHub Pages
 
 on:
-  # schedule: # remove cron job in favor of dataset repo dispatch
+  schedule:
     # Run every 2 hours
-    # - cron: '0 */2 * * *'
+    - cron: '0 */2 * * *'
   push:
     branches: 'main' # or whichever branch you want to deploy from
   repository_dispatch:
