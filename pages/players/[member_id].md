@@ -1,35 +1,32 @@
 ```sql basic_info
-    Select
-   -- distinct keeps us from getting multiples of the same information in the basic_info table 
-    p.name,
-    salary,
-    p.franchise,
-    p.skill_group as league,
-    p.member_id,
-    p.sprocket_player_id,
-    t."Photo URL" as logo,
-    CASE
-        WHEN t."Primary Color" is Null then '#2a4b82'
-        ELSE t."Primary Color"
-        END as primColor,
-    CASE 
-        WHEN t."Secondary Color" is Null then '#2a4b82'
-        ELSE t."Secondary Color"
-        END as secColor,
-    t."Primary Color" as primary_color,
-    t."Secondary Color" as secondary_color,
-    case
-       when p."Franchise Staff Position" = 'NA' then 'Player'
-       else p."Franchise Staff Position"
-       END as franchise_position,
-    current_scrim_points,
-    "Eligible Until"
- from players p
-    left join (select distinct member_id, skill_group from S18_stats) s18
-        on p.member_id = s18.member_id
-    left join teams t
-        on p.franchise = t.Franchise
-  where p.member_id = '${params.member_id}'
+    SELECT
+        p.name,
+        salary,
+        p.franchise,
+        p.skill_group AS league,
+        p.member_id,
+        p.sprocket_player_id,
+        t."Photo URL" AS logo,
+        CASE
+            WHEN t."Primary Color" IS NULL THEN '#2a4b82'
+            ELSE t."Primary Color"
+        END AS primColor,
+        CASE 
+            WHEN t."Secondary Color" IS NULL THEN '#2a4b82'
+            ELSE t."Secondary Color"
+        END AS secColor,
+        t."Primary Color" AS primary_color,
+        t."Secondary Color" AS secondary_color,
+        CASE
+        WHEN p."Franchise Staff Position" = 'NA' THEN 'Player'
+        ELSE p."Franchise Staff Position"
+        END AS franchise_position,
+        current_scrim_points,
+        "Eligible Until"
+    FROM players p
+    LEFT JOIN teams t
+        ON p.franchise = t.Franchise
+    WHERE p.member_id = '${params.member_id}'
 ```
 
 <LastRefreshed prefix="Data last updated"/>
