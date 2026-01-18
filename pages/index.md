@@ -265,6 +265,7 @@ WITH weeks AS (
         m.away_wins,
         '/franchise_page/' || m.Home AS home_link,
         '/franchise_page/' || m.Away AS away_link,
+        '/matchups/' || CAST(m.match_id AS INTEGER) AS matchups_link,
         mg.match_group_title AS Week
 
     FROM matches m
@@ -285,6 +286,7 @@ SELECT
     home_wins::INT || ' - ' || away_wins::INT AS series_score,
     Away,
     away_link,
+    matchups_link
 
 FROM weeks
 
@@ -333,7 +335,7 @@ ORDER BY
 
 </p>
 
-<DataTable data={matches} rows=16 headerColor=#2a4b82 headerFontColor=white>
+<DataTable data={matches} rows=16 headerColor=#2a4b82 headerFontColor=white link=matchups_link>
   <!-- <Column id=match_id align=center title="Match Id" /> -->
   <Column id=home_link contentType=link linkLabel=home align=center title="Home Team" />
   <Column id=series_score align=center/>
