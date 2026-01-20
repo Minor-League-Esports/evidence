@@ -98,3 +98,70 @@ AND p.franchise in ${inputs.Team.value}
         <Column id=shots_against align=center />
         <Column id=demos align=center />
 </DataTable>
+
+```sql HeatMap
+SELECT
+    DATE(tss.scrim_created_at) AS day,
+    COUNT(distinct tss.scrim_meta_id) AS total_day,
+    CASE
+        WHEN skill_group = 'FL' THEN 'Foundation League'
+        WHEN skill_group = 'AL' THEN 'Academy League'
+        WHEN skill_group = 'CL' THEN 'Champion League'
+        WHEN skill_group = 'ML' THEN 'Master League'
+        -- WHEN skill_group = 'PL' THEN 'Premier League'
+        ELSE 'Premier League'
+    END AS league
+FROM sprocket.total_scrim_stats tss
+    WHERE YEAR(tss.scrim_created_at) = 2026
+    AND league IN (${inputs.League.value})
+    GROUP BY DATE(tss.scrim_created_at) , league
+    ORDER BY day
+```
+
+<CalendarHeatmap 
+    data={HeatMap}
+    date=day
+    value=total_day
+    yearLabel={false}
+/> 
+
+```sql hourlyheatmap
+WITH scrim_in_hours AS (
+    select
+        dayname(timezone('America/New_York', timezone('UTC', scrim_created_at))) as scrim_day,
+        hour(timezone('America/New_York', timezone('UTC', scrim_created_at))) AS scrim_hour,
+        DATE(timezone('America/New_York', timezone('UTC', scrim_created_at))) as scrim_date,
+        COUNT(distinct scrim_meta_id) AS total_hour
+    from sprocket.total_scrim_stats
+    group by dayname(timezone('America/New_York', timezone('UTC', scrim_created_at))), hour(timezone('America/New_York', timezone('UTC', scrim_created_at))), DATE(timezone('America/New_York', timezone('UTC', scrim_created_at)))
+),
+day_counts AS (
+    select
+        dayname(timezone('America/New_York', timezone('UTC', scrim_created_at))) as scrim_day,
+        COUNT(distinct DATE(timezone('America/New_York', timezone('UTC', scrim_created_at)))) as day_count
+    from sprocket.total_scrim_stats
+    group by dayname(timezone('America/New_York', timezone('UTC', scrim_created_at)))
+)
+
+select
+    s.scrim_day,
+    s.scrim_hour,
+    SUM(s.total_hour) / d.day_count as avg_hour
+from scrim_in_hours s
+join day_counts d on s.scrim_day = d.scrim_day
+group by s.scrim_hour, s.scrim_day, d.day_count
+order by (case when s.scrim_day = 'Monday' then 0
+              when s.scrim_day = 'Tuesday' then 1
+              when s.scrim_day = 'Wednesday' then 2
+              when s.scrim_day = 'Thursday' then 3
+              when s.scrim_day = 'Friday' then 4
+              when s.scrim_day = 'Saturday' then 5
+              when s.scrim_day = 'Sunday' then 6 end), s.scrim_hour
+```
+
+<Heatmap 
+    data={hourlyheatmap} 
+    x=scrim_day 
+    y=scrim_hour 
+    value=avg_hour  
+/>
