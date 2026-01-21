@@ -265,7 +265,7 @@ WITH weeks AS (
         m.away_wins,
         '/franchise_page/' || m.Home AS home_link,
         '/franchise_page/' || m.Away AS away_link,
-        '/matchups/' || CAST(m.match_id AS INTEGER) AS matchups_link,
+        '/matchups/' || m.match_id AS matchups_link,
         mg.match_group_title AS Week
 
     FROM matches m
