@@ -28,7 +28,8 @@
 
 ```sql home_standings
 WITH base_matchup AS (
-    SELECT * FROM ${matchups_info}
+    SELECT * 
+    FROM ${matchups_info}
 )
 SELECT
     CASE
