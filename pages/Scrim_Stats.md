@@ -155,18 +155,18 @@ SELECT
     s.scrim_day
     , s.scrim_hour
     , SUM(s.total_hour) / d.day_count AS avg_hour
-    , league
 FROM scrim_in_hours s
 JOIN day_counts d ON s.scrim_day = d.scrim_day
     WHERE league IN ${inputs.League.value}
-    GROUP BY s.scrim_hour, s.scrim_day, d.day_count , league
+    AND s.scrim_date >= (NOW() AT TIME ZONE 'America/New_York')::date - INTERVAL '4 weeks'
+    GROUP BY s.scrim_hour, s.scrim_day, d.day_count
     ORDER BY (CASE WHEN s.scrim_day = 'Monday' THEN 0
               WHEN s.scrim_day = 'Tuesday' THEN 1
               WHEN s.scrim_day = 'Wednesday' THEN 2
               WHEN s.scrim_day = 'Thursday' THEN 3
               WHEN s.scrim_day = 'Friday' THEN 4
               WHEN s.scrim_day = 'Saturday' THEN 5
-              WHEN s.scrim_day = 'Sunday' THEN 6 END), s.scrim_hour
+              WHEN s.scrim_day = 'Sunday' THEN 6 END) , s.scrim_hour
 ```
 
 <Heatmap 
