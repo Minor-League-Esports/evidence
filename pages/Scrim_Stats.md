@@ -111,25 +111,28 @@ SELECT
         WHEN skill_group = 'PL' THEN 'Premier League'
         ELSE 'unknown'
     END AS league
-FROM sprocket.total_scrim_stats tss
+FROM total_scrim_stats tss
     WHERE YEAR(tss.scrim_created_at) = 2026
     AND league IN ${inputs.League.value}
     GROUP BY DATE(tss.scrim_created_at) , league
     ORDER BY day
 ```
 
+
 <CalendarHeatmap 
     data={HeatMap}
     date=day
     value=total_day
-    yearLabel={false}
+    yearLabel={true}
 /> 
 
 ```sql hourlyheatmap
 WITH scrim_in_hours AS (
-    select
+    SELECT
         dayname(timezone('America/New_York', timezone('UTC', scrim_created_at))) AS scrim_day
-        , hour(timezone('America/New_York', timezone('UTC', scrim_created_at))) AS scrim_hour
+        , strftime(scrim_created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York', '%I %p') AS scrim_hour
+        -- We keep the raw hour for sorting later
+        , EXTRACT(HOUR FROM scrim_created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York') AS raw_hour
         , DATE(timezone('America/New_York', timezone('UTC', scrim_created_at))) AS scrim_date
         , COUNT(DISTINCT scrim_meta_id) AS total_hour
         , CASE
@@ -140,38 +143,47 @@ WITH scrim_in_hours AS (
             WHEN skill_group = 'PL' THEN 'Premier League'
             ELSE 'unknown'
         END AS league
-    FROM sprocket.total_scrim_stats
-        GROUP BY dayname(timezone('America/New_York', timezone('UTC', scrim_created_at))), hour(timezone('America/New_York', timezone('UTC', scrim_created_at))), DATE(timezone('America/New_York', timezone('UTC', scrim_created_at))), league
+    FROM total_scrim_stats
+    GROUP BY 1, 2, 3, 4, league
 ),
 day_counts AS (
     SELECT
-        dayname(timezone('America/New_York', timezone('UTC', scrim_created_at))) AS scrim_day
-        , COUNT(DISTINCT DATE(timezone('America/New_York', timezone('UTC', scrim_created_at)))) AS day_count
-    FROM sprocket.total_scrim_stats
-        GROUP BY dayname(timezone('America/New_York', timezone('UTC', scrim_created_at)))
+        dayname(timezone('America/New_York', timezone('UTC', scrim_created_at))) AS scrim_day,
+        COUNT(DISTINCT DATE(timezone('America/New_York', timezone('UTC', scrim_created_at)))) AS day_count
+    FROM total_scrim_stats
+    WHERE DATE(timezone('America/New_York', timezone('UTC', scrim_created_at))) >= (NOW() AT TIME ZONE 'America/New_York')::date - INTERVAL '4 weeks'
+    GROUP BY 1
 )
 
 SELECT
     s.scrim_day
     , s.scrim_hour
+    , s.raw_hour
     , SUM(s.total_hour) / d.day_count AS avg_hour
+    , SUM(s.total_hour) as total_hour_sum
 FROM scrim_in_hours s
 JOIN day_counts d ON s.scrim_day = d.scrim_day
-    WHERE league IN ${inputs.League.value}
-    AND s.scrim_date >= (NOW() AT TIME ZONE 'America/New_York')::date - INTERVAL '4 weeks'
-    GROUP BY s.scrim_hour, s.scrim_day, d.day_count
-    ORDER BY (CASE WHEN s.scrim_day = 'Monday' THEN 0
-              WHEN s.scrim_day = 'Tuesday' THEN 1
-              WHEN s.scrim_day = 'Wednesday' THEN 2
-              WHEN s.scrim_day = 'Thursday' THEN 3
-              WHEN s.scrim_day = 'Friday' THEN 4
-              WHEN s.scrim_day = 'Saturday' THEN 5
-              WHEN s.scrim_day = 'Sunday' THEN 6 END) , s.scrim_hour
+WHERE s.league IN ${inputs.League.value}
+  AND s.scrim_date >= (NOW() AT TIME ZONE 'America/New_York')::date - INTERVAL '4 weeks'
+GROUP BY s.scrim_day
+        , s.scrim_hour
+        , s.raw_hour
+        , d.day_count
+ORDER BY 
+    (CASE WHEN s.scrim_day = 'Monday' THEN 0
+          WHEN s.scrim_day = 'Tuesday' THEN 1
+          WHEN s.scrim_day = 'Wednesday' THEN 2
+          WHEN s.scrim_day = 'Thursday' THEN 3
+          WHEN s.scrim_day = 'Friday' THEN 4
+          WHEN s.scrim_day = 'Saturday' THEN 5
+          WHEN s.scrim_day = 'Sunday' THEN 6 END)
+    , s.raw_hour -- This handles the 0-23 chronological sort perfectly
 ```
 
 <Heatmap 
     data={hourlyheatmap} 
     x=scrim_day 
-    y=scrim_hour 
+    y=scrim_hour
+    ySort=raw_hour 
     value=avg_hour  
 />
