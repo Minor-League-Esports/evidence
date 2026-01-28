@@ -6,7 +6,7 @@ title: Scrim Stats
 
 <Details title='Instructions' open>
 
-Below you will find stats for scrims in MLE for S19 in the last 60 days.
+Below you will find each player's average stats within scrims they've participated in during the last 60 days.
 - You can use the search bar above the table to search for a specific player.
 - You can also use the drop down menus below to Filter the stats however you see fit.
 - Lastly you can click on the stat column to put stats in ascending or descending order.
