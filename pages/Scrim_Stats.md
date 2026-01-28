@@ -102,7 +102,7 @@ AND p.franchise in ${inputs.Team.value}
 ```sql HeatMap
 SELECT
     DATE(tss.scrim_created_at) AS day
-    , COUNT(distinct tss.scrim_meta_id) AS total_day
+    , COUNT(distinct tss.scrim_meta_id) AS completed_scrims
     , CASE
         WHEN skill_group = 'FL' THEN 'Foundation League'
         WHEN skill_group = 'AL' THEN 'Academy League'
@@ -122,15 +122,16 @@ FROM total_scrim_stats tss
 <CalendarHeatmap 
     data={HeatMap}
     date=day
-    value=total_day
+    value=completed_scrims
     yearLabel={true}
+    title="Scrims per Day in 2026"
 /> 
 
 ```sql hourlyheatmap
 WITH scrim_in_hours AS (
     SELECT
         dayname(timezone('America/New_York', timezone('UTC', scrim_created_at))) AS scrim_day
-        , strftime(scrim_created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York', '%I %p') AS scrim_hour
+        , strftime(scrim_created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York', '%I:00 %p') AS scrim_hour
         -- We keep the raw hour for sorting later
         , EXTRACT(HOUR FROM scrim_created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York') AS raw_hour
         , DATE(timezone('America/New_York', timezone('UTC', scrim_created_at))) AS scrim_date
@@ -159,7 +160,7 @@ SELECT
     s.scrim_day
     , s.scrim_hour
     , s.raw_hour
-    , SUM(s.total_hour) / d.day_count AS avg_hour
+    , SUM(s.total_hour) / d.day_count AS avg_scrims
     , SUM(s.total_hour) as total_hour_sum
 FROM scrim_in_hours s
 JOIN day_counts d ON s.scrim_day = d.scrim_day
@@ -185,5 +186,6 @@ ORDER BY
     x=scrim_day 
     y=scrim_hour
     ySort=raw_hour 
-    value=avg_hour  
+    value=avg_scrims  
+    title="Average Scrims by Day and Hour in EST (Last 4 Weeks)"
 />
