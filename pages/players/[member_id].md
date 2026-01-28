@@ -25,8 +25,8 @@
     current_scrim_points,
     "Eligible Until"
  from players p
-    left join (select distinct member_id, skill_group from S18_stats) s18
-        on p.member_id = s18.member_id
+    left join (select distinct member_id, skill_group from S19_stats) s19
+        on p.member_id = s19.member_id
     left join teams t
         on p.franchise = t.Franchise
   where p.member_id = '${params.member_id}'
@@ -119,7 +119,7 @@ FROM points_by_day
     Select
     name,
     p.member_id,
-    s18.skill_group as league,
+    s19.skill_group as league,
     case
       when gamemode = 'RL_DOUBLES' then 'Doubles'
       when gamemode = 'RL_STANDARD' then 'Standard'
@@ -137,16 +137,16 @@ FROM points_by_day
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
  from players p
-    inner join S18_stats s18 
-        on p.member_id = s18.member_id
+    inner join S19_stats s19 
+        on p.member_id = s19.member_id
 where p.member_id = '${params.member_id}'
 group by name, league, p.member_id, gamemode
 ),
 leaguestats as (
     select
-    s18.skill_group || ' Average' as name,
+    s19.skill_group || ' Average' as name,
     'league_averages' as member_id,
-    s18.skill_group as league,
+    s19.skill_group as league,
     case
       when gamemode = 'RL_DOUBLES' then 'Doubles'
       when gamemode = 'RL_STANDARD' then 'Standard'
@@ -164,8 +164,8 @@ leaguestats as (
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
  from players p
-    inner join S18_stats s18
-        on p.member_id = s18.member_id
+    inner join S19_stats s19
+        on p.member_id = s19.member_id
 group by League, game_mode
 )
   select *
@@ -188,7 +188,7 @@ ${inputs.Stats.value} as value
 from ${player_stats}
 ```
 
-<Details title="Season 18 Player Match Averages">
+<Details title="Season 19 Player Match Averages">
 
 <p>Below you can use the dropdown to choose the statistic you would like to display. </p>
 <p><b>Note:</b> If no information appears then you do not have any statistical data to display. </p>
@@ -237,16 +237,16 @@ CASE WHEN winning_team = '${basic_info[0].franchise}' THEN 'Win'
             END AS series_result,
 game_mode
 from players p
-  inner join S18_stats s18
-    on p.member_id = s18.member_id
-  inner join s18_rounds r
-    on s18.match_id = r.match_id
+  inner join S19_stats s19
+    on p.member_id = s19.member_id
+  inner join s19_rounds r
+    on s19.match_id = r.match_id
   inner join matches m
     on r.match_id = m.match_id
   inner join match_groups mg
     on m.match_group_id = mg.match_group_id
 where p.member_id = '${params.member_id}'
-and parent_group_title = 'Season 18'
+and parent_group_title = 'Season 19'
 group by name, salary, r.home, r.away, week, home_wins, away_wins, winning_team, game_mode, m.match_id
 ), seriesStats as (
 select 
@@ -270,8 +270,8 @@ count(*) as games_played,
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
 from players p
-  inner join S18_stats s18
-    on p.member_id = s18.member_id
+  inner join S19_stats s19
+    on p.member_id = s19.member_id
 where p.member_id = '${params.member_id}'
 group by p.member_id, team_name, gamemode, match_id
 )
@@ -308,7 +308,7 @@ from seriesStats ss
 order by week asc 
 ```
 
-Season 18 Stats by Series
+Season 19 Stats by Series
 <DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primColor}' headerFontColor=white compact=true wrapTitles=true>
     <Column id=week align=center />
     <Column id=game_mode align=center />

@@ -1,5 +1,5 @@
 ---
-title: S18 Playoff Results
+title: S19 Playoff Results
 ---
 
 <LastRefreshed prefix="Data last updated"/>
@@ -17,7 +17,7 @@ match_group_title as round
 from matches m
   inner join match_groups mg
     on m.match_group_id = mg.match_group_id
-where parent_group_title = 'Season 18 Playoffs'
+where parent_group_title = 'Season 19 Playoffs'
 and league = '${inputs.leaguesButtons}'
 and game_mode = '${inputs.gamemode}'
 
