@@ -188,4 +188,5 @@ ORDER BY
     ySort=raw_hour 
     value=avg_scrims  
     title="Average Scrims by Day and Hour in EST (Last 4 Weeks)"
+    cellHeight=20
 />
