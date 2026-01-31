@@ -5,7 +5,7 @@ SELECT
     '/players/' || CAST(p.member_id AS INTEGER) as id_link,
     franchise, 
     p.current_scrim_points,
-    "Eligible Until"  
+    "Eligible Until"
 FROM players p
 LEFT JOIN S19_stats s19
     ON p.member_id = s19.member_id
