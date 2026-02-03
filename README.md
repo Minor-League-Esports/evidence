@@ -16,7 +16,6 @@
 4. [Node](https://nodejs.org/en/download)
     - Node.js is a cross-platform JavaScript runtime environment that allows developers to execute JavaScript code outside of a web browser.
     - This will allow VSCode to run a local version of Evidence from your terminal.
-    - Make sure to download version 22.x LTS or below, as Evidence is not yet compatible with version 24.x.
 
 
 ### Evidence Setup
