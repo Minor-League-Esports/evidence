@@ -116,7 +116,7 @@ FROM points_by_day
     Select
     name,
     p.member_id,
-    s18.skill_group as league,
+    s19.skill_group as league,
     case
       when gamemode = 'RL_DOUBLES' then 'Doubles'
       when gamemode = 'RL_STANDARD' then 'Standard'
@@ -134,16 +134,16 @@ FROM points_by_day
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
  from players p
-    inner join S18_stats s18 
-        on p.member_id = s18.member_id
+    inner join S19_stats s19 
+        on p.member_id = s19.member_id
 where p.member_id = '${params.member_id}'
 group by name, league, p.member_id, gamemode
 ),
 leaguestats as (
     select
-    s18.skill_group || ' Average' as name,
+    s19.skill_group || ' Average' as name,
     'league_averages' as member_id,
-    s18.skill_group as league,
+    s19.skill_group as league,
     case
       when gamemode = 'RL_DOUBLES' then 'Doubles'
       when gamemode = 'RL_STANDARD' then 'Standard'
@@ -161,8 +161,8 @@ leaguestats as (
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
  from players p
-    inner join S18_stats s18
-        on p.member_id = s18.member_id
+    inner join S19_stats s19
+        on p.member_id = s19.member_id
 group by League, game_mode
 )
   select *
@@ -185,7 +185,7 @@ ${inputs.Stats.value} as value
 from ${player_stats}
 ```
 
-<Details title="Season 18 Player Match Averages">
+<Details title="Season 19 Player Match Averages">
 
 <p>Below you can use the dropdown to choose the statistic you would like to display. </p>
 <p><b>Note:</b> If no information appears then you do not have any statistical data to display. </p>
@@ -227,11 +227,11 @@ from ${player_stats}
             m.match_id AS match_id,
             SUBSTRING(mg.match_group_title, 7)::INT AS week,
             CASE
-                WHEN r.home = s18.team_name THEN CONCAT(CAST(m.home_wins AS INTEGER), ' - ', CAST(m.away_wins AS INTEGER))   
-                WHEN r.away = s18.team_name THEN CONCAT(CAST(m.away_wins AS INTEGER), ' - ', CAST(m.home_wins AS INTEGER))
+                WHEN r.home = s19.team_name THEN CONCAT(CAST(m.home_wins AS INTEGER), ' - ', CAST(m.away_wins AS INTEGER))   
+                WHEN r.away = s19.team_name THEN CONCAT(CAST(m.away_wins AS INTEGER), ' - ', CAST(m.home_wins AS INTEGER))
             END AS record,
             CASE
-                WHEN m.winning_team = s18.team_name THEN 'Win' 
+                WHEN m.winning_team = s19.team_name THEN 'Win' 
                 WHEN m.winning_team = 'Not Played / Data Unavailable' THEN 'NA'
                 ELSE 'Loss'
             END AS series_result,
@@ -239,11 +239,10 @@ from ${player_stats}
 
         FROM players p
 
-        INNER JOIN S18_stats s18
-            ON p.member_id = s18.member_id
-
-        INNER JOIN s18_rounds r
-            ON s18.match_id = r.match_id
+        INNER JOIN S19_stats s19
+            ON p.member_id = s19.member_id
+        INNER JOIN s19_rounds r
+            ON s19.match_id = r.match_id
 
         INNER JOIN matches m
             ON r.match_id = m.match_id
@@ -252,12 +251,12 @@ from ${player_stats}
             ON m.match_group_id = mg.match_group_id
 
         WHERE p.member_id = '${params.member_id}'
-            AND mg.parent_group_title = 'Season 18'
+            AND mg.parent_group_title = 'Season 19'
 
         GROUP BY
             p.name
             , p.salary
-            , s18.team_name
+            , s19.team_name
             , r.home
             , r.away
             , week
@@ -271,37 +270,37 @@ from ${player_stats}
 
         SELECT
             p.member_id,
-            s18.team_name,
-            s18.gamemode,
-            s18.match_id,
+            s19.team_name,
+            s19.gamemode,
+            s19.match_id,
             count(*) AS games_played,
-            avg(s18.dpi) AS Avg_DPI,
-            avg(s18.gpi) AS Avg_GPI,
-            avg(s18.opi) AS Avg_OPI,
-            avg(s18.score) AS Score_Per_Game,
-            avg(s18.goals) AS Goals_Per_Game,
-            sum(s18.goals) AS total_goals,
-            avg(s18.assists) AS Assists_Per_Game,
-            sum(s18.assists) AS total_assists,
-            avg(s18.saves) AS Saves_Per_Game,
-            sum(s18.saves) AS total_saves,
-            avg(s18.shots) AS Shots_Per_Game,
-            avg(s18.goals_against) AS goals_against_per_game,
-            avg(s18.shots_against) AS shots_against_per_game,
-            sum(s18.goals)/sum(s18.shots) AS shooting_pct2
+            avg(s19.dpi) AS Avg_DPI,
+            avg(s19.gpi) AS Avg_GPI,
+            avg(s19.opi) AS Avg_OPI,
+            avg(s19.score) AS Score_Per_Game,
+            avg(s19.goals) AS Goals_Per_Game,
+            sum(s19.goals) AS total_goals,
+            avg(s19.assists) AS Assists_Per_Game,
+            sum(s19.assists) AS total_assists,
+            avg(s19.saves) AS Saves_Per_Game,
+            sum(s19.saves) AS total_saves,
+            avg(s19.shots) AS Shots_Per_Game,
+            avg(s19.goals_against) AS goals_against_per_game,
+            avg(s19.shots_against) AS shots_against_per_game,
+            sum(s19.goals)/sum(s19.shots) AS shooting_pct2
 
         FROM players p
 
-        INNER JOIN S18_stats s18
-            ON p.member_id = s18.member_id
+        INNER JOIN S19_stats s19
+            ON p.member_id = s19.member_id
         
         WHERE p.member_id = '${params.member_id}'
         
         GROUP BY
             p.member_id
-            , s18.team_name
-            , s18.gamemode
-            , s18.match_id
+            , s19.team_name
+            , s19.gamemode
+            , s19.match_id
 
     )
 
