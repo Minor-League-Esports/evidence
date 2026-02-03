@@ -28,7 +28,7 @@ many areas of current, and historical stats (performance, standings, etc).
 If you don't see something here, or are unsure of how to use this tool, reach out
 to the team on [Discord](https://discord.com/channels/172404472637685760/323511951357509642).
 
-<h2 style="font-size: 25px;"><center><b><u> Season 19 Champions </u></b></center></h2>
+<h2 style="font-size: 25px;"><center><b><u> Season 18 Champions </u></b></center></h2>
 
 <h3 style="font-size: 20px;"><center><b> Doubles: </b></center></h3>
 
