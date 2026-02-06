@@ -293,9 +293,9 @@ FROM weeks
 
 ORDER BY
     game_time
-    -- home_wins DESC
-    -- , away_wins DESC
-    -- , Home
+    , home_wins DESC
+    , away_wins DESC
+    , Home
 ```
 
 <p> 
