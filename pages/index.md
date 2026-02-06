@@ -1,3 +1,4 @@
+
 ```sql teamLogos
 SELECT 
 franchise,
@@ -266,6 +267,7 @@ WITH weeks AS (
         '/franchise_page/' || m.Home AS home_link,
         '/franchise_page/' || m.Away AS away_link,
         mg.match_group_title AS Week
+        , strftime(m.scheduled_time AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York', '%m/%d %I:%M %p') as game_time
 
     FROM matches m
 
@@ -285,11 +287,13 @@ SELECT
     home_wins::INT || ' - ' || away_wins::INT AS series_score,
     Away,
     away_link,
+    game_time
 
 FROM weeks
 
 ORDER BY
-    home_wins DESC
+    game_time
+    , home_wins DESC
     , away_wins DESC
     , Home
 ```
@@ -335,6 +339,7 @@ ORDER BY
 
 <DataTable data={matches} rows=16 headerColor=#2a4b82 headerFontColor=white>
   <!-- <Column id=match_id align=center title="Match Id" /> -->
+  <Column id=game_time contentType=datetime format="MMM d, h:mm A" align=center title="Game Time" />
   <Column id=home_link contentType=link linkLabel=home align=center title="Home Team" />
   <Column id=series_score align=center/>
   <Column id=away_link contentType=link linkLabel=away align=center title="Away Team" />
