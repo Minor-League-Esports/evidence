@@ -288,7 +288,7 @@ SELECT
     home_wins::INT || ' - ' || away_wins::INT AS series_score,
     Away,
     away_link,
-    matchups_link
+    matchups_link,
     game_time
 
 FROM weeks
