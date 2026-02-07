@@ -126,3 +126,15 @@ CREATE OR REPLACE TEMP TABLE trackers AS
 --    FROM read_parquet(
 --        'https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/scrim_stats.parquet'
 --	);
+
+CREATE OR REPLACE TEMP TABLE scrim_report_cards AS
+    SELECT *
+    FROM read_parquet(
+        'https://sprocket-public-datasets.nyc3.cdn.digitaloceanspaces.com/datasets/report_cards/scrim_report_cards.parquet'
+	);
+
+CREATE OR REPLACE TEMP TABLE match_report_cards AS
+    SELECT *
+    FROM read_parquet(
+        'https://sprocket-public-datasets.nyc3.cdn.digitaloceanspaces.com/datasets/report_cards/match_report_cards.parquet'
+	);
