@@ -5,10 +5,10 @@ SELECT
     '/players/' || CAST(p.member_id AS INTEGER) as id_link,
     franchise, 
     p.current_scrim_points,
-    "Eligible Until"  
+    "Eligible Until"
 FROM players p
-LEFT JOIN S18_stats s18
-    ON p.member_id = s18.member_id
+LEFT JOIN S19_stats s19
+    ON p.member_id = s19.member_id
 WHERE salary <= 21.0 --filtering out TestUser1 & TestUser2 which have > 21.0 salaries
 AND NOT franchise = 'FP'
 GROUP BY name, salary, p.member_id, franchise, current_scrim_points, "Eligible Until"

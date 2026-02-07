@@ -1,35 +1,32 @@
 ```sql basic_info
-    Select
-   -- distinct keeps us from getting multiples of the same information in the basic_info table 
-    p.name,
-    salary,
-    p.franchise,
-    p.skill_group as league,
-    p.member_id,
-    p.sprocket_player_id,
-    t."Photo URL" as logo,
-    CASE
-        WHEN t."Primary Color" is Null then '#2a4b82'
-        ELSE t."Primary Color"
-        END as primColor,
-    CASE 
-        WHEN t."Secondary Color" is Null then '#2a4b82'
-        ELSE t."Secondary Color"
-        END as secColor,
-    t."Primary Color" as primary_color,
-    t."Secondary Color" as secondary_color,
-    case
-       when p."Franchise Staff Position" = 'NA' then 'Player'
-       else p."Franchise Staff Position"
-       END as franchise_position,
-    current_scrim_points,
-    "Eligible Until"
- from players p
-    left join (select distinct member_id, skill_group from S18_stats) s18
-        on p.member_id = s18.member_id
-    left join teams t
-        on p.franchise = t.Franchise
-  where p.member_id = '${params.member_id}'
+    SELECT
+        p.name,
+        salary,
+        p.franchise,
+        p.skill_group AS league,
+        p.member_id,
+        p.sprocket_player_id,
+        t."Photo URL" AS logo,
+        CASE
+            WHEN t."Primary Color" IS NULL THEN '#2a4b82'
+            ELSE t."Primary Color"
+        END AS primColor,
+        CASE 
+            WHEN t."Secondary Color" IS NULL THEN '#2a4b82'
+            ELSE t."Secondary Color"
+        END AS secColor,
+        t."Primary Color" AS primary_color,
+        t."Secondary Color" AS secondary_color,
+        CASE
+        WHEN p."Franchise Staff Position" = 'NA' THEN 'Player'
+        ELSE p."Franchise Staff Position"
+        END AS franchise_position,
+        current_scrim_points,
+        "Eligible Until"
+    FROM players p
+    LEFT JOIN teams t
+        ON p.franchise = t.Franchise
+    WHERE p.member_id = '${params.member_id}'
 ```
 
 <LastRefreshed prefix="Data last updated"/>
@@ -119,7 +116,7 @@ FROM points_by_day
     Select
     name,
     p.member_id,
-    s18.skill_group as league,
+    s19.skill_group as league,
     case
       when gamemode = 'RL_DOUBLES' then 'Doubles'
       when gamemode = 'RL_STANDARD' then 'Standard'
@@ -137,16 +134,16 @@ FROM points_by_day
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
  from players p
-    inner join S18_stats s18 
-        on p.member_id = s18.member_id
+    inner join S19_stats s19 
+        on p.member_id = s19.member_id
 where p.member_id = '${params.member_id}'
 group by name, league, p.member_id, gamemode
 ),
 leaguestats as (
     select
-    s18.skill_group || ' Average' as name,
+    s19.skill_group || ' Average' as name,
     'league_averages' as member_id,
-    s18.skill_group as league,
+    s19.skill_group as league,
     case
       when gamemode = 'RL_DOUBLES' then 'Doubles'
       when gamemode = 'RL_STANDARD' then 'Standard'
@@ -164,8 +161,8 @@ leaguestats as (
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
  from players p
-    inner join S18_stats s18
-        on p.member_id = s18.member_id
+    inner join S19_stats s19
+        on p.member_id = s19.member_id
 group by League, game_mode
 )
   select *
@@ -188,7 +185,7 @@ ${inputs.Stats.value} as value
 from ${player_stats}
 ```
 
-<Details title="Season 18 Player Match Averages">
+<Details title="Season 19 Player Match Averages">
 
 <p>Below you can use the dropdown to choose the statistic you would like to display. </p>
 <p><b>Note:</b> If no information appears then you do not have any statistical data to display. </p>
@@ -210,105 +207,142 @@ from ${player_stats}
 </Dropdown>
 
 <BarChart 
-data={comparison}
-x=game_mode
-y=value
-series=name
-type=grouped
-colorPalette={[basic_info[0].primColor, '#A9A9A9']}
-sort=false
+    data={comparison}
+    x=game_mode
+    y=value
+    series=name
+    type=grouped
+    colorPalette={[basic_info[0].primColor, '#A9A9A9']}
+    sort=false
 />
 
 ```sql playerSeries
-with seriesRecord as(
-select 
-name,
-salary,
-r.Home as home,
-r.Away as away,
-m.match_id as match_id,
-SUBSTRING(match_group_title, 7)::INT as week,
-CASE WHEN r.home = '${basic_info[0].franchise}' THEN concat(cast(home_wins as integer), ' - ', cast(away_wins as integer))   
-    WHEN r.away = '${basic_info[0].franchise}' THEN concat(cast(away_wins as integer), ' - ', cast(home_wins as integer))
-         END as record,
-CASE WHEN winning_team = '${basic_info[0].franchise}' THEN 'Win' 
-    WHEN winning_team = 'Not Played / Data Unavailable' THEN 'NA'
-        ELSE 'Loss' 
+    WITH seriesRecord AS (
+
+        SELECT
+            p.name,
+            p.salary,
+            r.Home AS home,
+            r.Away AS away,
+            m.match_id AS match_id,
+            SUBSTRING(mg.match_group_title, 7)::INT AS week,
+            CASE
+                WHEN r.home = s19.team_name THEN CONCAT(CAST(m.home_wins AS INTEGER), ' - ', CAST(m.away_wins AS INTEGER))   
+                WHEN r.away = s19.team_name THEN CONCAT(CAST(m.away_wins AS INTEGER), ' - ', CAST(m.home_wins AS INTEGER))
+            END AS record,
+            CASE
+                WHEN m.winning_team = s19.team_name THEN 'Win' 
+                WHEN m.winning_team = 'Not Played / Data Unavailable' THEN 'NA'
+                ELSE 'Loss'
             END AS series_result,
-game_mode
-from players p
-  inner join S18_stats s18
-    on p.member_id = s18.member_id
-  inner join s18_rounds r
-    on s18.match_id = r.match_id
-  inner join matches m
-    on r.match_id = m.match_id
-  inner join match_groups mg
-    on m.match_group_id = mg.match_group_id
-where p.member_id = '${params.member_id}'
-and parent_group_title = 'Season 18'
-group by name, salary, r.home, r.away, week, home_wins, away_wins, winning_team, game_mode, m.match_id
-), seriesStats as (
-select 
-p.member_id,
-team_name,
-gamemode,
-match_id,
-count(*) as games_played,
-    avg(dpi) as Avg_DPI,
-    avg(gpi) as Avg_GPI,
-    avg(opi) as Avg_OPI,
-    avg(score) as Score_Per_Game,
-    avg(goals) as Goals_Per_Game,
-    sum(goals) as total_goals,
-    avg(assists) as Assists_Per_Game,
-    sum(assists) as total_assists,
-    avg(saves) as Saves_Per_Game,
-    sum(saves) as total_saves,
-    avg(shots) as Shots_Per_Game,
-    avg(goals_against) as goals_against_per_game,
-    avg(shots_against) as shots_against_per_game,
-    sum(goals)/sum(shots) as shooting_pct2
-from players p
-  inner join S18_stats s18
-    on p.member_id = s18.member_id
-where p.member_id = '${params.member_id}'
-group by p.member_id, team_name, gamemode, match_id
-)
-Select
-week,
-game_mode,
-home,
-away,
-case
-  when home = '${basic_info[0].franchise}' then away
-  else home
-  end as opponent,
-'/franchise_page/' || opponent as franchise_link,
-games_played,
-record,
-series_result,
-Avg_DPI,
-Avg_GPI,
-Avg_OPI,
-Score_Per_Game,
-Goals_Per_Game,
-total_goals,
-Assists_Per_Game,
-total_assists,
-Saves_Per_Game,
-total_saves,
-Shots_Per_Game,
-goals_against_per_game,
-shots_against_per_game,
-shooting_pct2
-from seriesStats ss
-  inner join seriesRecord sr
-    on ss.match_id = sr.match_id
-order by week asc 
+            m.game_mode
+
+        FROM players p
+
+        INNER JOIN S19_stats s19
+            ON p.member_id = s19.member_id
+        INNER JOIN s19_rounds r
+            ON s19.match_id = r.match_id
+
+        INNER JOIN matches m
+            ON r.match_id = m.match_id
+
+        INNER JOIN match_groups mg
+            ON m.match_group_id = mg.match_group_id
+
+        WHERE p.member_id = '${params.member_id}'
+            AND mg.parent_group_title = 'Season 19'
+
+        GROUP BY
+            p.name
+            , p.salary
+            , s19.team_name
+            , r.home
+            , r.away
+            , week
+            , m.home_wins
+            , m.away_wins
+            , m.winning_team
+            , m.game_mode
+            , m.match_id
+
+    ), seriesStats AS (
+
+        SELECT
+            p.member_id,
+            s19.team_name,
+            s19.gamemode,
+            s19.match_id,
+            count(*) AS games_played,
+            avg(s19.dpi) AS Avg_DPI,
+            avg(s19.gpi) AS Avg_GPI,
+            avg(s19.opi) AS Avg_OPI,
+            avg(s19.score) AS Score_Per_Game,
+            avg(s19.goals) AS Goals_Per_Game,
+            sum(s19.goals) AS total_goals,
+            avg(s19.assists) AS Assists_Per_Game,
+            sum(s19.assists) AS total_assists,
+            avg(s19.saves) AS Saves_Per_Game,
+            sum(s19.saves) AS total_saves,
+            avg(s19.shots) AS Shots_Per_Game,
+            avg(s19.goals_against) AS goals_against_per_game,
+            avg(s19.shots_against) AS shots_against_per_game,
+            sum(s19.goals)/sum(s19.shots) AS shooting_pct2
+
+        FROM players p
+
+        INNER JOIN S19_stats s19
+            ON p.member_id = s19.member_id
+        
+        WHERE p.member_id = '${params.member_id}'
+        
+        GROUP BY
+            p.member_id
+            , s19.team_name
+            , s19.gamemode
+            , s19.match_id
+
+    )
+
+    SELECT
+        sr.week,
+        sr.game_mode,
+        sr.home,
+        sr.away,
+        CASE
+            WHEN sr.home = ss.team_name THEN sr.away
+            ELSE sr.home
+        END AS opponent,
+        '/franchise_page/' || opponent AS franchise_link,
+        ss.games_played,
+        sr.record,
+        sr.series_result,
+        ss.Avg_DPI,
+        ss.Avg_GPI,
+        ss.Avg_OPI,
+        ss.Score_Per_Game,
+        ss.Goals_Per_Game,
+        ss.total_goals,
+        ss.Assists_Per_Game,
+        ss.total_assists,
+        ss.Saves_Per_Game,
+        ss.total_saves,
+        ss.Shots_Per_Game,
+        ss.goals_against_per_game,
+        ss.shots_against_per_game,
+        ss.shooting_pct2
+
+    FROM seriesStats ss
+
+    INNER JOIN seriesRecord sr
+        ON ss.match_id = sr.match_id
+
+    ORDER BY
+        week ASC
+
 ```
 
-Season 18 Stats by Series
+## Season 18 Stats by Series
 <DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primColor}' headerFontColor=white compact=true wrapTitles=true>
     <Column id=week align=center />
     <Column id=game_mode align=center />
@@ -330,4 +364,206 @@ Season 18 Stats by Series
     <Column id=goals_against_per_game title="Goals Against/Game" align=center />
     <Column id=shots_against_per_game title="Shots Against/Game"align=center />
     <Column id=shooting_pct2 align=center />
+</DataTable>
+
+```sql scrimStats
+    SELECT 
+        p.name
+        , p.member_id
+        , p.salary
+        , CASE WHEN ass.gamemode = 'RL_DOUBLES' THEN 'Doubles'
+            WHEN ass.gamemode = 'RL_STANDARD' THEN 'Standard'
+            ELSE 'Unknown' 
+            END as game_mode
+        , ass.skill_group as league
+        , p.franchise
+        , ass.scrim_games_played AS games_played
+        , ass.win_percentage AS win_pct
+        , ass.dpi_per_game as dpi
+        , ass.opi_per_game as opi
+        , ass.avg_sprocket_rating as sprocket_rating
+        , ass.score_per_game as score
+        , ass.goals_per_game as goals
+        , ass.assists_per_game as assists
+        , ass.saves_per_game as saves
+        , ass.shots_per_game as shots
+        , ass.avg_goals_against as goals_against
+        , ass.avg_shots_against as shots_against
+        , ass.demos_per_game as demos
+        , p.current_scrim_points as scrim_points
+        , p."Eligible Until" as eligible_until
+    FROM avgScrimStats ass
+
+    LEFT JOIN players p
+        ON p.sprocket_player_id = ass.sprocket_player_id
+        
+    WHERE p.member_id = '${params.member_id}'
+```
+
+
+## Scrim Stats from last 60 Days
+<DataTable data={scrimStats} rows=20 rowShading=true headerColor='{basic_info[0].primColor}' headerFontColor=white compact=true wrapTitles=true >
+        <Column id=game_mode align=center />
+        <Column id=league align=center />
+        <Column id=games_played align=center />
+        <Column id=win_pct align=center />
+        <Column id=sprocket_rating align=center />
+        <Column id=opi align=center />
+        <Column id=dpi align=center />
+        <Column id=score align=ceneter />
+        <Column id=goals align=center />
+        <Column id=assists align=center />
+        <Column id=saves align=center />
+        <Column id=shots align=center />
+        <Column id=goals_against align=center />
+        <Column id=shots_against align=center />
+        <Column id=demos align=center />
+</DataTable>
+
+
+## All-Time Stats
+```sql LeaderboardStats_career
+    SELECT
+        name AS Name
+        , '/players/' || ps.member_id as playerLink
+        , CASE
+            WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles'
+            WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard'
+            ELSE 'Unknown'
+        END AS GameMode
+        , SUM(games_played) AS games_played
+        , AVG(sprocket_rating) AS 'Sprocket Rating'
+        , AVG(opi_per_game) AS OPI
+        , AVG(dpi_per_game) AS DPI
+        , AVG(avg_score) AS 'Avg Score'
+        , SUM(total_goals) AS Goals
+        , SUM(total_assists) AS Assists
+        , SUM(total_saves) AS Saves
+        , SUM(total_shots) AS Shots
+        , SUM(total_goals) / SUM(total_shots) AS shooting_pct2
+        , SUM(total_demos_inflicted) AS 'Demos'
+        , SUM(total_demos_taken) AS 'Demos Taken'
+        , AVG(goals_per_game) AS 'Goals/ G'
+        , AVG(assists_per_game) AS 'Assists/ G'
+        , AVG(saves_per_game) AS 'Saves/ G'
+        , AVG(shots_per_game) AS 'Shots/ G'
+        , AVG(avg_goals_against) AS 'Goals Against/ G'
+        , AVG(avg_shots_against) AS 'Shots Against/ G'
+        , AVG(avg_demos_inflicted) AS 'Demos/ G'
+        , AVG(avg_demos_taken) AS 'Demos Taken/ G'
+    FROM player_stats ps
+
+    WHERE ps.member_id = '${params.member_id}'
+
+    GROUP BY
+        Name
+        , gamemode
+        , playerLink
+```
+
+
+
+<DataTable data={LeaderboardStats_career} rows=20 rowShading=true headerColor='{basic_info[0].primColor}' headerFontColor=white compact=true wrapTitles=true >
+    <Column id=Name align=center />
+    <Column id=GameMode align=center />
+    <Column id=games_played align=center />
+    <Column id='Sprocket Rating' align=center />
+    <Column id='OPI' align=center />
+    <Column id='DPI' align=center />
+    <Column id='Avg Score' align=center />
+    <Column id='Goals' align=center />
+    <Column id='Assists' align=center />
+    <Column id='Saves' align=center />
+    <Column id='Shots' align=center />
+    <Column id='shooting_pct2' align=center />
+    <Column id='Demos' align=center />
+    <Column id='Demos Taken' align=center />
+    <Column id='Shots/ G' align=center />
+    <Column id='Goals/ G' align=center />
+    <Column id='Assists/ G' align=center />
+    <Column id='Saves/ G' align=center />
+    <Column id='Shots/ G' align=center />
+    <Column id='Goals Against/ G' align=center />
+    <Column id='Shots Against/ G' align=center />
+    <Column id='Demos/ G' align=center />
+    <Column id='Demos Taken/ G' align=center />
+</DataTable>
+
+
+## Past Season Stats
+```sql SeasonStats_career
+    SELECT
+        name AS Name
+        , '/players/' || ps.member_id AS playerLink
+        , CASE
+            WHEN ps.gamemode = 'RL_DOUBLES' THEN 'Doubles'
+            WHEN ps.gamemode = 'RL_STANDARD' THEN 'Standard'
+            ELSE 'Unknown'
+        END AS GameMode
+        , season
+        , skill_group AS 'League'
+        , team_name AS Franchise
+        , SUM(games_played) AS games_played
+        , AVG(sprocket_rating) AS 'Sprocket Rating'
+        , AVG(opi_per_game) AS 'OPI'
+        , AVG(dpi_per_game) AS 'DPI'
+        , AVG(avg_score) AS 'Avg Score'
+        , SUM(total_goals) AS Goals
+        , SUM(total_assists) AS Assists
+        , SUM(total_saves) AS Saves
+        , SUM(total_shots) AS Shots
+        , SUM(total_goals) / SUM(total_shots) AS shooting_pct2
+        , SUM(total_demos_inflicted) AS 'Demos'
+        , SUM(total_demos_taken) AS 'Demos Taken'
+        , AVG(goals_per_game) AS 'Goals/ G'
+        , AVG(assists_per_game) AS 'Assists/ G'
+        , AVG(saves_per_game) AS 'Saves/ G'
+        , AVG(shots_per_game) AS 'Shots/ G'
+        , AVG(avg_goals_against) AS 'Goals Against/ G'
+        , avg(avg_shots_against) AS 'Shots Against/ G'
+        , avg(avg_demos_inflicted) AS 'Demos/ G'
+        , avg(avg_demos_taken) AS 'Demos Taken/ G'
+
+    FROM player_stats ps
+
+    WHERE ps.member_id = '${params.member_id}'
+
+    GROUP BY 
+        Name
+        , gamemode
+        , season
+        , team_name
+        , League
+        , playerLink
+
+    ORDER BY
+        season
+        , Gamemode
+```
+
+<DataTable data={SeasonStats_career} rows=20 rowShading=true headerColor='{basic_info[0].primColor}' headerFontColor=white compact=true wrapTitles=true >
+    <Column id='Franchise' align=center />
+    <Column id='League' align=center />
+    <Column id='season' align=center />
+    <Column id=GameMode align=center />
+    <Column id='games_played' align=center />
+    <Column id='Sprocket Rating' align=center />
+    <Column id='OPI' align=center />
+    <Column id='DPI' align=center />
+    <Column id='Avg Score' align=center />
+    <Column id='Goals' align=center />
+    <Column id='Assists' align=center />
+    <Column id='Saves' align=center />
+    <Column id='Shots' align=center />
+    <Column id='shooting_pct2' align=center />
+    <Column id='Demos' align=center />
+    <Column id='Demos Taken' align=center />
+    <Column id='Goals/ G' align=center />
+    <Column id='Assists/ G' align=center />
+    <Column id='Saves/ G' align=center />
+    <Column id='Shots/ G' align=center />
+    <Column id='Goals Against/ G' align=center />
+    <Column id='Shots Against/ G' align=center />
+    <Column id='Demos/ G' align=center />
+    <Column id='Demos Taken/ G' align=center />
 </DataTable>

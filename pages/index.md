@@ -1,3 +1,4 @@
+
 ```sql teamLogos
 SELECT 
 franchise,
@@ -72,7 +73,7 @@ to the team on [Discord](https://discord.com/channels/172404472637685760/3235119
 
 <Tabs>
 
-<Tab label=" S18 Conference Standings">
+<Tab label=" S19 Conference Standings">
 
   <LastRefreshed prefix="Data last updated"/>
 
@@ -106,16 +107,16 @@ FROM teams t
 ```
 
 ```sql conference_standings
-with S18standings as (
+with S19standings as (
     
     SELECT *
         , CASE
-            WHEN s18.mode IN ('Doubles', 'Standard') THEN s18.mode
+            WHEN s19.mode IN ('Doubles', 'Standard') THEN s19.mode
             ELSE 'Overall'
         END AS game_mode
-    FROM S18_standings s18
+    FROM S19_standings s19
     INNER JOIN teams t
-        ON s18.name = t.Franchise
+        ON s19.name = t.Franchise
 
 ), results AS (
 
@@ -131,12 +132,12 @@ with S18standings as (
 		, SUM(r."Home Goals") AS goals_for
 		, SUM(r."Away Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM s18_rounds r
+	FROM s19_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 18'
+	WHERE mg.parent_group_title = 'Season 19'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 		
@@ -154,12 +155,12 @@ with S18standings as (
 		, SUM(r."Away Goals") AS goals_for
 		, SUM(r."Home Goals") AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM s18_rounds r
+	FROM s19_rounds r
 	INNER JOIN matches m
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 18'
+	WHERE mg.parent_group_title = 'Season 19'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 
@@ -199,28 +200,28 @@ with S18standings as (
 )
 
 SELECT
-    s18.ranking AS divisional_rank
-    , s18.Franchise AS team_name
-    , s18."Photo URL" AS team_logo
-    , s18.Division AS division
-    , s18."Super Division" AS super_division
-    , '/franchise_page/' || s18.Franchise AS Franchise_Link
-	, s18.Conference
-    , s18.team_wins::INT || ' - ' || s18.team_losses::INT AS record
+    s19.ranking AS divisional_rank
+    , s19.Franchise AS team_name
+    , s19."Photo URL" AS team_logo
+    , s19.Division AS division
+    , s19."Super Division" AS super_division
+    , '/franchise_page/' || s19.Franchise AS Franchise_Link
+	, s19.Conference
+    , s19.team_wins::INT || ' - ' || s19.team_losses::INT AS record
     , sagd.series_wins || ' - ' || sagd.series_loses AS series_record
     , sagd.goals_for
     , sagd.goals_against
     , sagd.goal_diff AS goal_differential
-FROM S18standings s18
+FROM S19standings s19
 INNER JOIN series_and_goal_diff sagd
-    ON s18.Franchise = sagd.team_name
-    AND s18.league = sagd.league
-    AND s18.game_mode = sagd.game_mode
-WHERE s18.division_name NOT NULL
-    AND s18.league LIKE '${inputs.League_Selection}'
-    AND s18.game_mode LIKE '${inputs.GameMode_Selection}'
+    ON s19.Franchise = sagd.team_name
+    AND s19.league = sagd.league
+    AND s19.game_mode = sagd.game_mode
+WHERE s19.division_name NOT NULL
+    AND s19.league LIKE '${inputs.League_Selection}'
+    AND s19.game_mode LIKE '${inputs.GameMode_Selection}'
 ORDER BY
-    s18.team_wins DESC
+    s19.team_wins DESC
     , sagd.series_wins DESC
     , sagd.goal_diff DESC
     , sagd.goals_for DESC
@@ -251,7 +252,7 @@ ORDER BY
 
 
 
-  <Tab label="S18 Matchups">
+  <Tab label="S19 Matchups">
 
 ```sql matches
 WITH weeks AS (
@@ -267,13 +268,14 @@ WITH weeks AS (
         '/franchise_page/' || m.Away AS away_link,
         '/matchups/' || m.match_id AS matchups_link,
         mg.match_group_title AS Week
+        , strftime(m.scheduled_time AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York', '%m/%d %I:%M %p') as game_time
 
     FROM matches m
 
     LEFT JOIN match_groups mg
         ON m.match_group_id = mg.match_group_id
 
-    WHERE parent_group_title = 'Season 18'
+    WHERE parent_group_title = 'Season 19'
         AND m.League = '${inputs.League_Selection}'
         AND m.game_mode = '${inputs.GameMode_Selection}'
         AND Week = '${inputs.Week_Selection}'
@@ -287,11 +289,13 @@ SELECT
     Away,
     away_link,
     matchups_link
+    game_time
 
 FROM weeks
 
 ORDER BY
-    home_wins DESC
+    game_time
+    , home_wins DESC
     , away_wins DESC
     , Home
 ```
@@ -337,6 +341,7 @@ ORDER BY
 
 <DataTable data={matches} rows=16 headerColor=#2a4b82 headerFontColor=white link=matchups_link>
   <!-- <Column id=match_id align=center title="Match Id" /> -->
+  <Column id=game_time contentType=datetime format="MMM d, h:mm A" align=center title="Game Time" />
   <Column id=home_link contentType=link linkLabel=home align=center title="Home Team" />
   <Column id=series_score align=center/>
   <Column id=away_link contentType=link linkLabel=away align=center title="Away Team" />
@@ -345,15 +350,15 @@ ORDER BY
 
   </Tab>
 
-<Tab label="S18 Leaderboard">
+<Tab label="S19 Leaderboard">
 
 
-```sql S18leaderboard2s
+```sql S19leaderboard2s
 With playerstats as (
     Select name,
     salary as Salary,
     team_name as Team,
-    s18.skill_group as league,
+    s19.skill_group as league,
     "Primary Color" as primColor,
     CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode,
     count(*) as games_played,
@@ -372,8 +377,8 @@ With playerstats as (
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
  from players p
-    inner join S18_stats s18
-        on p.member_id = s18.member_id
+    inner join S19_stats s19
+        on p.member_id = s19.member_id
     inner join teams t 
         on p.franchise = t.franchise
 
@@ -399,12 +404,12 @@ LIMIT 10
 ```
 
 
-```sql S18leaderboard3s
+```sql S19leaderboard3s
 With playerstats as (
     Select name,
     salary as Salary,
     team_name as Team,
-    s18.skill_group as league,
+    s19.skill_group as league,
     "Primary Color" as primColor,
     CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode,
     count(*) as games_played,
@@ -423,8 +428,8 @@ With playerstats as (
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
  from players p
-    inner join S18_stats s18
-        on p.member_id = s18.member_id
+    inner join S19_stats s19
+        on p.member_id = s19.member_id
     inner join teams t 
         on p.franchise = t.franchise
 group by name, salary, team_name, league, primColor, gamemode)
@@ -455,7 +460,7 @@ LIMIT 10
         , CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
         , COUNT(*) as games_played
 
-    FROM S18_stats s18
+    FROM S19_stats s19
 
     WHERE skill_group='${inputs.leagueSelect}'
 
@@ -497,8 +502,8 @@ LIMIT 10
 <Slider title='Minimum Games Played' name=gamesSlider size=large data={slider} min=1 maxColumn=games_played />
 
 <Grid cols=2 >
-    <BarChart data={S18leaderboard2s} title="Top 10 for 2s" x=name y=stat1 swapXY=true series=name seriesLabels=false legend=false yAxisTitle='{inputs.stats.value}' pointSize=15 colorPalette={[S18leaderboard2s[0].primColor, S18leaderboard2s[1].primColor, S18leaderboard2s[2].primColor, S18leaderboard2s[3].primColor, S18leaderboard2s[4].primColor, S18leaderboard2s[5].primColor, S18leaderboard2s[6].primColor, S18leaderboard2s[7].primColor, S18leaderboard2s[8].primColor, S18leaderboard2s[9].primColor]} />
-    <BarChart data={S18leaderboard3s} title="Top 10 for 3s" x=name y=stat1 swapXY=true series=name seriesLabels=false legend=false yAxisTitle='{inputs.stats.value}' pointSize=15 colorPalette={[S18leaderboard3s[0].primColor, S18leaderboard3s[1].primColor, S18leaderboard3s[2].primColor, S18leaderboard3s[3].primColor, S18leaderboard3s[4].primColor, S18leaderboard3s[5].primColor, S18leaderboard3s[6].primColor, S18leaderboard3s[7].primColor, S18leaderboard3s[8].primColor, S18leaderboard3s[9].primColor]} />
+    <BarChart data={S19leaderboard2s} title="Top 10 for 2s" x=name y=stat1 swapXY=true series=name seriesLabels=false legend=false yAxisTitle='{inputs.stats.value}' pointSize=15 colorPalette={[S19leaderboard2s[0].primColor, S19leaderboard2s[1].primColor, S19leaderboard2s[2].primColor, S19leaderboard2s[3].primColor, S19leaderboard2s[4].primColor, S19leaderboard2s[5].primColor, S19leaderboard2s[6].primColor, S19leaderboard2s[7].primColor, S19leaderboard2s[8].primColor, S19leaderboard2s[9].primColor]} />
+    <BarChart data={S19leaderboard3s} title="Top 10 for 3s" x=name y=stat1 swapXY=true series=name seriesLabels=false legend=false yAxisTitle='{inputs.stats.value}' pointSize=15 colorPalette={[S19leaderboard3s[0].primColor, S19leaderboard3s[1].primColor, S19leaderboard3s[2].primColor, S19leaderboard3s[3].primColor, S19leaderboard3s[4].primColor, S19leaderboard3s[5].primColor, S19leaderboard3s[6].primColor, S19leaderboard3s[7].primColor, S19leaderboard3s[8].primColor, S19leaderboard3s[9].primColor]} />
 </Grid>
 
 </Tab>
