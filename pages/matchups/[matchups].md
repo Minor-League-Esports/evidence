@@ -26,6 +26,7 @@
     WHERE m.match_id = '${params.matchups}'
 ```
 
+
 ```sql home_standings
 WITH base_matchup AS (
     SELECT * 
@@ -137,108 +138,6 @@ ORDER BY overall_ranking, conference_ranking, division_ranking
 ```
 
 
-<!--
-```sql home_standings_original
-    SELECT
-        CASE
-            WHEN (s18.division_name IS NULL AND s18.conference IS NULL) THEN
-                CASE
-                    WHEN s18.ranking % 100 IN (11, 12, 13) THEN CAST(s18.ranking AS INTEGER) || 'th'
-                    WHEN s18.ranking % 10 = 1 THEN CAST(s18.ranking AS INTEGER) || 'st'
-                    WHEN s18.ranking % 10 = 2 THEN CAST(s18.ranking AS INTEGER) || 'nd'
-                    WHEN s18.ranking % 10 = 3 THEN CAST(s18.ranking AS INTEGER) || 'rd'
-                    ELSE CAST(s18.ranking AS INTEGER) || 'th'
-                END
-            ELSE NULL
-        END AS overall_ranking,
-        CASE
-            WHEN (s18.division_name IS NULL AND NOT s18.conference IS NULL) THEN
-                CASE
-                    WHEN s18.ranking % 100 IN (11, 12, 13) THEN CAST(s18.ranking AS INTEGER) || 'th'
-                    WHEN s18.ranking % 10 = 1 THEN CAST(s18.ranking AS INTEGER) || 'st'
-                    WHEN s18.ranking % 10 = 2 THEN CAST(s18.ranking AS INTEGER) || 'nd'
-                    WHEN s18.ranking % 10 = 3 THEN CAST(s18.ranking AS INTEGER) || 'rd'
-                    ELSE CAST(s18.ranking AS INTEGER) || 'th'
-                END            
-            ELSE NULL
-        END AS conference_ranking,
-        CASE
-            WHEN (s18.division_name IS NOT NULL AND s18.conference IS NOT NULL) THEN
-                CASE
-                    WHEN s18.ranking % 100 IN (11, 12, 13) THEN CAST(s18.ranking AS INTEGER) || 'th'
-                    WHEN s18.ranking % 10 = 1 THEN CAST(s18.ranking AS INTEGER) || 'st'
-                    WHEN s18.ranking % 10 = 2 THEN CAST(s18.ranking AS INTEGER) || 'nd'
-                    WHEN s18.ranking % 10 = 3 THEN CAST(s18.ranking AS INTEGER) || 'rd'
-                    ELSE CAST(s18.ranking AS INTEGER) || 'th'
-                END
-            ELSE NULL
-        END AS division_ranking,        
-        s18.name,
-        s18.division_name,
-        s18.conference,
-        s18.league,
-        s18.mode,
-        s18.team_wins,
-        s18.team_losses
-    FROM S18_standings s18
-    WHERE s18.league = 'Academy League'
-    AND s18.mode LIKE 'Doubles'
-    AND s18.name LIKE 'Bulls'
-    AND NOT (overall_ranking IS NULL AND conference_ranking IS NULL AND division_ranking IS NULL)
-    ORDER BY overall_ranking, conference_ranking, division_ranking
-```
-
-```sql away_standings_original
-    SELECT
-        CASE
-            WHEN (s18.division_name IS NULL AND s18.conference IS NULL) THEN
-                CASE
-                    WHEN s18.ranking % 100 IN (11, 12, 13) THEN CAST(s18.ranking AS INTEGER) || 'th'
-                    WHEN s18.ranking % 10 = 1 THEN CAST(s18.ranking AS INTEGER) || 'st'
-                    WHEN s18.ranking % 10 = 2 THEN CAST(s18.ranking AS INTEGER) || 'nd'
-                    WHEN s18.ranking % 10 = 3 THEN CAST(s18.ranking AS INTEGER) || 'rd'
-                    ELSE CAST(s18.ranking AS INTEGER) || 'th'
-                END
-            ELSE NULL
-        END AS overall_ranking,
-        CASE
-            WHEN (s18.division_name IS NULL AND NOT s18.conference IS NULL) THEN
-                CASE
-                    WHEN s18.ranking % 100 IN (11, 12, 13) THEN CAST(s18.ranking AS INTEGER) || 'th'
-                    WHEN s18.ranking % 10 = 1 THEN CAST(s18.ranking AS INTEGER) || 'st'
-                    WHEN s18.ranking % 10 = 2 THEN CAST(s18.ranking AS INTEGER) || 'nd'
-                    WHEN s18.ranking % 10 = 3 THEN CAST(s18.ranking AS INTEGER) || 'rd'
-                    ELSE CAST(s18.ranking AS INTEGER) || 'th'
-                END            
-            ELSE NULL
-        END AS conference_ranking,
-        CASE
-            WHEN (s18.division_name IS NOT NULL AND s18.conference IS NOT NULL) THEN
-                CASE
-                    WHEN s18.ranking % 100 IN (11, 12, 13) THEN CAST(s18.ranking AS INTEGER) || 'th'
-                    WHEN s18.ranking % 10 = 1 THEN CAST(s18.ranking AS INTEGER) || 'st'
-                    WHEN s18.ranking % 10 = 2 THEN CAST(s18.ranking AS INTEGER) || 'nd'
-                    WHEN s18.ranking % 10 = 3 THEN CAST(s18.ranking AS INTEGER) || 'rd'
-                    ELSE CAST(s18.ranking AS INTEGER) || 'th'
-                END
-            ELSE NULL
-        END AS division_ranking,        
-        s18.name,
-        s18.division_name,
-        s18.conference,
-        s18.league,
-        s18.mode,
-        s18.team_wins,
-        s18.team_losses
-    FROM S18_standings s18
-    WHERE s18.league = 'Academy League'
-    AND s18.mode LIKE 'Doubles'
-    AND s18.name LIKE 'Pandas'
-    AND NOT (overall_ranking IS NULL AND conference_ranking IS NULL AND division_ranking IS NULL)
-    ORDER BY overall_ranking, conference_ranking, division_ranking
-```
-
--->
 
 <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border: 1px solid #ddd; border-radius: 8px; gap: 30px;">
   
@@ -270,6 +169,21 @@ ORDER BY overall_ranking, conference_ranking, division_ranking
   </div>
 
 </div>
+
+
+```sql team_colors
+WITH base_matchup AS (
+    SELECT * 
+    FROM ${matchups_info}
+)
+SELECT 
+    t.Franchise,
+    "Primary Color" AS primColor,
+FROM teams t
+    INNER JOIN base_matchup b
+        ON t.Franchise = b.home
+        OR t.Franchise = b.away 
+```
 
 
 ```sql franchise_stats
@@ -321,6 +235,7 @@ ORDER BY stat1 DESC
 
 ```
 
+
 <Dropdown name=stats defaultValue=sprocket_rating>
     <DropdownOption value=avg_dpi valueLabel="Avg DPI" />
     <DropdownOption value=sprocket_rating valueLabel="Avg Sprocket Rating" />
@@ -340,9 +255,10 @@ ORDER BY stat1 DESC
 
 
 <Grid cols=1 >
-    <BarChart data={franchise_stats} title="Matchup Data" x=name y=stat1 swapXY=true series=name seriesLabels=false legend=false yAxisTitle='{inputs.stats.value}' pointSize=15/>
+    <BarChart data={franchise_stats} title="Matchup Data" x=name y=stat1 swapXY=true series=Team seriesLabels=false legend=false yAxisTitle='{inputs.stats.value}' pointSize=15 seriesColors = {{[team_colors[0].Franchise]:[team_colors[0].primColor],[team_colors[1].Franchise]:[team_colors[1].primColor]}}/>
 
 </Grid>
+
 
 
 <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border: 1px solid #ddd; border-radius: 8px; gap: 30px;">
@@ -375,6 +291,7 @@ ORDER BY stat1 DESC
   </div>
 
 </div>
+
 
 
 ```sql matches_data
@@ -451,12 +368,9 @@ ORDER BY stat1 DESC
     ) CTE
 ```
 
-```sql grouped_franchise_matches_data
+```sql grouped_franchise_series_data
     SELECT 
-        -- p.name,
         s18.team_name AS player_team,
-        -- s18.member_id,
-        m.match_id,
         AVG(s18.gpi) AS "Sprocket Rating",
         SUM(s18.goals) AS total_goals,
         SUM(s18.assists) AS total_assists,
@@ -473,9 +387,7 @@ ORDER BY stat1 DESC
             ON s18.member_id = p.member_id
     WHERE m.match_id = '${params.matchups}'
     GROUP BY
-        -- p.name,
         player_team,
-        -- s18.member_id,
         m.match_id,
     ORDER BY player_team ASC, "Sprocket Rating" DESC
 ```
@@ -520,3 +432,4 @@ ORDER BY stat1 DESC
     </Tab>
 
 </Tabs>
+
