@@ -137,11 +137,13 @@ WHERE NOT (overall_ranking IS NULL AND conference_ranking IS NULL AND division_r
 ORDER BY overall_ranking, conference_ranking, division_ranking
 ```
 
-
-
-{#if matchups_info[0].winner == 'Pending'}
-
-
+{#if matchups_info.length === 0}
+<div>
+## Match not found
+No data found for matchup `${params.matchups}`.
+</div>
+{/if}
+{#if matchups_info.length > 0}
 <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border: 1px solid #ddd; border-radius: 8px; gap: 30px;">
   
   <!-- Left Side: Home Team -->
@@ -149,31 +151,53 @@ ORDER BY overall_ranking, conference_ranking, division_ranking
     <img src={matchups_info[0].home_logo} alt="Home Team Logo" style="width: 80px; height: 80px; object-fit: contain;">
     <div>
       <h3 style="margin: 0; font-size: 20px; font-weight: bold;">{matchups_info[0].home}</h3>
+
+      {#if home_standings.length > 0}
       <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Record: {home_standings[0].team_wins} - {home_standings[0].team_losses}</p>
       <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Overall: {home_standings[0].overall_ranking}</p>
       <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Division: {home_standings[2].division_ranking}</p>
+      {:else}
+      <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Record: 0 - 0</p>
+      <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Overall: -</p>
+      <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Division: -</p>
+      {/if}
     </div>
   </div>
 
+{#if matchups_info[0].winner == 'Pending'}
   <!-- Center: VS or Score -->
   <div style="text-align: center; font-size: 24px; font-weight: bold; color: #333; min-width: 60px;">
     VS
   </div>
+{:else}
+    <!-- Center: Score -->
+  <div style="text-align: center; font-size: 32px; font-weight: bold; color: #333; min-width: 80px;">
+    {matchups_info[0].home_wins} - {matchups_info[0].away_wins}
+  </div>
+{/if}
 
   <!-- Right Side: Away Team -->
   <div style="display: flex; align-items: center; gap: 15px; flex: 1; flex-direction: row-reverse;">
     <img src={matchups_info[0].away_logo} alt="Away Team Logo" style="width: 80px; height: 80px; object-fit: contain;">
     <div style="text-align: right;">
       <h3 style="margin: 0; font-size: 20px; font-weight: bold;">{matchups_info[0].away}</h3>
+
+      {#if away_standings.length > 0}
       <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Record: {away_standings[0].team_wins} - {away_standings[0].team_losses}</p>
       <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Overall: {away_standings[0].overall_ranking}</p>
       <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Division: {away_standings[2].division_ranking}</p>
+      {:else}
+      <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Record: 0 - 0</p>
+      <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Overall: -</p>
+      <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Division: -</p>
+      {/if}
+
     </div>
   </div>
 
 </div>
 
-
+{#if matchups_info[0].winner == 'Pending'}
 ```sql team_colors
 WITH base_matchup AS (
     SELECT * 
@@ -263,38 +287,6 @@ ORDER BY stat1 DESC
 </Grid>
 
 {:else}
-
-<div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border: 1px solid #ddd; border-radius: 8px; gap: 30px;">
-  
-  <!-- Left Side: Home Team -->
-  <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
-    <img src={matchups_info[0].home_logo} alt="Home Team Logo" style="width: 80px; height: 80px; object-fit: contain;">
-    <div>
-      <h3 style="margin: 0; font-size: 20px; font-weight: bold;">{matchups_info[0].home}</h3>
-      <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Record: {home_standings[0].team_wins} - {home_standings[0].team_losses}</p>
-      <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Overall: {home_standings[0].overall_ranking}</p>
-      <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Division: {home_standings[2].division_ranking}</p>
-    </div>
-  </div>
-
-  <!-- Center: Score -->
-  <div style="text-align: center; font-size: 32px; font-weight: bold; color: #333; min-width: 80px;">
-    {matchups_info[0].home_wins} - {matchups_info[0].away_wins}
-  </div>
-
-  <!-- Right Side: Away Team -->
-  <div style="display: flex; align-items: center; gap: 15px; flex: 1; flex-direction: row-reverse;">
-    <img src={matchups_info[0].away_logo} alt="Away Team Logo" style="width: 80px; height: 80px; object-fit: contain;">
-    <div style="text-align: right;">
-      <h3 style="margin: 0; font-size: 20px; font-weight: bold;">{matchups_info[0].away}</h3>
-      <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Record: {away_standings[0].team_wins} - {home_standings[0].team_losses}</p>
-      <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Overall: {away_standings[0].overall_ranking}</p>
-      <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Division: {away_standings[2].division_ranking}</p>
-    </div>
-  </div>
-
-</div>
-
 
 
 ```sql matches_data
@@ -436,4 +428,5 @@ ORDER BY stat1 DESC
 
 </Tabs>
 
+{/if}
 {/if}
