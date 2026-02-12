@@ -63,23 +63,41 @@ CREATE OR REPLACE TEMP TABLE role_usages AS
 --    FROM read_parquet(
 --        'https://f004.backblazeb2.com/file/sprocket-artifacts/public/data/s17/player_stats_s17.parquet'
 --	);
+--
+-- CREATE OR REPLACE TEMP TABLE s18_rounds AS
+--     SELECT *
+--     FROM read_parquet(
+--         'https://sprocket-public-datasets.nyc3.cdn.digitaloceanspaces.com/datasets/rounds_s18.parquet'
+-- 	);
+--
+-- CREATE OR REPLACE TEMP TABLE s18_standings AS
+--     SELECT *
+--     FROM read_parquet(
+--         'https://sprocket-public-datasets.nyc3.cdn.digitaloceanspaces.com/datasets/standings_s18.parquet'
+-- 	);
+--
+-- CREATE OR REPLACE TEMP TABLE s18_stats AS
+--     SELECT *
+--     FROM read_parquet(
+--         'https://sprocket-public-datasets.nyc3.cdn.digitaloceanspaces.com/datasets/player_stats_s18.parquet'
+-- 	);
 
-CREATE OR REPLACE TEMP TABLE s18_rounds AS
+CREATE OR REPLACE TEMP TABLE s19_rounds AS
     SELECT *
     FROM read_parquet(
-        'https://sprocket-public-datasets.nyc3.cdn.digitaloceanspaces.com/datasets/rounds_s18.parquet'
+        'https://sprocket-public-datasets.nyc3.cdn.digitaloceanspaces.com/datasets/rounds_s19.parquet'
 	);
 
-CREATE OR REPLACE TEMP TABLE s18_standings AS
+CREATE OR REPLACE TEMP TABLE s19_standings AS
     SELECT *
     FROM read_parquet(
-        'https://sprocket-public-datasets.nyc3.cdn.digitaloceanspaces.com/datasets/standings_s18.parquet'
+        'https://sprocket-public-datasets.nyc3.cdn.digitaloceanspaces.com/datasets/standings_s19.parquet'
 	);
 
-CREATE OR REPLACE TEMP TABLE s18_stats AS
+CREATE OR REPLACE TEMP TABLE s19_stats AS
     SELECT *
     FROM read_parquet(
-        'https://sprocket-public-datasets.nyc3.cdn.digitaloceanspaces.com/datasets/player_stats_s18.parquet'
+        'https://sprocket-public-datasets.nyc3.cdn.digitaloceanspaces.com/datasets/player_stats_s19.parquet'
 	);
 
 CREATE OR REPLACE TEMP TABLE standings AS
