@@ -1,8 +1,13 @@
+---
+title: Home
+sidebar_position: 2
+---
+
 
 ```sql teamLogos
 SELECT 
 franchise,
-'/franchise_page/' || franchise as franchiseLink,
+'/franchises/' || franchise as franchiseLink,
 "Photo URL" as logo
 FROM teams
 ORDER BY franchise ASC
@@ -205,7 +210,7 @@ SELECT
     , s19."Photo URL" AS team_logo
     , s19.Division AS division
     , s19."Super Division" AS super_division
-    , '/franchise_page/' || s19.Franchise AS Franchise_Link
+    , '/franchises/' || s19.Franchise AS Franchise_Link
 	, s19.Conference
     , s19.team_wins::INT || ' - ' || s19.team_losses::INT AS record
     , sagd.series_wins || ' - ' || sagd.series_loses AS series_record

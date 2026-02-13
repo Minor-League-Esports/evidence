@@ -1,5 +1,6 @@
 ---
-title: S19 Standings
+title: Standings
+sidebar_position: 2
 ---
 <LastRefreshed prefix="Data last updated"/>
 
@@ -164,7 +165,7 @@ SELECT
     , s19."Photo URL" AS team_logo
     , s19.Division AS division
 	, s19."Super Division" AS super_division
-	, '/franchise_page/' || s19.Franchise AS Franchise_Link
+	, '/franchises/' || s19.Franchise AS Franchise_Link
     , s19.Conference
     , s19.team_wins::INT || ' - ' || s19.team_losses::INT AS record
 	, s19.team_wins::FLOAT / (s19.team_wins + s19.team_losses) AS win_pct2
@@ -309,7 +310,7 @@ SELECT
     , s19."Photo URL" AS team_logo
     , s19.Division AS division
     , s19."Super Division" AS super_division
-	, '/franchise_page/' || s19.Franchise AS Franchise_Link
+	, '/franchises/' || s19.Franchise AS Franchise_Link
 	, s19.Conference
     , s19.team_wins::INT || ' - ' || s19.team_losses::INT AS record
     , sagd.series_wins || ' - ' || sagd.series_loses AS series_record
@@ -456,7 +457,7 @@ with S19standings as (
 		, s19."Photo URL" AS team_logo
 		, s19.Division AS division
 		, s19."Super Division" AS super_division
-		, '/franchise_page/' || s19.Franchise AS Franchise_Link
+		, '/franchises/' || s19.Franchise AS Franchise_Link
 		, CASE
 			WHEN s19.Conference = 'BLUE' THEN 'Blue'
 			WHEN s19.Conference = 'ORANGE' THEN 'Orange'
@@ -629,7 +630,7 @@ SELECT
     , s19."Photo URL" AS team_logo
     , s19.Division AS division
     , s19."Super Division" AS super_division
-	, '/franchise_page/' || s19.Franchise AS Franchise_Link
+	, '/franchises/' || s19.Franchise AS Franchise_Link
 	, CASE
 		WHEN s19.Conference = 'BLUE' THEN 'Blue'
 		WHEN s19.Conference = 'ORANGE' THEN 'Orange'

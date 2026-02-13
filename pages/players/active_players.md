@@ -1,3 +1,8 @@
+---
+title: Active Players
+sidebar_position: 1
+---
+
 ```sql player_page_link
 SELECT
     name,

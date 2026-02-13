@@ -285,7 +285,7 @@ CASE
   WHEN home = '${params.franchise}' THEN away
   ELSE home
   END AS opponent,
-'/franchise_page/' || opponent AS franchise_link,
+'/franchises/' || opponent AS franchise_link,
 league,
 game_mode,
 home_wins,

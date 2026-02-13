@@ -1,5 +1,6 @@
 ---
 title: Scrim Stats
+sidebar_position: 5
 ---
 
 <LastRefreshed prefix="Data last updated"/>
