@@ -313,7 +313,7 @@ from ${player_stats}
             WHEN sr.home = ss.team_name THEN sr.away
             ELSE sr.home
         END AS opponent,
-        '/franchise_page/' || opponent AS franchise_link,
+        '/franchises/' || opponent AS franchise_link,
         ss.games_played,
         sr.record,
         sr.series_result,

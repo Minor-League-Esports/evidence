@@ -10,8 +10,8 @@
         m.away_wins,
         home."Photo URL" AS home_logo,
         away."Photo URL" AS away_logo,
-        '/franchise_page/' || home.franchise AS home_franchise_link,
-        '/franchise_page/' || away.franchise AS away_franchise_link,
+        '/franchises/' || home.franchise AS home_franchise_link,
+        '/franchises/' || away.franchise AS away_franchise_link,
         CASE 
             WHEN m.winning_team LIKE 'Not Played / Data Unavailable'
             THEN 'Pending'

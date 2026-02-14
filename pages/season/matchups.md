@@ -1,4 +1,7 @@
-# S19 Matchups
+---
+title: Matchups
+sidebar_position: 1
+---
 
 <LastRefreshed prefix="Data last updated"/>
 
@@ -12,8 +15,8 @@ WITH weeks AS (
         m.game_mode,
         m.home_wins,
         m.away_wins,
-        '/franchise_page/' || m.Home AS home_link,
-        '/franchise_page/' || m.Away AS away_link,
+        '/franchises/' || m.Home AS home_link,
+        '/franchises/' || m.Away AS away_link,
         '/matchups/' || m.match_id AS matchups_link,
         mg.match_group_title AS Week
         , strftime(m.scheduled_time AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York', '%m/%d %I:%M %p') as game_time

@@ -1,5 +1,6 @@
 ---
-title: S19 Playoff Results
+title: Playoff Results
+sidebar_position: 3
 ---
 
 <LastRefreshed prefix="Data last updated"/>
