@@ -22,10 +22,13 @@
         ELSE p."Franchise Staff Position"
         END AS franchise_position,
         current_scrim_points,
-        "Eligible Until"
+        "Eligible Until",
+        l.eligibility_requirement
     FROM players p
     LEFT JOIN teams t
         ON p.franchise = t.Franchise
+    LEFT JOIN leagues l
+        ON p.skill_group = l.league_name
     WHERE p.member_id = '${params.member_id}'
 ```
 
@@ -106,9 +109,9 @@ FROM points_by_day
       }
     }}
 >
-    <ReferenceLine y=30 label="Eligibility Line" />
-    <ReferenceArea yMin=30 label=Eligible color=positive/>
-    <ReferenceArea yMax=30 label=Ineligible color=negative/>
+    <ReferenceLine y={basic_info[0].eligibility_requirement} label="Eligibility Line"/>
+    <ReferenceArea yMin={basic_info[0].eligibility_requirement} label=Eligible color=positive/>
+    <ReferenceArea yMax={basic_info[0].eligibility_requirement} label=Ineligible color=negative/>
 </LineChart>
 
 ```sql player_stats
