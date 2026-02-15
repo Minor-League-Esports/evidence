@@ -1,5 +1,6 @@
 ---
 title: Non-Rostered Players
+sidebar_position: 2
 ---
 
 <LastRefreshed prefix="Data last updated"/>

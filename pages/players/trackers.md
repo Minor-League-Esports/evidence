@@ -1,5 +1,6 @@
 ---
 title: Player Trackers
+sidebar_position: 3
 ---
 
 <LastRefreshed prefix="Data last updated"/>
