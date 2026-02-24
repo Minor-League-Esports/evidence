@@ -22,7 +22,7 @@
         ELSE p."Franchise Staff Position"
         END AS franchise_position,
         current_scrim_points,
-        "Eligible Until",
+        "Eligible Through",
         l.eligibility_requirement
     FROM players p
     LEFT JOIN teams t
@@ -46,32 +46,35 @@
     <Column id=league align=center />
     <Column id=franchise_position align=center />
     <Column id=current_scrim_points align=center contentType=colorscale colorScale={['#ce5050','white']} colorBreakpoints={[0, 30]} />
-    <Column id="Eligible Until" align=center />
+    <Column id="Eligible Through" align=center />
 </DataTable>
 
 ```sql scrim_decay
 WITH player_scrims as (
-    SELECT
-        s.scrim_created_at,
-        s.scrim_points_earned,
-        s.scrim_created_at + INTERVAL 30 DAY AS "expiry_date"
-    FROM total_scrim_stats s
-    --The scrim stats does not include the member_id so we must grab the other binding feature from the basic info query
-    WHERE s.sprocket_player_id = (
+	SELECT
+		DATE(e.created_at_est) AS scrim_created_at,
+	    e.scrim_points,
+	    scrim_created_at + INTERVAL 30 DAY AS "expiry_date"
+	FROM eligibility e
+	--The scrim stats does not include the member_id so we must grab the other binding feature from the basic info query
+	WHERE e.player_id = (
         SELECT sprocket_player_id
         FROM ${basic_info}
     )
 ),
---Retrieve the current date AND the next 30 days
+-- Start from the most recent Monday of the current week, through today + 30 days
 dates AS (
-    SELECT CURRENT_DATE + (i - 1) * INTERVAL '1 day' AS "eval_date"
-    FROM RANGE(0, 31) AS t(i)
+    SELECT (DATE_TRUNC('WEEK', CURRENT_DATE)::DATE + i * INTERVAL '1 DAY') AS "eval_date"
+    FROM RANGE(
+        0,
+        DATEDIFF('DAY', DATE_TRUNC('WEEK', CURRENT_DATE)::DATE, CURRENT_DATE + INTERVAL 30 DAY) + 1
+    ) AS t(i)
 ),
---Iteratre through each day
+--Iterate through each day
 points_by_day AS (
     SELECT
         d.eval_date,
-        COALESCE(SUM(s.scrim_points_earned),0) AS points
+        COALESCE(SUM(s.scrim_points),0) AS points
     FROM dates d
     LEFT JOIN player_scrims s
         ON s.scrim_created_at <= d.eval_date
@@ -82,11 +85,12 @@ points_by_day AS (
 
 SELECT 
     *
+    , CURRENT_DATE AS today
 FROM points_by_day
 ```
 
 <Details title="Active Scrim Eligibility">
-  <p>The chart below displays your scrim point decay from today and over the next 30 days.  That is, the number of scrim points remaining on each day over this timeframe.  You are not eligible for league play once your number of scrim points drops below 30.</p>
+  <p>The chart below displays your scrim point decay from the most recent Monday of the current week through the next 30 days.  That is, the number of scrim points remaining on each day over this timeframe.</p>
 </Details>
 
 <!-- Evidence's default line chart configuration applies date labels to the x-axis with the day of date only. -->
@@ -96,7 +100,7 @@ FROM points_by_day
     y="points"
     yMin=0
     yMax={Math.max(100, basic_info[0].current_scrim_points+20)}
-    title={`${basic_info[0].name} - Scrim Point Decay (Next 30 Days)`}
+    title="Scrim Point Decay"
     xAxisTitle="Date"
     yAxisTitle="Scrim Points"
     
@@ -109,6 +113,7 @@ FROM points_by_day
       }
     }}
 >
+    <ReferenceLine x={scrim_decay[0].today} label="Today" hideValue=true labelBackground=false />
     <ReferenceLine y={basic_info[0].eligibility_requirement} label="Eligibility Line"/>
     <ReferenceArea yMin={basic_info[0].eligibility_requirement} label=Eligible color=positive/>
     <ReferenceArea yMax={basic_info[0].eligibility_requirement} label=Ineligible color=negative/>
@@ -394,7 +399,7 @@ from ${player_stats}
         , ass.avg_shots_against as shots_against
         , ass.demos_per_game as demos
         , p.current_scrim_points as scrim_points
-        , p."Eligible Until" as eligible_until
+        , p."Eligible Through" as eligible_through
     FROM avgScrimStats ass
 
     LEFT JOIN players p

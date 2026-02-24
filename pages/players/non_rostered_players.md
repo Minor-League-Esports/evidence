@@ -72,7 +72,7 @@ SELECT DISTINCT
         WHEN current_scrim_points >= 30 THEN 'Yes' 
         ELSE 'No' 
     END AS Eligible,
-    "Eligible Until"
+    "Eligible Through"
 FROM players p
 WHERE franchise IN ${inputs.Status.value}
     AND p.skill_group in ${inputs.League.value}
@@ -86,5 +86,5 @@ ORDER BY name ASC;
     <Column id=skill_group fmt=varhcar title=League align=center/> 
     <Column id=franchise title="Status" fmt=varchar align=center/> 
     <Column id=salary fmt=int align=center/> 
-    <Column id="Eligible Until" fmt=varchar align=center/> 
+    <Column id="Eligible Through" fmt=varchar align=center/> 
 </DataTable>
