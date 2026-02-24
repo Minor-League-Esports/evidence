@@ -10,13 +10,13 @@ SELECT
     '/players/' || CAST(p.member_id AS INTEGER) as id_link,
     franchise, 
     p.current_scrim_points,
-    "Eligible Until"
+    "Eligible Through"
 FROM players p
 LEFT JOIN S19_stats s19
     ON p.member_id = s19.member_id
 WHERE salary <= 21.0 --filtering out TestUser1 & TestUser2 which have > 21.0 salaries
 AND NOT franchise = 'FP'
-GROUP BY name, salary, p.member_id, franchise, current_scrim_points, "Eligible Until"
+GROUP BY name, salary, p.member_id, franchise, current_scrim_points, "Eligible Through"
 ```
 
 ## Active Player Pages
@@ -30,7 +30,7 @@ GROUP BY name, salary, p.member_id, franchise, current_scrim_points, "Eligible U
   <Column id="salary" align=center />
   <Column id="franchise" align=center />
   <Column id=current_scrim_points align=center contentType=colorscale colorScale={['#ce5050','white']} colorBreakpoints={[0, 30]} />
-  <Column id="Eligible Until" align=center />
+  <Column id="Eligible Through" align=center />
 </DataTable>
 
 

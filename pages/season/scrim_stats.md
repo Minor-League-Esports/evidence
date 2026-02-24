@@ -59,7 +59,7 @@ LEFT JOIN players p
         , ass.avg_shots_against as shots_against
         , ass.demos_per_game as demos
         , p.current_scrim_points as scrim_points
-        , p."Eligible Until" as eligible_until
+        , p."Eligible Through" as eligible_until
     FROM avgScrimStats ass 
     LEFT JOIN players p 
         ON p.sprocket_player_id = ass.sprocket_player_id

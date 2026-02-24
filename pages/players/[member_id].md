@@ -22,7 +22,7 @@
         ELSE p."Franchise Staff Position"
         END AS franchise_position,
         current_scrim_points,
-        "Eligible Until",
+        "Eligible Through",
         l.eligibility_requirement
     FROM players p
     LEFT JOIN teams t
@@ -46,13 +46,13 @@
     <Column id=league align=center />
     <Column id=franchise_position align=center />
     <Column id=current_scrim_points align=center contentType=colorscale colorScale={['#ce5050','white']} colorBreakpoints={[0, 30]} />
-    <Column id="Eligible Until" align=center />
+    <Column id="Eligible Through" align=center />
 </DataTable>
 
 ```sql scrim_decay
 WITH player_scrims as (
 	SELECT
-		DATE(e.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York') AS scrim_created_at,
+		DATE(e.created_at_est) AS scrim_created_at,
 	    e.scrim_points,
 	    scrim_created_at + INTERVAL 30 DAY AS "expiry_date"
 	FROM eligibility e
@@ -399,7 +399,7 @@ from ${player_stats}
         , ass.avg_shots_against as shots_against
         , ass.demos_per_game as demos
         , p.current_scrim_points as scrim_points
-        , p."Eligible Until" as eligible_until
+        , p."Eligible Through" as eligible_until
     FROM avgScrimStats ass
 
     LEFT JOIN players p
