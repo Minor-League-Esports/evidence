@@ -399,7 +399,7 @@ from ${player_stats}
         , ass.avg_shots_against as shots_against
         , ass.demos_per_game as demos
         , p.current_scrim_points as scrim_points
-        , p."Eligible Through" as eligible_until
+        , p."Eligible Through" as eligible_through
     FROM avgScrimStats ass
 
     LEFT JOIN players p
