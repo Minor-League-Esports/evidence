@@ -85,7 +85,7 @@ points_by_day AS (
 
 SELECT 
     *
-    , CURRENT_DATE AS today
+    , CAST((CURRENT_TIMESTAMP AT TIME ZONE 'America/New_York') AS DATE) AS today
 FROM points_by_day
 ```
 
