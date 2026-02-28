@@ -251,7 +251,8 @@ ORDER BY
 {#each leagues as league}
 
 <div style="float:left; font-size:21px; display:inline-block;"><b>{league.league_name}</b></div>
-<div style="float:right; display:inline-block;"> <b>Can Afford:</b> <Value data={affordance.where(`league = '${league.league_name}'`)} column=can_afford /> </div>
+<div style="float:right; display:inline-block;"> <b>Remaining Salary:</b> <Value data={affordance.where(`league = '${league.league_name}'`)} column=remaining_salary /> </div>
+<div style="float:right; padding:0 50px; display:inline-block;"> <b>Can Afford:</b> <Value data={affordance.where(`league = '${league.league_name}'`)} column=can_afford /> </div>
 <div style="float:right; padding:0 50px; display:inline-block;"> <b>Captain:</b> <Value data={staff_members.where(`league = '${league.league_name}'`)} column=name /> </div>
 
 <DataTable data={eligibility.where(`skill_group = '${league.league_name}'`)} rowshading=true headerColor={league.color} headerFontColor=white wrapTitles=true>
