@@ -81,12 +81,44 @@ points_by_day AS (
         AND s.expiry_date > d.eval_date
     GROUP BY d.eval_date
     ORDER BY d.eval_date
+),
+-- determine eligibility status anytime points are above the eligibility requirement, and track the first date that eligibility is reached each week. Use basic_info eligibilty_requirement to account for PL difference
+eligibility_state AS (
+	SELECT
+		p.*,
+		(SELECT eligibility_requirement FROM ${basic_info}) AS eligibility_requirement,
+		DATE_TRUNC('WEEK', p.eval_date)::DATE AS week_start,
+		MIN(
+			CASE 
+				WHEN p.points >= (SELECT eligibility_requirement FROM ${basic_info})
+				THEN p.eval_date 
+			END
+		) OVER (PARTITION BY DATE_TRUNC('WEEK', p.eval_date)::DATE) AS first_eligible_date
+	FROM points_by_day p
 )
 
-SELECT 
-    *
-    , CAST((CURRENT_TIMESTAMP AT TIME ZONE 'America/New_York') AS DATE) AS today
-FROM points_by_day
+
+SELECT
+	e.*,
+	CASE
+		WHEN e.first_eligible_date IS NOT NULL
+		     AND e.eval_date >= e.first_eligible_date
+		THEN 1
+		ELSE 0
+	END AS eligible_state,
+    case 
+        when eligible_state = 1 or lag(eligible_state) over (order by eval_date) = 1 
+        then 1
+        else 0
+    end as eligible_mask,
+    case 
+        when eligible_state = 0 or lag(eligible_state) over (order by eval_date) = 0
+        then 1
+        else 0
+    end as ineligible_mask,
+	CAST((CURRENT_TIMESTAMP AT TIME ZONE 'America/New_York') AS DATE) AS today
+FROM eligibility_state e
+ORDER BY e.eval_date;
 ```
 
 <Details title="Active Scrim Eligibility">
@@ -104,16 +136,66 @@ FROM points_by_day
     xAxisTitle="Date"
     yAxisTitle="Scrim Points"
     
-    echartsOptions={{
-      xAxis:{
-        type: 'time',
-        axisLabel: {
-          formatter: '{dd} {MMM}'
-        }
-      }
-    }}
+    echartsOptions={
+    	scrim_decay?.length
+    		? {
+    			xAxis: {
+    				type: 'time',
+    				min: scrim_decay[0].eval_date,
+    				max: scrim_decay[scrim_decay.length - 1].eval_date,
+    				splitNumber: Math.min(40, scrim_decay.length),
+    				axisLabel: {
+    					hideOverlap: true,
+    					formatter: function (value) {
+    						const d = new Date(value);
+    						if (d.getDay() !== 1) return '';
+    						return d.toLocaleDateString(undefined, { month: 'short', day: '2-digit' });
+    					}
+    				}
+    			},
+    			series: [
+                    {
+    					name: 'Ineligible',
+    					type: 'line',
+    					showSymbol: false,
+    					connectNulls: false,
+    					lineStyle: {
+    						width: 3,
+    						color: '#ef4444'
+    					},
+    					data: scrim_decay.map(function (r) {
+    						return r.ineligible_mask === 1
+    							? [r.eval_date, r.points]
+    							: null;
+    					})
+    				},
+    				{
+    					name: 'Eligible',
+    					type: 'line',
+    					showSymbol: false,
+    					connectNulls: false,
+    					lineStyle: {
+    						width: 3,
+    						color: '#22c55e'
+    					},
+    					data: scrim_decay.map(function (r) {
+    						return r.eligible_mask === 1
+    							? [r.eval_date, r.points]
+    							: null;
+    					})
+    				}    				
+    			]
+            
+    		}
+    		: {}
+    }
 >
     <ReferenceLine x={scrim_decay[0].today} label="Today" hideValue=true labelBackground=false />
+    <ReferenceLine x={scrim_decay[0].eval_date} label="Monday" hideValue=true labelBackground=false />
+    <ReferenceLine x={scrim_decay[7].eval_date} label="Monday" hideValue=true labelBackground=false />
+    <ReferenceLine x={scrim_decay[14].eval_date} label="Monday" hideValue=true labelBackground=false />
+    <ReferenceLine x={scrim_decay[21].eval_date} label="Monday" hideValue=true labelBackground=false />
+    <ReferenceLine x={scrim_decay[28].eval_date} label="Monday" hideValue=true labelBackground=false />
     <ReferenceLine y={basic_info[0].eligibility_requirement} label="Eligibility Line"/>
     <ReferenceArea yMin={basic_info[0].eligibility_requirement} label=Eligible color=positive/>
     <ReferenceArea yMax={basic_info[0].eligibility_requirement} label=Ineligible color=negative/>
