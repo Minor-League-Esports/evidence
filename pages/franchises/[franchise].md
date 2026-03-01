@@ -232,21 +232,17 @@ SELECT
     END AS Eligible,
     p."Eligible Through",
     CASE
-        WHEN p."Franchise Staff Position"  = 'Franchise Manager' THEN ' - FM'
-        WHEN p."Franchise Staff Position" = 'General Manager' THEN ' - GM'
-        WHEN p."Franchise Staff Position" = 'Assistant General Manager' THEN ' - AGM'
+        WHEN p."Franchise Staff Position"  = 'Franchise Manager' THEN 'FM'
+        WHEN p."Franchise Staff Position" = 'General Manager' THEN 'GM'
+        WHEN p."Franchise Staff Position" = 'Assistant General Manager' THEN 'AGM'
+        WHEN p."Franchise Staff Position" = 'Captain' THEN 'Capt.'
         ELSE null
     END AS staff_pos_abr,
     CASE
-        WHEN p."Franchise Staff Position" = 'Captain' THEN ' - Capt.'
-        ELSE null
-    END AS captain,
-    CASE
-        WHEN staff_pos_abr IS NOT NULL AND captain IS NOT NULL THEN p.name || staff_pos_abr || captain
-        WHEN staff_pos_abr IS NOT NULL THEN p.name || staff_pos_abr
-        WHEN captain IS NOT NULL THEN p.name || captain
+        WHEN staff_pos_abr IS NOT NULL THEN p.name || ' - ' || staff_pos_abr
         ELSE p.name
     END AS name_with_pos
+    
 
 FROM players p
 
@@ -269,8 +265,9 @@ ORDER BY
 {#each leagues as league}
 
 <div style="float:left; font-size:21px; display:inline-block;"><b>{league.league_name}</b></div>
-<div style="float:right; display:inline-block;"> <b>Total Salary:</b> <Value data={affordance.where(`league = '${league.league_name}'`)} column=total_salary /> </div>
-<div style="float:right; padding:0 50px; display:inline-block;"> <b>Can Afford:</b> <Value data={affordance.where(`league = '${league.league_name}'`)} column=can_afford /> </div>
+<div style="float:right; display:inline-block;"> <b>Can Afford:</b> <Value data={affordance.where(`league = '${league.league_name}'`)} column=can_afford /> </div>
+<div style="float:right; padding:0 25px; display:inline-block;"> <b>Cap:</b> <Value data={affordance.where(`league = '${league.league_name}'`)} column=total_salary /> </div>
+
 
 <DataTable data={eligibility.where(`skill_group = '${league.league_name}'`)} rowshading=true headerColor={league.color} headerFontColor=white wrapTitles=true>
     <Column id=slot align=center />
