@@ -106,16 +106,16 @@ SELECT
 		THEN 1
 		ELSE 0
 	END AS eligible_state,
-    case 
-        when eligible_state = 1 or lag(eligible_state) over (order by eval_date) = 1 
-        then 1
-        else 0
-    end as eligible_mask,
-    case 
-        when eligible_state = 0 or lag(eligible_state) over (order by eval_date) = 0
-        then 1
-        else 0
-    end as ineligible_mask,
+    CASE 
+        WHEN eligible_state = 1 OR lag(eligible_state) OVER (ORDER BY eval_date) = 1 
+        THEN 1
+        ELSE 0
+    END AS eligible_mask,
+    CASE 
+        WHEN eligible_state = 0 OR lag(eligible_state) OVER (ORDER BY eval_date) = 0
+        THEN 1
+        ELSE 0
+    END AS ineligible_mask,
 	CAST((CURRENT_TIMESTAMP AT TIME ZONE 'America/New_York') AS DATE) AS today
 FROM eligibility_state e
 ORDER BY e.eval_date;
@@ -169,7 +169,7 @@ ORDER BY e.eval_date;
     							: null;
     					})
     				},
-    				{
+                    {
     					name: 'Eligible',
     					type: 'line',
     					showSymbol: false,
@@ -183,7 +183,9 @@ ORDER BY e.eval_date;
     							? [r.eval_date, r.points]
     							: null;
     					})
-    				}    				
+    				}
+                    
+    				    				
     			]
             
     		}
