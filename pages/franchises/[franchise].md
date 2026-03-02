@@ -64,7 +64,6 @@ SELECT
         WHEN p."Franchise Staff Position" = 'General Manager' THEN 3
         WHEN p."Franchise Staff Position" = 'Assistant General Manager' THEN 4
     END AS franchise_order
-
 FROM players p
 
 WHERE franchise = '${params.franchise}'
@@ -134,6 +133,7 @@ WITH eligibility AS (
 	    s.franchise
 	    , s.skill_group
 	    , l.max_salary - SUM(s.salary) OVER(PARTITION BY s.franchise, s.skill_group) AS remaining_salary
+        , l.max_salary - remaining_salary AS total_sal
     	, CASE
 			WHEN remaining_salary >= 0 THEN TRUE
 			ELSE FALSE
@@ -159,6 +159,7 @@ SELECT DISTINCT
 		WHEN c.can_sign_player THEN remaining_sal::STRING
 		ELSE 'Over Cap'
 	END AS can_afford
+    , total_sal || '/' || l.max_salary as total_salary
 
 FROM top_sals AS s
 
@@ -219,7 +220,7 @@ SELECT
         WHEN p.skill_group = 'Champion League' THEN 3 
         WHEN p.skill_group = 'Master League' THEN 4 
         WHEN p.skill_group = 'Premier League' THEN 5 
-    END as league_order, 
+    END AS league_order, 
     p.franchise,
     SUBSTRING(p.slot, 7) AS slot,
     COALESCE(ru.doubles_uses, 0) AS doubles_uses,
@@ -229,7 +230,16 @@ SELECT
     CASE WHEN p.current_scrim_points >= 30 THEN 'Yes'
         ELSE 'No'
     END AS Eligible,
-    p."Eligible Through"
+    p."Eligible Through",
+    CASE
+        WHEN p."Franchise Staff Position"  = 'Franchise Manager' THEN 'FM'
+        WHEN p."Franchise Staff Position" = 'General Manager' THEN 'GM'
+        WHEN p."Franchise Staff Position" = 'Assistant General Manager' THEN 'AGM'
+        WHEN p."Franchise Staff Position" = 'Captain' THEN 'Capt.'
+        ELSE ''
+    END AS staff_pos_abr,
+
+    
 
 FROM players p
 
@@ -238,6 +248,7 @@ LEFT JOIN role_usages ru
     AND p.slot = ru.role
     AND UPPER(p.skill_group) = CONCAT(ru.league, ' LEAGUE')
     AND ru.season_number = 19
+
 
 WHERE p.franchise = '${params.franchise}'
     AND p.slot LIKE 'PLAYER%'
@@ -252,10 +263,12 @@ ORDER BY
 
 <div style="float:left; font-size:21px; display:inline-block;"><b>{league.league_name}</b></div>
 <div style="float:right; display:inline-block;"> <b>Can Afford:</b> <Value data={affordance.where(`league = '${league.league_name}'`)} column=can_afford /> </div>
-<div style="float:right; padding:0 50px; display:inline-block;"> <b>Captain:</b> <Value data={staff_members.where(`league = '${league.league_name}'`)} column=name /> </div>
+<div style="float:right; padding:0 25px; display:inline-block;"> <b>Cap:</b> <Value data={affordance.where(`league = '${league.league_name}'`)} column=total_salary /> </div>
+
 
 <DataTable data={eligibility.where(`skill_group = '${league.league_name}'`)} rowshading=true headerColor={league.color} headerFontColor=white wrapTitles=true>
     <Column id=slot align=center />
+    <Column id=staff_pos_abr align=center title=Staff />
     <Column id=id_link contentType=link linkLabel=name align=center title=Player />
     <Column id=salary align=center fmt=##.0/>
     <Column id=doubles_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 4, 5, 6]} />
