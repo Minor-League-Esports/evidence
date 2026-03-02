@@ -220,7 +220,7 @@ SELECT
         WHEN p.skill_group = 'Champion League' THEN 3 
         WHEN p.skill_group = 'Master League' THEN 4 
         WHEN p.skill_group = 'Premier League' THEN 5 
-    END as league_order, 
+    END AS league_order, 
     p.franchise,
     SUBSTRING(p.slot, 7) AS slot,
     COALESCE(ru.doubles_uses, 0) AS doubles_uses,
@@ -236,12 +236,9 @@ SELECT
         WHEN p."Franchise Staff Position" = 'General Manager' THEN 'GM'
         WHEN p."Franchise Staff Position" = 'Assistant General Manager' THEN 'AGM'
         WHEN p."Franchise Staff Position" = 'Captain' THEN 'Capt.'
-        ELSE null
+        ELSE ''
     END AS staff_pos_abr,
-    CASE
-        WHEN staff_pos_abr IS NOT NULL THEN p.name || ' - ' || staff_pos_abr
-        ELSE p.name
-    END AS name_with_pos
+
     
 
 FROM players p
@@ -271,7 +268,8 @@ ORDER BY
 
 <DataTable data={eligibility.where(`skill_group = '${league.league_name}'`)} rowshading=true headerColor={league.color} headerFontColor=white wrapTitles=true>
     <Column id=slot align=center />
-    <Column id=id_link contentType=link linkLabel=name_with_pos align=center title=Player />
+    <Column id=staff_pos_abr align=center title=Staff />
+    <Column id=id_link contentType=link linkLabel=name align=center title=Player />
     <Column id=salary align=center fmt=##.0/>
     <Column id=doubles_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 4, 5, 6]} />
     <Column id=standard_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 6, 7, 8]} />
