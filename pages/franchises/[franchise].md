@@ -235,7 +235,7 @@ SELECT
         WHEN p."Franchise Staff Position"  = 'Franchise Manager' THEN 'FM'
         WHEN p."Franchise Staff Position" = 'General Manager' THEN 'GM'
         WHEN p."Franchise Staff Position" = 'Assistant General Manager' THEN 'AGM'
-        WHEN p."Franchise Staff Position" = 'Captain' THEN 'Capt.'
+        WHEN p."Franchise Staff Position" = 'Captain' THEN 'CAPT'
         ELSE ''
     END AS staff_pos_abr,
 
