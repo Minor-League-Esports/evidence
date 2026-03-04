@@ -320,7 +320,7 @@ ORDER BY stat1 DESC
         '<a href="' || franchise_link || '" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;">'
         || '<span class="markdown">' || player_team || '</span>'
         || '<img src="' || franchise_logo || '" style="width:22px;height:22px;object-fit:contain;" />'
-        || '</a>' as team_html
+        || '</a>' AS team_html
     FROM matches m
         INNER JOIN s19_stats s19
             ON m.match_id = s19.match_id
@@ -363,11 +363,11 @@ ORDER BY stat1 DESC
         s19.shots AS total_shots,
         DENSE_RANK() OVER (ORDER BY round_id ASC) AS rank_id,
         '/franchises/' || t.franchise AS franchise_link,
-        t."Photo URL" as franchise_logo,
+        t."Photo URL" AS franchise_logo,
         '<a href="' || franchise_link || '" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;">'
         || '<span class="markdown">' || player_team || '</span>'
         || '<img src="' || franchise_logo || '" style="width:22px;height:22px;object-fit:contain;" />'
-        || '</a>' as team_html
+        || '</a>' AS team_html
     FROM s19_stats s19
         INNER JOIN players p
             ON s19.member_id = p.member_id
