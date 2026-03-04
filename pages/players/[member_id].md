@@ -7,6 +7,7 @@
         p.member_id,
         p.sprocket_player_id,
         t."Photo URL" AS logo,
+        '/franchises/' || p.franchise as franchiseLink,
         CASE
             WHEN t."Primary Color" IS NULL THEN '#2a4b82'
             ELSE t."Primary Color"
@@ -35,8 +36,13 @@
 <LastRefreshed prefix="Data last updated"/>
 
 {#if basic_info[0].logo}
+<a href="{basic_info[0].franchiseLink}" >
 <center><img class="h-16" alt="Team Logo" style="content: url({basic_info[0].logo}); object-fit: contain;" /></center>
+</a>
 {/if}
+
+
+
 
 # <center> <Value data={basic_info} column=name /> </center>
 
@@ -54,7 +60,7 @@ WITH player_scrims as (
 	SELECT
 		DATE(e.created_at_est) AS scrim_created_at,
 	    e.scrim_points,
-	    scrim_created_at + INTERVAL 30 DAY AS "expiry_date"
+	    scrim_created_at + INTERVAL 31 DAY AS "expiry_date" -- Interval includes the starting date (scrim_created_at) so to get scrim_created_at + 30 days we must add interval 31 day to account for this
 	FROM eligibility e
 	--The scrim stats does not include the member_id so we must grab the other binding feature from the basic info query
 	WHERE e.player_id = (
@@ -67,7 +73,7 @@ dates AS (
     SELECT (DATE_TRUNC('WEEK', CURRENT_DATE)::DATE + i * INTERVAL '1 DAY') AS "eval_date"
     FROM RANGE(
         0,
-        DATEDIFF('DAY', DATE_TRUNC('WEEK', CURRENT_DATE)::DATE, CURRENT_DATE + INTERVAL 30 DAY) + 1
+        DATEDIFF('DAY', DATE_TRUNC('WEEK', CURRENT_DATE)::DATE, CURRENT_DATE + INTERVAL 31 DAY)
     ) AS t(i)
 ),
 --Iterate through each day
