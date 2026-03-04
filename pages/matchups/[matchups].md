@@ -148,7 +148,9 @@ No data found for matchup `${params.matchups}`.
   
   <!-- Left Side: Home Team -->
   <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
-    <img src={matchups_info[0].home_logo} alt="Home Team Logo" style="width: 80px; height: 80px; object-fit: contain;">
+    <a href="{matchups_info[0].home_franchise_link}" >
+        <img src={matchups_info[0].home_logo} alt="Home Team Logo" style="width: 80px; height: 80px; object-fit: contain;">
+    </a>
     <div>
       <h3 style="margin: 0; font-size: 20px; font-weight: bold;">{matchups_info[0].home}</h3>
 
@@ -178,7 +180,9 @@ No data found for matchup `${params.matchups}`.
 
   <!-- Right Side: Away Team -->
   <div style="display: flex; align-items: center; gap: 15px; flex: 1; flex-direction: row-reverse;">
-    <img src={matchups_info[0].away_logo} alt="Away Team Logo" style="width: 80px; height: 80px; object-fit: contain;">
+    <a href="{matchups_info[0].away_franchise_link}" >
+        <img src={matchups_info[0].away_logo} alt="Away Team Logo" style="width: 80px; height: 80px; object-fit: contain;">
+    </a>
     <div style="text-align: right;">
       <h3 style="margin: 0; font-size: 20px; font-weight: bold;">{matchups_info[0].away}</h3>
 
@@ -292,14 +296,31 @@ ORDER BY stat1 DESC
 ```sql matches_data
     SELECT 
         p.name,
+        '/players/' || CAST(p.member_id AS INTEGER) AS id_link,
         s19.team_name AS player_team,
         s19.member_id,
         m.match_id,
         AVG(s19.gpi) AS "Sprocket Rating",
+        AVG(s19.opi) AS "OPI",
+        AVG(s19.dpi) AS "DPI",
         SUM(s19.goals) AS total_goals,
         SUM(s19.assists) AS total_assists,
         SUM(s19.saves) AS total_saves,
-        SUM(s19.shots) AS total_shots
+        SUM(s19.shots) AS total_shots,
+        CASE
+            WHEN s19.team_name = m.home THEN '/franchises/' || home.franchise
+            WHEN s19.team_name = m.away THEN '/franchises/' || away.franchise
+            ELSE NULL
+        END AS franchise_link,
+        CASE
+            WHEN s19.team_name = m.home THEN home."Photo URL"
+            WHEN s19.team_name = m.away THEN away."Photo URL"
+            ELSE NULL
+        END AS franchise_logo,
+        '<a href="' || franchise_link || '" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;">'
+        || '<span class="markdown">' || player_team || '</span>'
+        || '<img src="' || franchise_logo || '" style="width:22px;height:22px;object-fit:contain;" />'
+        || '</a>' AS team_html
     FROM matches m
         INNER JOIN s19_stats s19
             ON m.match_id = s19.match_id
@@ -315,25 +336,43 @@ ORDER BY stat1 DESC
         player_team,
         s19.member_id,
         m.match_id,
+        home.franchise,
+        away.franchise,
+        m.home,
+        m.away,
+        home."Photo URL",
+        away."Photo URL",
+        p.member_id
     ORDER BY player_team ASC, "Sprocket Rating" DESC
 ```
 
 ```sql rounds_data
     SELECT
         p.name,
+        '/players/' || CAST(p.member_id AS INTEGER) AS id_link,
         s19.member_id,
         s19.round_id,
         s19.match_id,
         s19.team_name AS player_team,
         s19.gpi AS "Sprocket Rating",
+        s19.opi AS "OPI",
+        s19.dpi AS "DPI",
         s19.goals AS total_goals,
         s19.assists AS total_assists,
         s19.saves AS total_saves,
         s19.shots AS total_shots,
-        DENSE_RANK() OVER (ORDER BY round_id ASC) AS rank_id 
+        DENSE_RANK() OVER (ORDER BY round_id ASC) AS rank_id,
+        '/franchises/' || t.franchise AS franchise_link,
+        t."Photo URL" AS franchise_logo,
+        '<a href="' || franchise_link || '" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;">'
+        || '<span class="markdown">' || player_team || '</span>'
+        || '<img src="' || franchise_logo || '" style="width:22px;height:22px;object-fit:contain;" />'
+        || '</a>' AS team_html
     FROM s19_stats s19
         INNER JOIN players p
             ON s19.member_id = p.member_id
+        INNER JOIN teams t
+            ON s19.team_name = t.franchise
     WHERE s19.match_id = '${params.matchups}' 
     ORDER by s19.round_id, p.name ASC
 ```
@@ -393,10 +432,12 @@ ORDER BY stat1 DESC
 
         ## Series Report
 
-        <DataTable data={matches_data} rowShading=true headerColor=#2a4b82 headerFontColor=white wrapTitles=true groupBy=player_team groupType=section>
-            <Column id=name align=center title="Name"/>
-            <Column id=player_team align=center title="Team"/>
+        <DataTable data={matches_data} rowShading=true headerColor=#2a4b82 headerFontColor=white wrapTitles=true groupBy=team_html groupType=section>
+            <Column id=id_link contentType=link linkLabel=name align=center title="Name"/>
+            <Column id=team_html contentType=html align=center title="Team"/>
             <Column id="Sprocket Rating" align=center/>
+            <Column id="OPI" align=center/>
+            <Column id="DPI" align=center/>
             <Column id=total_goals align=center title="Goals"/>
             <Column id=total_assists align=center title="Assists"/>
             <Column id=total_saves align=center title="Saves"/>
@@ -410,10 +451,12 @@ ORDER BY stat1 DESC
 
             ## Game {games.rank_id}
 
-            <DataTable data={rounds_data.where(`rank_id = '${games.rank_id}'`)} rowShading=true headerColor=#2a4b82 headerFontColor=white wrapTitles=true groupBy=player_team groupType=section>
-                <Column id=name align=center title="Name"/>
-                <Column id=player_team align=center title="Team"/>
+            <DataTable data={rounds_data.where(`rank_id = '${games.rank_id}'`)} rowShading=true headerColor=#2a4b82 headerFontColor=white wrapTitles=true groupBy=team_html groupType=section>
+                <Column id=id_link contentType=link linkLabel=name align=center title="Name"/>
+                <Column id=team_html contentType=html align=center title="Team"/>
                 <Column id="Sprocket Rating" align=center/>
+                <Column id="OPI" align=center/>
+                <Column id="DPI" align=center/>
                 <Column id=total_goals align=center title="Goals"/>
                 <Column id=total_assists align=center title="Assists"/>
                 <Column id=total_saves align=center title="Saves"/>
