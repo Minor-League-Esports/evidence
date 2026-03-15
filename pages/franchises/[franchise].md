@@ -266,7 +266,7 @@ ORDER BY
 <div style="float:right; padding:0 25px; display:inline-block;"> <b>Cap:</b> <Value data={affordance.where(`league = '${league.league_name}'`)} column=total_salary /> </div>
 
 
-<DataTable data={eligibility.where(`skill_group = '${league.league_name}'`)} rowshading=true headerColor={league.color} headerFontColor=white wrapTitles=true>
+<DataTable data={eligibility.where(`skill_group = '${league.league_name}'`)} rowShading=true headerColor={league.color} headerFontColor=white wrapTitles=true>
     <Column id=slot align=center />
     <Column id=staff_pos_abr align=center title=Staff />
     <Column id=id_link contentType=link linkLabel=name align=center title=Player />
@@ -387,7 +387,7 @@ FROM record re
 <BigValue data={teamStatistics} value=record /> <BigValue data={teamStatistics} value=series_record /> <BigValue data={teamStatistics} value=goal_differential />
 
 >Season 19 Results
-<DataTable data={team_record} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white >
+<DataTable data={team_record} rowShading=true headerColor='{team_info[0].primary_color}' headerFontColor=white >
     <Column id=week align=center />
     <Column id=franchise_link contentType=link linkLabel=opponent title=Opponent align=center />
     <Column id=series_result align=center />
@@ -561,7 +561,7 @@ ORDER BY season ASC
 </ButtonGroup>
 
 ## <p> <center> <u> Record By Season </u> </center> </p>
-<DataTable data={allTimeRecord} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white totalRow=true >
+<DataTable data={allTimeRecord} rowShading=true headerColor='{team_info[0].primary_color}' headerFontColor=white totalRow=true >
     <Column id=name align=center />
     <Column id=mode align=center totalAgg='Totals:' />
     <Column id=team_wins align=center totalAgg=sum />
