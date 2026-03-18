@@ -23,6 +23,7 @@ WHERE t.franchise = '${params.franchise}'
 ```sql leagues
 SELECT
     l.league_name
+    , UPPER(l.league_name) AS upper_league_name
     , l.color
     , l.league_photo_url
     , l.max_salary
@@ -222,7 +223,7 @@ SELECT
         WHEN p.skill_group = 'Premier League' THEN 5 
     END AS league_order, 
     p.franchise,
-    SUBSTRING(p.slot, 7) AS slot,
+    SUBSTRING(ru.role, 7) AS slot,
     COALESCE(ru.doubles_uses, 0) AS doubles_uses,
     COALESCE(ru.standard_uses, 0) AS standard_uses,
     COALESCE(ru.total_uses, 0) AS total_uses,
@@ -238,24 +239,24 @@ SELECT
         WHEN p."Franchise Staff Position" = 'Captain' THEN 'CAPT'
         ELSE ''
     END AS staff_pos_abr,
+    ru.league || ' LEAGUE' AS league_name
 
     
 
-FROM players p
+FROM role_usages ru
 
-LEFT JOIN role_usages ru
-    ON p.franchise = ru.team_name
-    AND p.slot = ru.role
+LEFT JOIN players p
+    ON p.slot = ru.role
+    AND p.franchise = ru.team_name
     AND UPPER(p.skill_group) = CONCAT(ru.league, ' LEAGUE')
+
+WHERE ru.team_name = '${params.franchise}'
+    AND ru.role LIKE 'PLAYER%'
     AND ru.season_number = 19
 
-
-WHERE p.franchise = '${params.franchise}'
-    AND p.slot LIKE 'PLAYER%'
-
 ORDER BY
-    league_order
-    , p.slot
+    ru.league
+    , ru.role
 ```
 
 
@@ -266,7 +267,7 @@ ORDER BY
 <div style="float:right; padding:0 25px; display:inline-block;"> <b>Cap:</b> <Value data={affordance.where(`league = '${league.league_name}'`)} column=total_salary /> </div>
 
 
-<DataTable data={eligibility.where(`skill_group = '${league.league_name}'`)} rowshading=true headerColor={league.color} headerFontColor=white wrapTitles=true>
+<DataTable data={eligibility.where(`league_name = '${league.upper_league_name}'`)} rowshading=true headerColor={league.color} headerFontColor=white wrapTitles=true>
     <Column id=slot align=center />
     <Column id=staff_pos_abr align=center title=Staff />
     <Column id=id_link contentType=link linkLabel=name align=center title=Player />
