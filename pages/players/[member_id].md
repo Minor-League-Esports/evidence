@@ -372,19 +372,19 @@ from ${player_stats}
             s19.gamemode,
             s19.match_id,
             count(*) AS games_played,
-            avg(s19.dpi) AS Avg_DPI,
-            avg(s19.gpi) AS Avg_GPI,
-            avg(s19.opi) AS Avg_OPI,
+            printf('%.1f', avg(s19.dpi)) AS Avg_DPI,
+            printf('%.1f', avg(s19.gpi)) AS Avg_GPI,
+            printf('%.1f', avg(s19.opi)) AS Avg_OPI,
             avg(s19.score) AS Score_Per_Game,
-            avg(s19.goals) AS Goals_Per_Game,
+            printf('%.2f', avg(s19.goals)) AS Goals_Per_Game,
             sum(s19.goals) AS total_goals,
-            avg(s19.assists) AS Assists_Per_Game,
+            printf('%.2f', avg(s19.assists)) AS Assists_Per_Game,
             sum(s19.assists) AS total_assists,
-            avg(s19.saves) AS Saves_Per_Game,
+            printf('%.2f', avg(s19.saves)) AS Saves_Per_Game,
             sum(s19.saves) AS total_saves,
-            avg(s19.shots) AS Shots_Per_Game,
-            avg(s19.goals_against) AS goals_against_per_game,
-            avg(s19.shots_against) AS shots_against_per_game,
+            printf('%.2f', avg(s19.shots)) AS Shots_Per_Game,
+            printf('%.2f', avg(s19.goals_against)) AS goals_against_per_game,
+            printf('%.2f', avg(s19.shots_against)) AS shots_against_per_game,
             sum(s19.goals)/sum(s19.shots) AS shooting_pct2
 
         FROM players p
@@ -407,6 +407,7 @@ from ${player_stats}
         sr.game_mode,
         sr.home,
         sr.away,
+        sr.match_link,
         CASE
             WHEN sr.home = ss.team_name THEN sr.away
             ELSE sr.home
@@ -439,15 +440,19 @@ from ${player_stats}
         week ASC
 
 ```
+<!-- Change entire row to link to matchup page
+remove games played -
+update record to only reflect games played by player
+remove result column -
+make all /g stats 2 levels of precision -
+ -->
 
 ## Season 19 Stats by Series
-<DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primColor}' headerFontColor=white compact=true wrapTitles=true>
+<DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primColor}' headerFontColor=white compact=true wrapTitles=true link=match_link>
     <Column id=week align=center />
     <Column id=game_mode align=center />
     <Column id=franchise_link contentType=link linkLabel=opponent title=Opponent align=center />
-    <Column id=games_played align=center />
     <Column id=record align=center />
-    <Column id=series_result align=center />
     <Column id=Avg_GPI title="Sprocket Rating" align=center />
     <Column id=Avg_OPI align=center />
     <Column id=Avg_DPI align=center />
@@ -481,13 +486,13 @@ from ${player_stats}
         , ass.opi_per_game as opi
         , ass.avg_sprocket_rating as sprocket_rating
         , ass.score_per_game as score
-        , ass.goals_per_game as goals
-        , ass.assists_per_game as assists
+        , printf('%.2f', ass.goals_per_game) as goals
+        , printf('%.2f', ass.assists_per_game) as assists
         , ass.saves_per_game as saves
         , ass.shots_per_game as shots
         , ass.avg_goals_against as goals_against
         , ass.avg_shots_against as shots_against
-        , ass.demos_per_game as demos
+        , printf('%.2f', ass.demos_per_game) as demos
         , p.current_scrim_points as scrim_points
         , p."Eligible Through" as eligible_through
     FROM avgScrimStats ass
