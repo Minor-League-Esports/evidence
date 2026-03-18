@@ -344,6 +344,7 @@ from ${player_stats}
 
         INNER JOIN matches m
             ON r.match_id = m.match_id
+            
 
         INNER JOIN match_groups mg
             ON m.match_group_id = mg.match_group_id
@@ -385,7 +386,7 @@ from ${player_stats}
             printf('%.2f', avg(s19.shots)) AS Shots_Per_Game,
             printf('%.2f', avg(s19.goals_against)) AS goals_against_per_game,
             printf('%.2f', avg(s19.shots_against)) AS shots_against_per_game,
-            sum(s19.goals)/sum(s19.shots) AS shooting_pct2
+            sum(s19.goals) / nullif(sum(s19.shots), 0) AS shooting_pct2
 
         FROM players p
 
@@ -400,14 +401,54 @@ from ${player_stats}
             , s19.gamemode
             , s19.match_id
 
-    )
+    ), playerRounds AS (
+
+    SELECT DISTINCT
+        s19.member_id,
+        s19.match_id,
+        s19.round_id,
+        s19.team_name,
+        s19.gamemode
+    FROM s19_stats s19
+    WHERE s19.member_id = '${params.member_id}'
+
+), playerSeriesRecord AS (
+
+    SELECT
+        pr.member_id,
+        pr.match_id,
+        pr.team_name,
+        COUNT(*) AS games_played,
+        SUM(
+            CASE
+                WHEN pr.team_name = r.home AND r."Home Goals" > r."Away Goals" THEN 1
+                WHEN pr.team_name = r.away AND r."Away Goals" > r."Home Goals" THEN 1
+                ELSE 0
+            END
+        ) AS player_wins,
+        SUM(
+            CASE
+                WHEN pr.team_name = r.home AND r."Home Goals" < r."Away Goals" THEN 1
+                WHEN pr.team_name = r.away AND r."Away Goals" < r."Home Goals" THEN 1
+                ELSE 0
+            END
+        ) AS player_losses
+    FROM playerRounds pr
+    INNER JOIN s19_rounds r
+        ON pr.round_id = r.round_id
+    GROUP BY
+        pr.member_id,
+        pr.match_id,
+        pr.team_name
+
+)
 
     SELECT
         sr.week,
         sr.game_mode,
         sr.home,
         sr.away,
-        sr.match_link,
+        '/matchups/' || sr.match_id AS match_link,
         CASE
             WHEN sr.home = ss.team_name THEN sr.away
             ELSE sr.home
@@ -415,6 +456,7 @@ from ${player_stats}
         '/franchises/' || opponent AS franchise_link,
         ss.games_played,
         sr.record,
+        psr.player_wins || ' - ' || psr.player_losses AS psr_record,
         sr.series_result,
         ss.Avg_DPI,
         ss.Avg_GPI,
@@ -435,12 +477,17 @@ from ${player_stats}
 
     INNER JOIN seriesRecord sr
         ON ss.match_id = sr.match_id
-
+    INNER JOIN playerSeriesRecord psr
+        ON ss.match_id = psr.match_id
+        AND ss.member_id = psr.member_id
+        AND ss.team_name = psr.team_name
     ORDER BY
         week ASC
 
 ```
-<!-- Change entire row to link to matchup page
+
+
+<!-- Change entire row to link to matchup page -
 remove games played -
 update record to only reflect games played by player
 remove result column -
@@ -452,7 +499,7 @@ make all /g stats 2 levels of precision -
     <Column id=week align=center />
     <Column id=game_mode align=center />
     <Column id=franchise_link contentType=link linkLabel=opponent title=Opponent align=center />
-    <Column id=record align=center />
+    <Column id=psr_record title="Player Record" align=center />
     <Column id=Avg_GPI title="Sprocket Rating" align=center />
     <Column id=Avg_OPI align=center />
     <Column id=Avg_DPI align=center />
