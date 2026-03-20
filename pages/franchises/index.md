@@ -34,7 +34,7 @@ SELECT
   t.Franchise,
   '/franchises/' || t.Franchise AS Franchise_Link,
   t."Photo URL" AS logo,
-  ROUND(o.Overall_Wins::FLOAT / NULLIF(o.Overall_Wins + o.Overall_Losses, 0) * 100, 1) AS Overall_Win_Pct,
+  ROUND(o.Overall_Wins::FLOAT / NULLIF(o.Overall_Wins + o.Overall_Losses, 0) * 100, 1)::STRING || '%' AS Overall_Win_Pct,
   o.Overall_Wins::INT || ' - ' || o.Overall_Losses::INT AS Overall_Record,
   d.Doubles_Wins::INT || ' - ' || d.Doubles_Losses::INT AS Doubles_Record,
   s.Standard_Wins::INT || ' - ' || s.Standard_Losses::INT AS Standard_Record,
@@ -51,7 +51,7 @@ ORDER BY t.Franchise
 <DataTable data={joined_franchises} search=true rows=32 headerColor=#2a4b82 headerFontColor=white link=Franchise_Link rowShading=true>
   <Column id="Franchise" align=center/>
   <Column id="logo" contentType=image height=50px align=center />
-  <Column id="Overall_Win_Pct" align=center title="Overall Win %" fmt="0.0'%'" />
+  <Column id="Overall_Win_Pct" align=center title="Overall Win %" />
   <Column id="Overall_Record" align=center />
   <Column id="Doubles_Record" align=center />
   <Column id="Standard_Record" align=center />
