@@ -230,7 +230,7 @@ ORDER BY e.eval_date;
     avg(shots) as shots_per_game,
     avg(goals_against) as goals_against_per_game,
     avg(shots_against) as shots_against_per_game,
-    sum(goals)/sum(shots) as shooting_pct2
+    sum(goals)/NULLIF(sum(shots), 0) as shooting_pct2
  from players p
     inner join S19_stats s19 
         on p.member_id = s19.member_id
@@ -257,7 +257,7 @@ leaguestats as (
     avg(shots) as shots_per_game,
     avg(goals_against) as goals_against_per_game,
     avg(shots_against) as shots_against_per_game,
-    sum(goals)/sum(shots) as shooting_pct2
+    sum(goals)/ NULLIF(sum(shots), 0) as shooting_pct2
  from players p
     inner join S19_stats s19
         on p.member_id = s19.member_id
@@ -344,6 +344,7 @@ from ${player_stats}
 
         INNER JOIN matches m
             ON r.match_id = m.match_id
+            
 
         INNER JOIN match_groups mg
             ON m.match_group_id = mg.match_group_id
@@ -385,7 +386,7 @@ from ${player_stats}
             avg(s19.shots) AS Shots_Per_Game,
             avg(s19.goals_against) AS goals_against_per_game,
             avg(s19.shots_against) AS shots_against_per_game,
-            sum(s19.goals)/sum(s19.shots) AS shooting_pct2
+            sum(s19.goals) / NULLIF(sum(s19.shots), 0) AS shooting_pct2
 
         FROM players p
 
@@ -400,13 +401,54 @@ from ${player_stats}
             , s19.gamemode
             , s19.match_id
 
-    )
+    ), playerRounds AS (
+
+    SELECT DISTINCT
+        s19.member_id,
+        s19.match_id,
+        s19.round_id,
+        s19.team_name,
+        s19.gamemode
+    FROM s19_stats s19
+    WHERE s19.member_id = '${params.member_id}'
+
+), playerSeriesRecord AS (
+
+    SELECT
+        pr.member_id,
+        pr.match_id,
+        pr.team_name,
+        COUNT(*) AS games_played,
+        SUM(
+            CASE
+                WHEN pr.team_name = r.home AND r."Home Goals" > r."Away Goals" THEN 1
+                WHEN pr.team_name = r.away AND r."Away Goals" > r."Home Goals" THEN 1
+                ELSE 0
+            END
+        ) AS player_wins,
+        SUM(
+            CASE
+                WHEN pr.team_name = r.home AND r."Home Goals" < r."Away Goals" THEN 1
+                WHEN pr.team_name = r.away AND r."Away Goals" < r."Home Goals" THEN 1
+                ELSE 0
+            END
+        ) AS player_losses
+    FROM playerRounds pr
+    INNER JOIN s19_rounds r
+        ON pr.round_id = r.round_id
+    GROUP BY
+        pr.member_id,
+        pr.match_id,
+        pr.team_name
+
+)
 
     SELECT
         sr.week,
         sr.game_mode,
         sr.home,
         sr.away,
+        '/matchups/' || sr.match_id AS match_link,
         CASE
             WHEN sr.home = ss.team_name THEN sr.away
             ELSE sr.home
@@ -414,6 +456,7 @@ from ${player_stats}
         '/franchises/' || opponent AS franchise_link,
         ss.games_played,
         sr.record,
+        psr.player_wins || ' - ' || psr.player_losses AS psr_record,
         sr.series_result,
         ss.Avg_DPI,
         ss.Avg_GPI,
@@ -434,33 +477,37 @@ from ${player_stats}
 
     INNER JOIN seriesRecord sr
         ON ss.match_id = sr.match_id
-
+    INNER JOIN playerSeriesRecord psr
+        ON ss.match_id = psr.match_id
+        AND ss.member_id = psr.member_id
+        AND ss.team_name = psr.team_name
     ORDER BY
         week ASC
 
 ```
 
+
+
+
 ## Season 19 Stats by Series
-<DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primColor}' headerFontColor=white compact=true wrapTitles=true>
+<DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primColor}' headerFontColor=white compact=true wrapTitles=true link=match_link>
     <Column id=week align=center />
     <Column id=game_mode align=center />
     <Column id=franchise_link contentType=link linkLabel=opponent title=Opponent align=center />
-    <Column id=games_played align=center />
-    <Column id=record align=center />
-    <Column id=series_result align=center />
+    <Column id=psr_record title="Player Record" align=center />
     <Column id=Avg_GPI title="Sprocket Rating" align=center />
     <Column id=Avg_OPI align=center />
     <Column id=Avg_DPI align=center />
     <Column id=Score_Per_Game title="Score/Game" align=center />
-    <Column id=Goals_Per_Game title="Goals/Game" align=center />
+    <Column id=Goals_Per_Game title="Goals/Game" align=center fmt=num2 />
     <Column id=total_goals align=center />
-    <Column id=Assists_Per_Game title="Assists/Game" align=center />
+    <Column id=Assists_Per_Game title="Assists/Game" align=center fmt=num2 />
     <Column id=total_assists align=center />
-    <Column id=Saves_Per_Game title="Saves/Game" align=center />
+    <Column id=Saves_Per_Game title="Saves/Game" align=center fmt=num2 />
     <Column id=total_saves align=center />
-    <Column id=Shots_Per_Game title="Shots/Game" align=center />
-    <Column id=goals_against_per_game title="Goals Against/Game" align=center />
-    <Column id=shots_against_per_game title="Shots Against/Game"align=center />
+    <Column id=Shots_Per_Game title="Shots/Game" align=center fmt=num2 />
+    <Column id=goals_against_per_game title="Goals Against/Game" align=center fmt=num2 />
+    <Column id=shots_against_per_game title="Shots Against/Game"align=center fmt=num2 />
     <Column id=shooting_pct2 align=center />
 </DataTable>
 
@@ -515,7 +562,7 @@ from ${player_stats}
         <Column id=shots align=center />
         <Column id=goals_against align=center />
         <Column id=shots_against align=center />
-        <Column id=demos align=center />
+        <Column id=demos align=center fmt=num2 />
 </DataTable>
 
 
@@ -538,7 +585,7 @@ from ${player_stats}
         , SUM(total_assists) AS Assists
         , SUM(total_saves) AS Saves
         , SUM(total_shots) AS Shots
-        , SUM(total_goals) / SUM(total_shots) AS shooting_pct2
+        , SUM(total_goals) / NULLIF(SUM(total_shots), 0) AS shooting_pct2
         , SUM(total_demos_inflicted) AS 'Demos'
         , SUM(total_demos_taken) AS 'Demos Taken'
         , AVG(goals_per_game) AS 'Goals/ G'
@@ -576,15 +623,15 @@ from ${player_stats}
     <Column id='shooting_pct2' align=center />
     <Column id='Demos' align=center />
     <Column id='Demos Taken' align=center />
-    <Column id='Shots/ G' align=center />
-    <Column id='Goals/ G' align=center />
-    <Column id='Assists/ G' align=center />
-    <Column id='Saves/ G' align=center />
-    <Column id='Shots/ G' align=center />
-    <Column id='Goals Against/ G' align=center />
-    <Column id='Shots Against/ G' align=center />
-    <Column id='Demos/ G' align=center />
-    <Column id='Demos Taken/ G' align=center />
+    <Column id='Shots/ G' align=center fmt=num2 />
+    <Column id='Goals/ G' align=center fmt=num2 />
+    <Column id='Assists/ G' align=center fmt=num2 />
+    <Column id='Saves/ G' align=center fmt=num2 />
+    <Column id='Shots/ G' align=center fmt=num2 />
+    <Column id='Goals Against/ G' align=center fmt=num2 />
+    <Column id='Shots Against/ G' align=center fmt=num2 />
+    <Column id='Demos/ G' align=center fmt=num2 />
+    <Column id='Demos Taken/ G' align=center fmt=num2 />
 </DataTable>
 
 
@@ -610,7 +657,7 @@ from ${player_stats}
         , SUM(total_assists) AS Assists
         , SUM(total_saves) AS Saves
         , SUM(total_shots) AS Shots
-        , SUM(total_goals) / SUM(total_shots) AS shooting_pct2
+        , SUM(total_goals) / NULLIF(SUM(total_shots), 0) AS shooting_pct2
         , SUM(total_demos_inflicted) AS 'Demos'
         , SUM(total_demos_taken) AS 'Demos Taken'
         , AVG(goals_per_game) AS 'Goals/ G'
@@ -656,12 +703,12 @@ from ${player_stats}
     <Column id='shooting_pct2' align=center />
     <Column id='Demos' align=center />
     <Column id='Demos Taken' align=center />
-    <Column id='Goals/ G' align=center />
-    <Column id='Assists/ G' align=center />
-    <Column id='Saves/ G' align=center />
-    <Column id='Shots/ G' align=center />
-    <Column id='Goals Against/ G' align=center />
-    <Column id='Shots Against/ G' align=center />
-    <Column id='Demos/ G' align=center />
-    <Column id='Demos Taken/ G' align=center />
+    <Column id='Goals/ G' align=center fmt=num2 />
+    <Column id='Assists/ G' align=center fmt=num2 />
+    <Column id='Saves/ G' align=center fmt=num2 />
+    <Column id='Shots/ G' align=center fmt=num2 />
+    <Column id='Goals Against/ G' align=center fmt=num2 />
+    <Column id='Shots Against/ G' align=center fmt=num2 />
+    <Column id='Demos/ G' align=center fmt=num2 />
+    <Column id='Demos Taken/ G' align=center fmt=num2 />
 </DataTable>
