@@ -210,7 +210,8 @@ WHERE s.salary_rank <= 4
 
 ```sql eligibility
 WITH base_slots AS (
-
+--Select Franchise, league, and slot/role from players and role usages, using a UNION to fill the gaps between them. 
+--(players is missing slots that got used but have since been vacated, role usages is missing players with 0 uses)
     SELECT DISTINCT
         p.franchise AS team_name,
         REPLACE(UPPER(p.skill_group), ' LEAGUE', '') AS league,
@@ -265,13 +266,16 @@ SELECT
 
     
 FROM base_slots bs
+--start from base slots
 
+--join role usages to fill out ru selects
 LEFT JOIN role_usages ru
     ON ru.role = bs.role
     AND ru.team_name = bs.team_name
     AND ru.league = bs.league
     AND ru.season_number = 19
 
+--join players to fill out p selects
 LEFT JOIN players p
     ON p.slot = bs.role
     AND p.franchise = bs.team_name
