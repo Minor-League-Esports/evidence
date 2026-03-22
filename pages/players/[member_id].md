@@ -373,19 +373,19 @@ from ${player_stats}
             s19.gamemode,
             s19.match_id,
             count(*) AS games_played,
-            printf('%.1f', avg(s19.dpi)) AS Avg_DPI,
-            printf('%.1f', avg(s19.gpi)) AS Avg_GPI,
-            printf('%.1f', avg(s19.opi)) AS Avg_OPI,
+            avg(s19.dpi) AS Avg_DPI,
+            avg(s19.gpi) AS Avg_GPI,
+            avg(s19.opi) AS Avg_OPI,
             avg(s19.score) AS Score_Per_Game,
-            printf('%.2f', avg(s19.goals)) AS Goals_Per_Game,
+            avg(s19.goals) AS Goals_Per_Game,
             sum(s19.goals) AS total_goals,
-            printf('%.2f', avg(s19.assists)) AS Assists_Per_Game,
+            avg(s19.assists) AS Assists_Per_Game,
             sum(s19.assists) AS total_assists,
-            printf('%.2f', avg(s19.saves)) AS Saves_Per_Game,
+            avg(s19.saves) AS Saves_Per_Game,
             sum(s19.saves) AS total_saves,
-            printf('%.2f', avg(s19.shots)) AS Shots_Per_Game,
-            printf('%.2f', avg(s19.goals_against)) AS goals_against_per_game,
-            printf('%.2f', avg(s19.shots_against)) AS shots_against_per_game,
+            avg(s19.shots) AS Shots_Per_Game,
+            avg(s19.goals_against) AS goals_against_per_game,
+            avg(s19.shots_against) AS shots_against_per_game,
             sum(s19.goals) / nullif(sum(s19.shots), 0) AS shooting_pct2
 
         FROM players p
@@ -487,12 +487,7 @@ from ${player_stats}
 ```
 
 
-<!-- Change entire row to link to matchup page -
-remove games played -
-update record to only reflect games played by player
-remove result column -
-make all /g stats 2 levels of precision -
- -->
+
 
 ## Season 19 Stats by Series
 <DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primColor}' headerFontColor=white compact=true wrapTitles=true link=match_link>
@@ -504,15 +499,15 @@ make all /g stats 2 levels of precision -
     <Column id=Avg_OPI align=center />
     <Column id=Avg_DPI align=center />
     <Column id=Score_Per_Game title="Score/Game" align=center />
-    <Column id=Goals_Per_Game title="Goals/Game" align=center />
+    <Column id=Goals_Per_Game title="Goals/Game" align=center fmt=num2 />
     <Column id=total_goals align=center />
-    <Column id=Assists_Per_Game title="Assists/Game" align=center />
+    <Column id=Assists_Per_Game title="Assists/Game" align=center fmt=num2 />
     <Column id=total_assists align=center />
-    <Column id=Saves_Per_Game title="Saves/Game" align=center />
+    <Column id=Saves_Per_Game title="Saves/Game" align=center fmt=num2 />
     <Column id=total_saves align=center />
-    <Column id=Shots_Per_Game title="Shots/Game" align=center />
-    <Column id=goals_against_per_game title="Goals Against/Game" align=center />
-    <Column id=shots_against_per_game title="Shots Against/Game"align=center />
+    <Column id=Shots_Per_Game title="Shots/Game" align=center fmt=num2 />
+    <Column id=goals_against_per_game title="Goals Against/Game" align=center fmt=num2 />
+    <Column id=shots_against_per_game title="Shots Against/Game"align=center fmt=num2 />
     <Column id=shooting_pct2 align=center />
 </DataTable>
 
@@ -533,13 +528,13 @@ make all /g stats 2 levels of precision -
         , ass.opi_per_game as opi
         , ass.avg_sprocket_rating as sprocket_rating
         , ass.score_per_game as score
-        , printf('%.2f', ass.goals_per_game) as goals
-        , printf('%.2f', ass.assists_per_game) as assists
+        , ass.goals_per_game as goals
+        , ass.assists_per_game as assists
         , ass.saves_per_game as saves
         , ass.shots_per_game as shots
         , ass.avg_goals_against as goals_against
         , ass.avg_shots_against as shots_against
-        , printf('%.2f', ass.demos_per_game) as demos
+        , ass.demos_per_game as demos
         , p.current_scrim_points as scrim_points
         , p."Eligible Through" as eligible_through
     FROM avgScrimStats ass
@@ -567,7 +562,7 @@ make all /g stats 2 levels of precision -
         <Column id=shots align=center />
         <Column id=goals_against align=center />
         <Column id=shots_against align=center />
-        <Column id=demos align=center />
+        <Column id=demos align=center fmt=num2 />
 </DataTable>
 
 
@@ -628,15 +623,15 @@ make all /g stats 2 levels of precision -
     <Column id='shooting_pct2' align=center />
     <Column id='Demos' align=center />
     <Column id='Demos Taken' align=center />
-    <Column id='Shots/ G' align=center />
-    <Column id='Goals/ G' align=center />
-    <Column id='Assists/ G' align=center />
-    <Column id='Saves/ G' align=center />
-    <Column id='Shots/ G' align=center />
-    <Column id='Goals Against/ G' align=center />
-    <Column id='Shots Against/ G' align=center />
-    <Column id='Demos/ G' align=center />
-    <Column id='Demos Taken/ G' align=center />
+    <Column id='Shots/ G' align=center fmt=num2 />
+    <Column id='Goals/ G' align=center fmt=num2 />
+    <Column id='Assists/ G' align=center fmt=num2 />
+    <Column id='Saves/ G' align=center fmt=num2 />
+    <Column id='Shots/ G' align=center fmt=num2 />
+    <Column id='Goals Against/ G' align=center fmt=num2 />
+    <Column id='Shots Against/ G' align=center fmt=num2 />
+    <Column id='Demos/ G' align=center fmt=num2 />
+    <Column id='Demos Taken/ G' align=center fmt=num2 />
 </DataTable>
 
 
@@ -708,12 +703,12 @@ make all /g stats 2 levels of precision -
     <Column id='shooting_pct2' align=center />
     <Column id='Demos' align=center />
     <Column id='Demos Taken' align=center />
-    <Column id='Goals/ G' align=center />
-    <Column id='Assists/ G' align=center />
-    <Column id='Saves/ G' align=center />
-    <Column id='Shots/ G' align=center />
-    <Column id='Goals Against/ G' align=center />
-    <Column id='Shots Against/ G' align=center />
-    <Column id='Demos/ G' align=center />
-    <Column id='Demos Taken/ G' align=center />
+    <Column id='Goals/ G' align=center fmt=num2 />
+    <Column id='Assists/ G' align=center fmt=num2 />
+    <Column id='Saves/ G' align=center fmt=num2 />
+    <Column id='Shots/ G' align=center fmt=num2 />
+    <Column id='Goals Against/ G' align=center fmt=num2 />
+    <Column id='Shots Against/ G' align=center fmt=num2 />
+    <Column id='Demos/ G' align=center fmt=num2 />
+    <Column id='Demos Taken/ G' align=center fmt=num2 />
 </DataTable>
