@@ -230,7 +230,7 @@ ORDER BY e.eval_date;
     avg(shots) as shots_per_game,
     avg(goals_against) as goals_against_per_game,
     avg(shots_against) as shots_against_per_game,
-    sum(goals)/sum(shots) as shooting_pct2
+    sum(goals)/NULLIF(sum(shots), 0) as shooting_pct2
  from players p
     inner join S19_stats s19 
         on p.member_id = s19.member_id
@@ -257,7 +257,7 @@ leaguestats as (
     avg(shots) as shots_per_game,
     avg(goals_against) as goals_against_per_game,
     avg(shots_against) as shots_against_per_game,
-    sum(goals)/sum(shots) as shooting_pct2
+    sum(goals)/ NULLIF(sum(shots), 0) as shooting_pct2
  from players p
     inner join S19_stats s19
         on p.member_id = s19.member_id
@@ -386,7 +386,7 @@ from ${player_stats}
             avg(s19.shots) AS Shots_Per_Game,
             avg(s19.goals_against) AS goals_against_per_game,
             avg(s19.shots_against) AS shots_against_per_game,
-            sum(s19.goals) / nullif(sum(s19.shots), 0) AS shooting_pct2
+            sum(s19.goals) / NULLIF(sum(s19.shots), 0) AS shooting_pct2
 
         FROM players p
 
@@ -585,7 +585,7 @@ from ${player_stats}
         , SUM(total_assists) AS Assists
         , SUM(total_saves) AS Saves
         , SUM(total_shots) AS Shots
-        , SUM(total_goals) / SUM(total_shots) AS shooting_pct2
+        , SUM(total_goals) / NULLIF(SUM(total_shots), 0) AS shooting_pct2
         , SUM(total_demos_inflicted) AS 'Demos'
         , SUM(total_demos_taken) AS 'Demos Taken'
         , AVG(goals_per_game) AS 'Goals/ G'
@@ -657,7 +657,7 @@ from ${player_stats}
         , SUM(total_assists) AS Assists
         , SUM(total_saves) AS Saves
         , SUM(total_shots) AS Shots
-        , SUM(total_goals) / SUM(total_shots) AS shooting_pct2
+        , SUM(total_goals) / NULLIF(SUM(total_shots), 0) AS shooting_pct2
         , SUM(total_demos_inflicted) AS 'Demos'
         , SUM(total_demos_taken) AS 'Demos Taken'
         , AVG(goals_per_game) AS 'Goals/ G'
