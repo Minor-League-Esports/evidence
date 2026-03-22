@@ -209,10 +209,33 @@ WHERE s.salary_rank <= 4
 
 
 ```sql eligibility
+WITH base_slots AS (
+--Select Franchise, league, and slot/role from players and role usages, using a UNION to fill the gaps between them. 
+--(players is missing slots that got used but have since been vacated, role usages is missing players with 0 uses)
+    SELECT DISTINCT
+        p.franchise AS team_name,
+        REPLACE(UPPER(p.skill_group), ' LEAGUE', '') AS league,
+        p.slot AS role
+    FROM players p
+    WHERE p.franchise = '${params.franchise}'
+        AND p.slot LIKE 'PLAYER%'
+
+    UNION
+
+    SELECT DISTINCT
+        ru.team_name,
+        ru.league,
+        ru.role
+    FROM role_usages ru
+    WHERE ru.team_name = '${params.franchise}'
+        AND ru.role LIKE 'PLAYER%'
+        AND ru.season_number = 19
+
+)
+
 SELECT 
     p.name,
     '/players/' || CAST(p.member_id AS INTEGER) AS id_link,
-        '/players/' || CAST(p.member_id AS INTEGER) AS id_link,
     p.salary,
     p.skill_group,
     CASE
@@ -223,7 +246,7 @@ SELECT
         WHEN p.skill_group = 'Premier League' THEN 5 
     END AS league_order, 
     p.franchise,
-    SUBSTRING(ru.role, 7) AS slot,
+    SUBSTRING(bs.role, 7) AS slot,
     COALESCE(ru.doubles_uses, 0) AS doubles_uses,
     COALESCE(ru.standard_uses, 0) AS standard_uses,
     COALESCE(ru.total_uses, 0) AS total_uses,
@@ -239,24 +262,29 @@ SELECT
         WHEN p."Franchise Staff Position" = 'Captain' THEN 'CAPT'
         ELSE ''
     END AS staff_pos_abr,
-    ru.league || ' LEAGUE' AS league_name
+    bs.league || ' LEAGUE' AS league_name
 
     
+FROM base_slots bs
+--start from base slots
 
-FROM role_usages ru
-
-LEFT JOIN players p
-    ON p.slot = ru.role
-    AND p.franchise = ru.team_name
-    AND UPPER(p.skill_group) = CONCAT(ru.league, ' LEAGUE')
-
-WHERE ru.team_name = '${params.franchise}'
-    AND ru.role LIKE 'PLAYER%'
+--join role usages to fill out ru selects
+LEFT JOIN role_usages ru
+    ON ru.role = bs.role
+    AND ru.team_name = bs.team_name
+    AND ru.league = bs.league
     AND ru.season_number = 19
 
+--join players to fill out p selects
+LEFT JOIN players p
+    ON p.slot = bs.role
+    AND p.franchise = bs.team_name
+    AND UPPER(p.skill_group) = CONCAT(UPPER(bs.league), ' LEAGUE')
+
+
 ORDER BY
-    ru.league
-    , ru.role
+    bs.league
+    , bs.role
 ```
 
 
