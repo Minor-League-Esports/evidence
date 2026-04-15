@@ -27,6 +27,7 @@ SELECT
     , l.color
     , l.league_photo_url
     , l.max_salary
+    , l.eligibility_requirement
     , COUNT(*) AS num_players
 
 FROM players p
@@ -43,6 +44,7 @@ GROUP BY
     , l.color
     , l.league_photo_url
     , l.max_salary
+    , l.eligibility_requirement
 
 HAVING num_players > 1
 
@@ -96,7 +98,7 @@ WITH eligibility AS (
 	    COALESCE(ru.standard_uses, 0) AS standard_uses,
 	    COALESCE(ru.total_uses, 0) AS total_uses,
 	    p.current_scrim_points,
-	    CASE WHEN p.current_scrim_points >= 30 THEN 'Yes'
+	    CASE WHEN p.current_scrim_points >= l.eligibility_requirement THEN 'Yes'
 	        ELSE 'No'
 	    END AS Eligible,
 	    p."Eligible Through"
@@ -108,6 +110,9 @@ WITH eligibility AS (
 	    AND p.slot = ru.role
 	    AND UPPER(p.skill_group) = CONCAT(ru.league, ' LEAGUE')
 	    AND ru.season_number = 19
+	
+	LEFT JOIN leagues l
+	    ON p.skill_group = l.league_name
 	
 	WHERE p.slot LIKE 'PLAYER%'
 	
@@ -251,7 +256,7 @@ SELECT
     COALESCE(ru.standard_uses, 0) AS standard_uses,
     COALESCE(ru.total_uses, 0) AS total_uses,
     p.current_scrim_points,
-    CASE WHEN p.current_scrim_points >= 30 THEN 'Yes'
+    CASE WHEN p.current_scrim_points >= l.eligibility_requirement THEN 'Yes'
         ELSE 'No'
     END AS Eligible,
     p."Eligible Through",
@@ -281,6 +286,9 @@ LEFT JOIN players p
     AND p.franchise = bs.team_name
     AND UPPER(p.skill_group) = CONCAT(UPPER(bs.league), ' LEAGUE')
 
+LEFT JOIN leagues l
+    ON UPPER(l.league_name) = CONCAT(UPPER(bs.league), ' LEAGUE')
+
 
 ORDER BY
     bs.league
@@ -303,7 +311,7 @@ ORDER BY
     <Column id=doubles_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 4, 5, 6]} />
     <Column id=standard_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 6, 7, 8]} />
     <Column id=total_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 10, 11, 12]} />    
-    <Column id=current_scrim_points align=center contentType=colorscale colorScale={['#ce5050','white']} colorBreakpoints={[0, 30]}/>
+    <Column id=current_scrim_points align=center contentType=colorscale colorScale={['#ce5050','white']} colorBreakpoints={[0, league.eligibility_requirement]}/>
     <Column id="Eligible Through" align=center />
 </DataTable>
 
