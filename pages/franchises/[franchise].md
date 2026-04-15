@@ -382,6 +382,7 @@ SELECT
 SUBSTRING(match_group_title, 7)::INT AS week,
 opponent,
 franchise_link,
+'/matchups/' || gd.match_id AS matchup_link,
 series_winner,
 CASE WHEN series_winner = '${params.franchise}' THEN 'Win' 
     WHEN series_winner = 'Not Played / Data Unavailable' THEN 'NA'
@@ -417,10 +418,10 @@ FROM record re
 
 >Season 19 Results
 <DataTable data={team_record} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white >
-    <Column id=week align=center />
+    <Column id=matchup_link contentType=link linkLabel=week title=Week align=center />
     <Column id=franchise_link contentType=link linkLabel=opponent title=Opponent align=center />
     <Column id=series_result align=center />
-    <Column id=record align=center />
+    <Column id=matchup_link contentType=link linkLabel=record title=Record align=center />
     <Column id=goal_differential align=center />
 </DataTable>
 
