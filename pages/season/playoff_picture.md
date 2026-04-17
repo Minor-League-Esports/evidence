@@ -5,7 +5,7 @@ sidebar_position: 6
 
 <LastRefreshed prefix="Data last updated"/>
 
-> **Tiebreaker note:** Tiebreakers will be decided by League Operations and implemented here after official determinations.
+> **Tiebreaker note:** Standings use the official tiebreaker procedure (Win%, H2H, Series%, Division%, GD, GF) but there may still be errors. Final determinations are made by League Operations.
 
 ## Filters
 
@@ -21,6 +21,11 @@ sidebar_position: 6
     <ButtonGroupItem valueLabel="Doubles" value="Doubles" default />
     <ButtonGroupItem valueLabel="Standard" value="Standard" />
 </ButtonGroup>
+
+<!-- Playoff seeds: calculates seeding for each league/mode combination.
+     Partitions by conference (16-team) or super_division (32-team).
+     Division leaders get seeds 1-2, wildcards get 3-4.
+     Ordered by: divisional leader status, win%, series win%, goal diff, goals for. -->
 
 ```sql playoff_seeds
 WITH S19standings AS (
@@ -99,6 +104,7 @@ staging AS (
         END AS conference
         , s19.league
         , s19.game_mode
+        , s19.Division AS division
         , s19.team_wins::INT || ' - ' || s19.team_losses::INT AS record
         , s19.team_wins / NULLIF(s19.team_wins + s19.team_losses, 0) AS win_pct
         , sagd.series_wins / NULLIF(sagd.series_wins + sagd.series_loses, 0) AS series_win_pct
@@ -119,20 +125,81 @@ ranked AS (
     SELECT
         *
         , ROW_NUMBER() OVER (
-            PARTITION BY super_division
+            PARTITION BY CASE
+                WHEN league IN ('Foundation League', 'Premier League') THEN conference
+                ELSE super_division
+            END
             ORDER BY
                 is_divisional_leader DESC
                 , win_pct DESC
                 , series_win_pct DESC
                 , goal_differential DESC
                 , goals_for DESC
-        ) AS super_division_rank
+        ) AS seed_rank
     FROM staging
 )
 SELECT * FROM ranked
-WHERE super_division_rank <= 4
-ORDER BY conference, super_division, super_division_rank
+WHERE seed_rank <= 4
+ORDER BY conference, super_division, seed_rank
 ```
+
+<!-- Head-to-head records: pairwise game wins between teams for H2H tiebreaker. -->
+
+```sql h2h_records
+SELECT
+    m.home AS team_a
+    , m.away AS team_b
+    , SUM(m.home_wins) AS a_game_wins
+    , SUM(m.away_wins) AS b_game_wins
+FROM matches m
+INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
+WHERE mg.parent_group_title = 'Season 19'
+    AND m.league = '${inputs.League}'
+    AND m.game_mode = '${inputs.GameMode}'
+GROUP BY m.home, m.away
+```
+
+<!-- Division records: game win % in division-only matchups for tiebreaker step 4 (rule 1.9.4).
+     Only used when all tied teams share the same division. -->
+
+```sql division_records
+SELECT
+    team_name
+    , SUM(wins) AS div_wins
+    , SUM(losses) AS div_losses
+    , SUM(wins)::FLOAT / NULLIF(SUM(wins) + SUM(losses), 0) AS div_win_pct
+FROM (
+    SELECT
+        m.home AS team_name
+        , m.home_wins AS wins
+        , m.away_wins AS losses
+    FROM matches m
+    INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
+    INNER JOIN teams t_home ON m.home = t_home.Franchise
+    INNER JOIN teams t_away ON m.away = t_away.Franchise
+    WHERE mg.parent_group_title = 'Season 19'
+        AND m.league = '${inputs.League}'
+        AND m.game_mode = '${inputs.GameMode}'
+        AND t_home.Division = t_away.Division
+    UNION ALL
+    SELECT
+        m.away AS team_name
+        , m.away_wins AS wins
+        , m.home_wins AS losses
+    FROM matches m
+    INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
+    INNER JOIN teams t_home ON m.home = t_home.Franchise
+    INNER JOIN teams t_away ON m.away = t_away.Franchise
+    WHERE mg.parent_group_title = 'Season 19'
+        AND m.league = '${inputs.League}'
+        AND m.game_mode = '${inputs.GameMode}'
+        AND t_home.Division = t_away.Division
+) div_matchups
+GROUP BY team_name
+```
+
+<!-- Official playoff games: populated once "Season 19 Playoffs" match group has results.
+     When available, the bracket displays actual matchup results instead of seed-based projections. -->
 
 ```sql playoff_games
 SELECT
@@ -153,4 +220,4 @@ WHERE mg.parent_group_title = 'Season 19 Playoffs'
 ORDER BY mg.match_group_title
 ```
 
-<PlayoffBracket {playoff_seeds} {playoff_games} />
+<PlayoffBracket {playoff_seeds} {playoff_games} {h2h_records} {division_records} league="{inputs.League}" />
