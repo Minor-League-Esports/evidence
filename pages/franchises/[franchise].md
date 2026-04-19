@@ -416,7 +416,7 @@ FROM record re
 <BigValue data={teamStatistics} value=record /> <BigValue data={teamStatistics} value=series_record /> <BigValue data={teamStatistics} value=goal_differential />
 
 >Season 19 Results
-<DataTable data={team_record} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white >
+<DataTable data={team_record} rowShading=true headerColor='{team_info[0].primary_color}' headerFontColor=white >
     <Column id=week align=center />
     <Column id=franchise_link contentType=link linkLabel=opponent title=Opponent align=center />
     <Column id=series_result align=center />
@@ -590,7 +590,7 @@ ORDER BY season ASC
 </ButtonGroup>
 
 ## <p> <center> <u> Record By Season </u> </center> </p>
-<DataTable data={allTimeRecord} rowshading=true headerColor='{team_info[0].primary_color}' headerFontColor=white totalRow=true >
+<DataTable data={allTimeRecord} rowShading=true headerColor='{team_info[0].primary_color}' headerFontColor=white totalRow=true >
     <Column id=name align=center />
     <Column id=mode align=center totalAgg='Totals:' />
     <Column id=team_wins align=center totalAgg=sum />
