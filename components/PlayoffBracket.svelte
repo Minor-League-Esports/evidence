@@ -21,6 +21,7 @@
   export let playoff_games = [];
   export let h2h_records = [];
   export let division_records = [];
+  export let team_logos = [];
   export let league = '';
 
   // 16-team leagues use conference-based seeding; 32-team leagues use super_division-based seeding
@@ -182,24 +183,19 @@
   // Note: seed lookups below reference resolvedSeeds directly in the $: expression
   // so Svelte properly re-runs them when resolvedSeeds changes.
 
-  function getLogo(name, seeds) {
-    return (seeds || []).find(t => t.team_name === name)?.team_logo ?? '';
+  // Logo lookup: seeds first (has per-mode record), then the full team_logos
+  // list so teams outside the top 4 still render a logo.
+  function getLogo(name, seeds, logos) {
+    const fromSeeds = (seeds || []).find(t => t.team_name === name)?.team_logo;
+    if (fromSeeds) return fromSeeds;
+    return (logos || []).find(t => t.team_name === name)?.team_logo ?? '';
   }
 
-  function findGame(a, b) {
-    if (!a || !b) return null;
-    return playoff_games.find(g =>
-      (g.home === a && g.away === b) || (g.home === b && g.away === a)
-    ) ?? null;
-  }
-
-  function seriesScore(game, name) {
-    if (!game || game.winner === null) return null;
-    return game.home === name ? game.home_wins : game.away_wins;
-  }
-
-  function roundGames(kw, conf, seeds) {
-    return playoff_games.filter(g => {
+  // Takes `games` explicitly (rather than reading the prop via closure) so Svelte's
+  // static reactive-dep tracking sees `playoff_games` in every $: callsite —
+  // otherwise these reactives miss the initial async arrival of playoff_games.
+  function roundGames(games, kw, conf, seeds) {
+    return (games || []).filter(g => {
       const r = g.round?.toLowerCase() ?? '';
       if (!r.includes(kw)) return false;
       if (!conf) return true;
@@ -211,23 +207,16 @@
 
   const TBD = { topName:'TBD', topLogo:'', topScore:null, botName:'TBD', botLogo:'', botScore:null, winner:null };
 
-  function bd(game, seeds) {
+  function bd(game, seeds, logos) {
     return {
       topName: game.home,
-      topLogo: getLogo(game.home, seeds),
+      topLogo: getLogo(game.home, seeds, logos),
       topScore: game.winner !== null ? game.home_wins : null,
       botName: game.away,
-      botLogo: getLogo(game.away, seeds),
+      botLogo: getLogo(game.away, seeds, logos),
       botScore: game.winner !== null ? game.away_wins : null,
       winner: game.winner
     };
-  }
-
-  function qfCls(m, isBot) {
-    const seed = isBot ? m.botSeed : m.topSeed;
-    const w = m.game?.winner;
-    if (!w) return seed ? '' : 'tbd';
-    return w === seed?.team_name ? 'winner' : 'loser';
   }
 
   function slotCls(m, isBot) {
@@ -235,6 +224,126 @@
     const w = m.winner;
     if (!w) return name === 'TBD' ? 'tbd' : '';
     return w === name ? 'winner' : 'loser';
+  }
+
+  // ===== First-round match override =====
+  // For each seeded pair (e.g., W#1 vs E#4), check first-round playoff_games:
+  //   1. exact seeded pair played -> use that game as-is
+  //   2. one seeded team played someone else -> replace the other slot with the
+  //      actual opponent (handles cases where tiebreaker logic picked a wildcard
+  //      that League Ops' bracket doesn't agree with)
+  //   3. no game found -> fall back to pure seed projection
+  $: firstRoundKw = is16 ? 'semi' : 'quarter';
+  $: firstRoundGames = playoff_games.filter(g =>
+    (g.round?.toLowerCase() ?? '').includes(firstRoundKw)
+  );
+
+  function findFirstRoundMatch(topSeed, botSeed, rGames) {
+    const gs = rGames || [];
+    if (topSeed && botSeed) {
+      const exact = gs.find(g =>
+        (g.home === topSeed.team_name && g.away === botSeed.team_name) ||
+        (g.home === botSeed.team_name && g.away === topSeed.team_name)
+      );
+      if (exact) return { game: exact, actualTop: topSeed.team_name, actualBot: botSeed.team_name };
+    }
+    if (topSeed) {
+      const g = gs.find(x => x.home === topSeed.team_name || x.away === topSeed.team_name);
+      if (g) {
+        const other = g.home === topSeed.team_name ? g.away : g.home;
+        return { game: g, actualTop: topSeed.team_name, actualBot: other };
+      }
+    }
+    if (botSeed) {
+      const g = gs.find(x => x.home === botSeed.team_name || x.away === botSeed.team_name);
+      if (g) {
+        const other = g.home === botSeed.team_name ? g.away : g.home;
+        return { game: g, actualTop: other, actualBot: botSeed.team_name };
+      }
+    }
+    return null;
+  }
+
+  function buildFirstRoundSlot(topSeed, botSeed, topLabel, botLabel, rGames, seeds, logos) {
+    const match = findFirstRoundMatch(topSeed, botSeed, rGames);
+    if (!match) {
+      return {
+        topName: topSeed?.team_name ?? 'TBD',
+        topLogo: topSeed?.team_logo ?? '',
+        topRec:  topSeed?.record ?? '',
+        topSeedLabel: topSeed ? topLabel : '',
+        topScore: null,
+        topCls: topSeed ? '' : 'tbd',
+        botName: botSeed?.team_name ?? 'TBD',
+        botLogo: botSeed?.team_logo ?? '',
+        botRec:  botSeed?.record ?? '',
+        botSeedLabel: botSeed ? botLabel : '',
+        botScore: null,
+        botCls: botSeed ? '' : 'tbd',
+      };
+    }
+    const { game, actualTop, actualBot } = match;
+    const hasWinner = game.winner !== null && game.winner !== undefined;
+    function info(actualName, seedTeam, seedLabel) {
+      const isSeedMatch = seedTeam?.team_name === actualName;
+      return {
+        name: actualName,
+        logo: getLogo(actualName, seeds, logos),
+        rec: hasWinner ? '' : (isSeedMatch ? (seedTeam.record ?? '') : ''),
+        seedLabel: hasWinner ? '' : (isSeedMatch ? seedLabel : ''),
+        score: hasWinner ? (game.home === actualName ? game.home_wins : game.away_wins) : null,
+        cls: hasWinner ? (game.winner === actualName ? 'winner' : 'loser') : '',
+      };
+    }
+    const top = info(actualTop, topSeed, topLabel);
+    const bot = info(actualBot, botSeed, botLabel);
+    return {
+      topName: top.name, topLogo: top.logo, topRec: top.rec,
+      topSeedLabel: top.seedLabel, topScore: top.score, topCls: top.cls,
+      botName: bot.name, botLogo: bot.logo, botRec: bot.rec,
+      botSeedLabel: bot.seedLabel, botScore: bot.score, botCls: bot.cls,
+    };
+  }
+
+  // ===== SF pair ordering (32-team) =====
+  // Each SF slot is fed by a specific QF pair. Classify by checking whether
+  // either team's (super_division, resolved_rank) lands in pair 1 or pair 2's set.
+  // Division leaders (seeds 1-2) are the stable anchors; wildcards rarely reach SF
+  // without a leader also present, so one lookup usually suffices.
+  function classifySFTeam(seed) {
+    if (!seed?.super_division || !seed.resolved_rank) return null;
+    const sd = seed.super_division.toLowerCase();
+    const r = seed.resolved_rank;
+    if (seed.conference === 'Orange') {
+      const w = sd.includes('west'), e = sd.includes('east');
+      if ((w && r === 1) || (e && r === 4) || (e && r === 2) || (w && r === 3)) return 'top';
+      if ((e && r === 1) || (w && r === 4) || (w && r === 2) || (e && r === 3)) return 'bot';
+    } else if (seed.conference === 'Blue') {
+      const n = sd.includes('north'), s = sd.includes('south');
+      if ((n && r === 1) || (s && r === 4) || (s && r === 2) || (n && r === 3)) return 'top';
+      if ((s && r === 1) || (n && r === 4) || (n && r === 2) || (s && r === 3)) return 'bot';
+    }
+    return null;
+  }
+
+  function orderSFGames(games, seeds) {
+    const out = [null, null];
+    const pending = [];
+    for (const g of games) {
+      let cls = null;
+      for (const name of [g.home, g.away]) {
+        const s = (seeds || []).find(t => t.team_name === name);
+        if (s) { const c = classifySFTeam(s); if (c) { cls = c; break; } }
+      }
+      if (cls === 'top' && !out[0]) out[0] = g;
+      else if (cls === 'bot' && !out[1]) out[1] = g;
+      else pending.push(g);
+    }
+    for (const g of pending) {
+      const i = out.indexOf(null);
+      if (i >= 0) out[i] = g;
+    }
+    return out;
   }
 
   // ===== 32-Team Seeds & Matchups =====
@@ -252,38 +361,65 @@
   $: bS3 = resolvedSeeds && _sd('Blue','south',3);  $: bS4 = resolvedSeeds && _sd('Blue','south',4);
 
   // QF ordering matches official 32-team bracket:
-  // Pair 1 (Games 1+2): W#1 vs E#4, E#2 vs W#3 -> SF
-  // Pair 2 (Games 3+4): E#1 vs W#4, W#2 vs E#3 -> SF
+  // Pair 1 (Games 1+2): W#1 vs E#4, E#2 vs W#3 -> SF top
+  // Pair 2 (Games 3+4): E#1 vs W#4, W#2 vs E#3 -> SF bottom
   $: oQF = [
-    { topSeed:oW1, botSeed:oE4, topLabel:'W#1', botLabel:'E#4', game:findGame(oW1?.team_name, oE4?.team_name) },
-    { topSeed:oE2, botSeed:oW3, topLabel:'E#2', botLabel:'W#3', game:findGame(oE2?.team_name, oW3?.team_name) },
-    { topSeed:oE1, botSeed:oW4, topLabel:'E#1', botLabel:'W#4', game:findGame(oE1?.team_name, oW4?.team_name) },
-    { topSeed:oW2, botSeed:oE3, topLabel:'W#2', botLabel:'E#3', game:findGame(oW2?.team_name, oE3?.team_name) },
+    buildFirstRoundSlot(oW1, oE4, 'W#1', 'E#4', firstRoundGames, resolvedSeeds, team_logos),
+    buildFirstRoundSlot(oE2, oW3, 'E#2', 'W#3', firstRoundGames, resolvedSeeds, team_logos),
+    buildFirstRoundSlot(oE1, oW4, 'E#1', 'W#4', firstRoundGames, resolvedSeeds, team_logos),
+    buildFirstRoundSlot(oW2, oE3, 'W#2', 'E#3', firstRoundGames, resolvedSeeds, team_logos),
   ];
   $: bQF = [
-    { topSeed:bN1, botSeed:bS4, topLabel:'N#1', botLabel:'S#4', game:findGame(bN1?.team_name, bS4?.team_name) },
-    { topSeed:bS2, botSeed:bN3, topLabel:'S#2', botLabel:'N#3', game:findGame(bS2?.team_name, bN3?.team_name) },
-    { topSeed:bS1, botSeed:bN4, topLabel:'S#1', botLabel:'N#4', game:findGame(bS1?.team_name, bN4?.team_name) },
-    { topSeed:bN2, botSeed:bS3, topLabel:'N#2', botLabel:'S#3', game:findGame(bN2?.team_name, bS3?.team_name) },
+    buildFirstRoundSlot(bN1, bS4, 'N#1', 'S#4', firstRoundGames, resolvedSeeds, team_logos),
+    buildFirstRoundSlot(bS2, bN3, 'S#2', 'N#3', firstRoundGames, resolvedSeeds, team_logos),
+    buildFirstRoundSlot(bS1, bN4, 'S#1', 'N#4', firstRoundGames, resolvedSeeds, team_logos),
+    buildFirstRoundSlot(bN2, bS3, 'N#2', 'S#3', firstRoundGames, resolvedSeeds, team_logos),
   ];
 
-  $: oSFRaw = roundGames('semi','Orange', resolvedSeeds).map(g => bd(g, resolvedSeeds));
-  $: bSFRaw = roundGames('semi','Blue', resolvedSeeds).map(g => bd(g, resolvedSeeds));
-  $: oSF = [oSFRaw[0] ?? TBD, oSFRaw[1] ?? TBD];
-  $: bSF = [bSFRaw[0] ?? TBD, bSFRaw[1] ?? TBD];
+  $: oSF = orderSFGames(roundGames(playoff_games, 'semi','Orange', resolvedSeeds), resolvedSeeds).map(g => g ? bd(g, resolvedSeeds, team_logos) : TBD);
+  $: bSF = orderSFGames(roundGames(playoff_games, 'semi','Blue',  resolvedSeeds), resolvedSeeds).map(g => g ? bd(g, resolvedSeeds, team_logos) : TBD);
 
-  $: oCF = roundGames('final','Orange', resolvedSeeds).filter(g => {
+  // CF round filter: "Conference Finals" only — exclude rounds whose names also
+  // contain 'final' ("semifinals", "quarterfinals", "grand finals").
+  $: oCF = roundGames(playoff_games, 'final','Orange', resolvedSeeds).filter(g => {
     const r = g.round?.toLowerCase() ?? '';
-    return !r.includes('grand') && !r.includes('championship');
-  }).map(g => bd(g, resolvedSeeds))[0] ?? TBD;
-  $: bCF = roundGames('final','Blue', resolvedSeeds).filter(g => {
+    return !r.includes('grand') && !r.includes('championship')
+        && !r.includes('semi') && !r.includes('quarter');
+  }).map(g => bd(g, resolvedSeeds, team_logos))[0] ?? TBD;
+  $: bCF = roundGames(playoff_games, 'final','Blue', resolvedSeeds).filter(g => {
     const r = g.round?.toLowerCase() ?? '';
-    return !r.includes('grand') && !r.includes('championship');
-  }).map(g => bd(g, resolvedSeeds))[0] ?? TBD;
-  $: gf = playoff_games.filter(g => {
-    const r = g.round?.toLowerCase() ?? '';
-    return r.includes('grand') || r.includes('championship');
-  }).map(g => bd(g, resolvedSeeds))[0] ?? TBD;
+    return !r.includes('grand') && !r.includes('championship')
+        && !r.includes('semi') && !r.includes('quarter');
+  }).map(g => bd(g, resolvedSeeds, team_logos))[0] ?? TBD;
+
+  // Grand Final: place the Orange-conference team on top, Blue on bottom,
+  // regardless of which side of the game.home/game.away split they fall on.
+  function buildGF(game, seeds, logos) {
+    if (!game) return TBD;
+    const homeConf = (seeds || []).find(t => t.team_name === game.home)?.conference;
+    const awayConf = (seeds || []).find(t => t.team_name === game.away)?.conference;
+    const homeIsOrange = homeConf === 'Orange' || awayConf === 'Blue';
+    const orangeName  = homeIsOrange ? game.home : game.away;
+    const orangeScore = homeIsOrange ? game.home_wins : game.away_wins;
+    const blueName    = homeIsOrange ? game.away : game.home;
+    const blueScore   = homeIsOrange ? game.away_wins : game.home_wins;
+    return {
+      topName: orangeName,
+      topLogo: getLogo(orangeName, seeds, logos),
+      topScore: game.winner !== null ? orangeScore : null,
+      botName: blueName,
+      botLogo: getLogo(blueName, seeds, logos),
+      botScore: game.winner !== null ? blueScore : null,
+      winner: game.winner
+    };
+  }
+  $: gf = buildGF(
+    playoff_games.find(g => {
+      const r = g.round?.toLowerCase() ?? '';
+      return r.includes('grand') || r.includes('championship');
+    }),
+    resolvedSeeds, team_logos
+  );
 
   // ===== 16-Team Seeds & Matchups =====
   // _cs: look up a seed by conference and resolved rank (no super_division for 16-team leagues).
@@ -295,12 +431,12 @@
 
   // SF matchups: Seed 4 @ Seed 1, Seed 3 @ Seed 2
   $: oSF16 = [
-    { topSeed:o1, botSeed:o4, topLabel:'#1', botLabel:'#4', game:findGame(o1?.team_name, o4?.team_name) },
-    { topSeed:o2, botSeed:o3, topLabel:'#2', botLabel:'#3', game:findGame(o2?.team_name, o3?.team_name) },
+    buildFirstRoundSlot(o1, o4, '#1', '#4', firstRoundGames, resolvedSeeds, team_logos),
+    buildFirstRoundSlot(o2, o3, '#2', '#3', firstRoundGames, resolvedSeeds, team_logos),
   ];
   $: bSF16 = [
-    { topSeed:b1, botSeed:b4, topLabel:'#1', botLabel:'#4', game:findGame(b1?.team_name, b4?.team_name) },
-    { topSeed:b2, botSeed:b3, topLabel:'#2', botLabel:'#3', game:findGame(b2?.team_name, b3?.team_name) },
+    buildFirstRoundSlot(b1, b4, '#1', '#4', firstRoundGames, resolvedSeeds, team_logos),
+    buildFirstRoundSlot(b2, b3, '#2', '#3', firstRoundGames, resolvedSeeds, team_logos),
   ];
 </script>
 
@@ -327,19 +463,19 @@
         {#each oSF16 as m}
         <div class="bk-slot">
           <div class="pp-card">
-            <div class="pp-row {qfCls(m,false)} pp-sep">
-              {#if m.topSeed?.team_logo}<img src={m.topSeed.team_logo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.topSeed?.team_name ?? 'TBD'}</span>
-              {#if m.topSeed?.record}<span class="pp-rec">{m.topSeed.record}</span>{/if}
-              {#if seriesScore(m.game, m.topSeed?.team_name) !== null}<span class="pp-score">{seriesScore(m.game, m.topSeed?.team_name)}</span>{/if}
-              <span class="pp-seed">{m.topLabel}</span>
+            <div class="pp-row {m.topCls} pp-sep">
+              {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
+              <span class="pp-name">{m.topName}</span>
+              {#if m.topRec}<span class="pp-rec">{m.topRec}</span>{/if}
+              {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
+              {#if m.topSeedLabel}<span class="pp-seed">{m.topSeedLabel}</span>{/if}
             </div>
-            <div class="pp-row {qfCls(m,true)}">
-              {#if m.botSeed?.team_logo}<img src={m.botSeed.team_logo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.botSeed?.team_name ?? 'TBD'}</span>
-              {#if m.botSeed?.record}<span class="pp-rec">{m.botSeed.record}</span>{/if}
-              {#if seriesScore(m.game, m.botSeed?.team_name) !== null}<span class="pp-score">{seriesScore(m.game, m.botSeed?.team_name)}</span>{/if}
-              <span class="pp-seed">{m.botLabel}</span>
+            <div class="pp-row {m.botCls}">
+              {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
+              <span class="pp-name">{m.botName}</span>
+              {#if m.botRec}<span class="pp-rec">{m.botRec}</span>{/if}
+              {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
+              {#if m.botSeedLabel}<span class="pp-seed">{m.botSeedLabel}</span>{/if}
             </div>
           </div>
         </div>
@@ -352,19 +488,19 @@
         {#each bSF16 as m}
         <div class="bk-slot">
           <div class="pp-card">
-            <div class="pp-row {qfCls(m,false)} pp-sep">
-              {#if m.topSeed?.team_logo}<img src={m.topSeed.team_logo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.topSeed?.team_name ?? 'TBD'}</span>
-              {#if m.topSeed?.record}<span class="pp-rec">{m.topSeed.record}</span>{/if}
-              {#if seriesScore(m.game, m.topSeed?.team_name) !== null}<span class="pp-score">{seriesScore(m.game, m.topSeed?.team_name)}</span>{/if}
-              <span class="pp-seed">{m.topLabel}</span>
+            <div class="pp-row {m.topCls} pp-sep">
+              {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
+              <span class="pp-name">{m.topName}</span>
+              {#if m.topRec}<span class="pp-rec">{m.topRec}</span>{/if}
+              {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
+              {#if m.topSeedLabel}<span class="pp-seed">{m.topSeedLabel}</span>{/if}
             </div>
-            <div class="pp-row {qfCls(m,true)}">
-              {#if m.botSeed?.team_logo}<img src={m.botSeed.team_logo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.botSeed?.team_name ?? 'TBD'}</span>
-              {#if m.botSeed?.record}<span class="pp-rec">{m.botSeed.record}</span>{/if}
-              {#if seriesScore(m.game, m.botSeed?.team_name) !== null}<span class="pp-score">{seriesScore(m.game, m.botSeed?.team_name)}</span>{/if}
-              <span class="pp-seed">{m.botLabel}</span>
+            <div class="pp-row {m.botCls}">
+              {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
+              <span class="pp-name">{m.botName}</span>
+              {#if m.botRec}<span class="pp-rec">{m.botRec}</span>{/if}
+              {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
+              {#if m.botSeedLabel}<span class="pp-seed">{m.botSeedLabel}</span>{/if}
             </div>
           </div>
         </div>
@@ -450,19 +586,19 @@
         {#each pair as m}
         <div class="bk-slot">
           <div class="pp-card">
-            <div class="pp-row {qfCls(m,false)} pp-sep">
-              {#if m.topSeed?.team_logo}<img src={m.topSeed.team_logo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.topSeed?.team_name ?? 'TBD'}</span>
-              {#if m.topSeed?.record}<span class="pp-rec">{m.topSeed.record}</span>{/if}
-              {#if seriesScore(m.game, m.topSeed?.team_name) !== null}<span class="pp-score">{seriesScore(m.game, m.topSeed?.team_name)}</span>{/if}
-              <span class="pp-seed">{m.topLabel}</span>
+            <div class="pp-row {m.topCls} pp-sep">
+              {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
+              <span class="pp-name">{m.topName}</span>
+              {#if m.topRec}<span class="pp-rec">{m.topRec}</span>{/if}
+              {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
+              {#if m.topSeedLabel}<span class="pp-seed">{m.topSeedLabel}</span>{/if}
             </div>
-            <div class="pp-row {qfCls(m,true)}">
-              {#if m.botSeed?.team_logo}<img src={m.botSeed.team_logo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.botSeed?.team_name ?? 'TBD'}</span>
-              {#if m.botSeed?.record}<span class="pp-rec">{m.botSeed.record}</span>{/if}
-              {#if seriesScore(m.game, m.botSeed?.team_name) !== null}<span class="pp-score">{seriesScore(m.game, m.botSeed?.team_name)}</span>{/if}
-              <span class="pp-seed">{m.botLabel}</span>
+            <div class="pp-row {m.botCls}">
+              {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
+              <span class="pp-name">{m.botName}</span>
+              {#if m.botRec}<span class="pp-rec">{m.botRec}</span>{/if}
+              {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
+              {#if m.botSeedLabel}<span class="pp-seed">{m.botSeedLabel}</span>{/if}
             </div>
           </div>
         </div>
@@ -477,19 +613,19 @@
         {#each pair as m}
         <div class="bk-slot">
           <div class="pp-card">
-            <div class="pp-row {qfCls(m,false)} pp-sep">
-              {#if m.topSeed?.team_logo}<img src={m.topSeed.team_logo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.topSeed?.team_name ?? 'TBD'}</span>
-              {#if m.topSeed?.record}<span class="pp-rec">{m.topSeed.record}</span>{/if}
-              {#if seriesScore(m.game, m.topSeed?.team_name) !== null}<span class="pp-score">{seriesScore(m.game, m.topSeed?.team_name)}</span>{/if}
-              <span class="pp-seed">{m.topLabel}</span>
+            <div class="pp-row {m.topCls} pp-sep">
+              {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
+              <span class="pp-name">{m.topName}</span>
+              {#if m.topRec}<span class="pp-rec">{m.topRec}</span>{/if}
+              {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
+              {#if m.topSeedLabel}<span class="pp-seed">{m.topSeedLabel}</span>{/if}
             </div>
-            <div class="pp-row {qfCls(m,true)}">
-              {#if m.botSeed?.team_logo}<img src={m.botSeed.team_logo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.botSeed?.team_name ?? 'TBD'}</span>
-              {#if m.botSeed?.record}<span class="pp-rec">{m.botSeed.record}</span>{/if}
-              {#if seriesScore(m.game, m.botSeed?.team_name) !== null}<span class="pp-score">{seriesScore(m.game, m.botSeed?.team_name)}</span>{/if}
-              <span class="pp-seed">{m.botLabel}</span>
+            <div class="pp-row {m.botCls}">
+              {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
+              <span class="pp-name">{m.botName}</span>
+              {#if m.botRec}<span class="pp-rec">{m.botRec}</span>{/if}
+              {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
+              {#if m.botSeedLabel}<span class="pp-seed">{m.botSeedLabel}</span>{/if}
             </div>
           </div>
         </div>

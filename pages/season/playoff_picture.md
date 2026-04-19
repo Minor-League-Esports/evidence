@@ -220,4 +220,14 @@ WHERE mg.parent_group_title = 'Season 19 Playoffs'
 ORDER BY mg.match_group_title
 ```
 
-<PlayoffBracket {playoff_seeds} {playoff_games} {h2h_records} {division_records} league="{inputs.League}" />
+<!-- All-team logo lookup so teams outside the top 4 seeds still render a logo. -->
+
+```sql team_logos
+SELECT DISTINCT
+    Franchise AS team_name
+    , "Photo URL" AS team_logo
+FROM teams
+WHERE "Photo URL" IS NOT NULL AND "Photo URL" != ''
+```
+
+<PlayoffBracket {playoff_seeds} {playoff_games} {h2h_records} {division_records} {team_logos} league="{inputs.League}" />
