@@ -27,6 +27,7 @@ SELECT
     , l.color
     , l.league_photo_url
     , l.max_salary
+    , l.eligibility_requirement
     , COUNT(*) AS num_players
 
 FROM players p
@@ -43,6 +44,7 @@ GROUP BY
     , l.color
     , l.league_photo_url
     , l.max_salary
+    , l.eligibility_requirement
 
 HAVING num_players > 1
 
@@ -96,7 +98,7 @@ WITH eligibility AS (
 	    COALESCE(ru.standard_uses, 0) AS standard_uses,
 	    COALESCE(ru.total_uses, 0) AS total_uses,
 	    p.current_scrim_points,
-	    CASE WHEN p.current_scrim_points >= 30 THEN 'Yes'
+	    CASE WHEN p.current_scrim_points >= l.eligibility_requirement THEN 'Yes'
 	        ELSE 'No'
 	    END AS Eligible,
 	    p."Eligible Through"
@@ -108,6 +110,9 @@ WITH eligibility AS (
 	    AND p.slot = ru.role
 	    AND UPPER(p.skill_group) = CONCAT(ru.league, ' LEAGUE')
 	    AND ru.season_number = 19
+	
+	LEFT JOIN leagues l
+	    ON p.skill_group = l.league_name
 	
 	WHERE p.slot LIKE 'PLAYER%'
 	
@@ -251,7 +256,7 @@ SELECT
     COALESCE(ru.standard_uses, 0) AS standard_uses,
     COALESCE(ru.total_uses, 0) AS total_uses,
     p.current_scrim_points,
-    CASE WHEN p.current_scrim_points >= 30 THEN 'Yes'
+    CASE WHEN p.current_scrim_points >= l.eligibility_requirement THEN 'Yes'
         ELSE 'No'
     END AS Eligible,
     p."Eligible Through",
@@ -281,6 +286,9 @@ LEFT JOIN players p
     AND p.franchise = bs.team_name
     AND UPPER(p.skill_group) = CONCAT(UPPER(bs.league), ' LEAGUE')
 
+LEFT JOIN leagues l
+    ON UPPER(l.league_name) = CONCAT(UPPER(bs.league), ' LEAGUE')
+
 
 ORDER BY
     bs.league
@@ -303,7 +311,7 @@ ORDER BY
     <Column id=doubles_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 4, 5, 6]} />
     <Column id=standard_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 6, 7, 8]} />
     <Column id=total_uses align=center contentType=colorscale colorScale={['white', 'white', 'yellow', '#ce5050']} colorBreakpoints={[0, 10, 11, 12]} />    
-    <Column id=current_scrim_points align=center contentType=colorscale colorScale={['#ce5050','white']} colorBreakpoints={[0, 30]}/>
+    <Column id=current_scrim_points align=center contentType=colorscale colorScale={['#ce5050','white']} colorBreakpoints={[0, league.eligibility_requirement]}/>
     <Column id="Eligible Through" align=center />
 </DataTable>
 
@@ -382,6 +390,7 @@ SELECT
 SUBSTRING(match_group_title, 7)::INT AS week,
 opponent,
 franchise_link,
+'/matchups/' || gd.match_id AS matchup_link,
 series_winner,
 CASE WHEN series_winner = '${params.franchise}' THEN 'Win' 
     WHEN series_winner = 'Not Played / Data Unavailable' THEN 'NA'
@@ -420,7 +429,7 @@ FROM record re
     <Column id=week align=center />
     <Column id=franchise_link contentType=link linkLabel=opponent title=Opponent align=center />
     <Column id=series_result align=center />
-    <Column id=record align=center />
+    <Column id=matchup_link contentType=link linkLabel=record title=Record align=center />
     <Column id=goal_differential align=center />
 </DataTable>
 
@@ -440,19 +449,23 @@ WITH S19standings AS (
 ), results AS (
 
 	SELECT
-		r.match_id
+		m.match_id
 		, m.league
 		, m.game_mode
-		, r.Home AS team_name
+		, m.home AS team_name
 		, m.home_wins AS wins
 		, m.away_wins AS loses
-		, CASE WHEN r.Home = m.winning_team THEN 1 ELSE 0 END AS series_wins
-		, CASE WHEN r.Home != m.winning_team THEN 1 ELSE 0 END AS series_loses
-		, SUM(r."Home Goals") AS goals_for
-		, SUM(r."Away Goals") AS goals_against
+		, CASE WHEN m.home = m.winning_team THEN 1 ELSE 0 END AS series_wins
+		, CASE
+			WHEN m.winning_team = 'Not Played / Data Unavailable' THEN 0
+			WHEN m.home = m.winning_team THEN 0
+			ELSE 1
+		  END AS series_loses
+		, COALESCE(SUM(r."Home Goals"), 0) AS goals_for
+		, COALESCE(SUM(r."Away Goals"), 0) AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM s19_rounds r
-	INNER JOIN matches m
+	FROM matches m
+	LEFT JOIN s19_rounds r
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    ON m.match_group_id = mg.match_group_id
@@ -463,19 +476,23 @@ WITH S19standings AS (
 	UNION ALL
 	
 	SELECT
-		r.match_id
+		m.match_id
 		, m.league
 		, m.game_mode
-		, r.Away AS team_name
+		, m.away AS team_name
 		, m.away_wins AS wins
 		, m.home_wins AS loses
-		, CASE WHEN r.Away = m.winning_team THEN 1 ELSE 0 END AS series_wins
-		, CASE WHEN r.Away != m.winning_team THEN 1 ELSE 0 END AS series_loses
-		, SUM(r."Away Goals") AS goals_for
-		, SUM(r."Home Goals") AS goals_against
+		, CASE WHEN m.away = m.winning_team THEN 1 ELSE 0 END AS series_wins
+		, CASE
+			WHEN m.winning_team = 'Not Played / Data Unavailable' THEN 0
+			WHEN m.away = m.winning_team THEN 0
+			ELSE 1
+		  END AS series_loses
+		, COALESCE(SUM(r."Away Goals"), 0) AS goals_for
+		, COALESCE(SUM(r."Home Goals"), 0) AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM s19_rounds r
-	INNER JOIN matches m
+	FROM matches m
+	LEFT JOIN s19_rounds r
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    ON m.match_group_id = mg.match_group_id

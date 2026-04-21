@@ -82,42 +82,50 @@ with S19standings as (
 ), results AS (
 
 	SELECT
-		r.match_id
+		m.match_id
 		, m.league
 		, m.game_mode
-		, r.Home AS team_name
+		, m.home AS team_name
 		, m.home_wins AS wins
 		, m.away_wins AS loses
-		, CASE WHEN r.Home = m.winning_team THEN 1 ELSE 0 END AS series_wins
-		, CASE WHEN r.Home != m.winning_team THEN 1 ELSE 0 END AS series_loses
-		, SUM(r."Home Goals") AS goals_for
-		, SUM(r."Away Goals") AS goals_against
+		, CASE WHEN m.home = m.winning_team THEN 1 ELSE 0 END AS series_wins
+		, CASE
+			WHEN m.winning_team = 'Not Played / Data Unavailable' THEN 0
+			WHEN m.home = m.winning_team THEN 0
+			ELSE 1
+		  END AS series_loses
+		, COALESCE(SUM(r."Home Goals"), 0) AS goals_for
+		, COALESCE(SUM(r."Away Goals"), 0) AS goals_against
 		, goals_for - goals_against AS goal_diff
-		FROM s19_rounds r
-		INNER JOIN matches m
-		    ON r.match_id = m.match_id
-		INNER JOIN match_groups mg
-		    on m.match_group_id = mg.match_group_id
-		WHERE mg.parent_group_title = 'Season 19'
+	FROM matches m
+	LEFT JOIN s19_rounds r
+	    ON r.match_id = m.match_id
+	INNER JOIN match_groups mg
+	    on m.match_group_id = mg.match_group_id
+	WHERE mg.parent_group_title = 'Season 19'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 		
 	UNION ALL
 	
 	SELECT
-		r.match_id
+		m.match_id
 		, m.league
 		, m.game_mode
-		, r.Away AS team_name
+		, m.away AS team_name
 		, m.away_wins AS wins
 		, m.home_wins AS loses
-		, CASE WHEN r.Away = m.winning_team THEN 1 ELSE 0 END AS series_wins
-		, CASE WHEN r.Away != m.winning_team THEN 1 ELSE 0 END AS series_loses
-		, SUM(r."Away Goals") AS goals_for
-		, SUM(r."Home Goals") AS goals_against
+		, CASE WHEN m.away = m.winning_team THEN 1 ELSE 0 END AS series_wins
+		, CASE
+			WHEN m.winning_team = 'Not Played / Data Unavailable' THEN 0
+			WHEN m.away = m.winning_team THEN 0
+			ELSE 1
+		  END AS series_loses
+		, COALESCE(SUM(r."Away Goals"), 0) AS goals_for
+		, COALESCE(SUM(r."Home Goals"), 0) AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM s19_rounds r
-	INNER JOIN matches m
+	FROM matches m
+	LEFT JOIN s19_rounds r
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
@@ -226,19 +234,23 @@ with S19standings as (
 ), results AS (
 
 	SELECT
-		r.match_id
+		m.match_id
 		, m.league
 		, m.game_mode
-		, r.Home AS team_name
+		, m.home AS team_name
 		, m.home_wins AS wins
 		, m.away_wins AS loses
-		, CASE WHEN r.Home = m.winning_team THEN 1 ELSE 0 END AS series_wins
-		, CASE WHEN r.Home != m.winning_team THEN 1 ELSE 0 END AS series_loses
-		, SUM(r."Home Goals") AS goals_for
-		, SUM(r."Away Goals") AS goals_against
+		, CASE WHEN m.home = m.winning_team THEN 1 ELSE 0 END AS series_wins
+		, CASE
+			WHEN m.winning_team = 'Not Played / Data Unavailable' THEN 0
+			WHEN m.home = m.winning_team THEN 0
+			ELSE 1
+		  END AS series_loses
+		, COALESCE(SUM(r."Home Goals"), 0) AS goals_for
+		, COALESCE(SUM(r."Away Goals"), 0) AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM s19_rounds r
-	INNER JOIN matches m
+	FROM matches m
+	LEFT JOIN s19_rounds r
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
@@ -249,19 +261,23 @@ with S19standings as (
 	UNION ALL
 	
 	SELECT
-		r.match_id
+		m.match_id
 		, m.league
 		, m.game_mode
-		, r.Away AS team_name
+		, m.away AS team_name
 		, m.away_wins AS wins
 		, m.home_wins AS loses
-		, CASE WHEN r.Away = m.winning_team THEN 1 ELSE 0 END AS series_wins
-		, CASE WHEN r.Away != m.winning_team THEN 1 ELSE 0 END AS series_loses
-		, SUM(r."Away Goals") AS goals_for
-		, SUM(r."Home Goals") AS goals_against
+		, CASE WHEN m.away = m.winning_team THEN 1 ELSE 0 END AS series_wins
+		, CASE
+			WHEN m.winning_team = 'Not Played / Data Unavailable' THEN 0
+			WHEN m.away = m.winning_team THEN 0
+			ELSE 1
+		  END AS series_loses
+		, COALESCE(SUM(r."Away Goals"), 0) AS goals_for
+		, COALESCE(SUM(r."Home Goals"), 0) AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM s19_rounds r
-	INNER JOIN matches m
+	FROM matches m
+	LEFT JOIN s19_rounds r
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
@@ -374,19 +390,23 @@ with S19standings as (
 ), results AS (
 
 	SELECT
-		r.match_id
+		m.match_id
 		, m.league
 		, m.game_mode
-		, r.Home AS team_name
+		, m.home AS team_name
 		, m.home_wins AS wins
 		, m.away_wins AS loses
-		, CASE WHEN r.Home = m.winning_team THEN 1 ELSE 0 END AS series_wins
-		, CASE WHEN r.Home != m.winning_team THEN 1 ELSE 0 END AS series_loses
-		, SUM(r."Home Goals") AS goals_for
-		, SUM(r."Away Goals") AS goals_against
+		, CASE WHEN m.home = m.winning_team THEN 1 ELSE 0 END AS series_wins
+		, CASE
+			WHEN m.winning_team = 'Not Played / Data Unavailable' THEN 0
+			WHEN m.home = m.winning_team THEN 0
+			ELSE 1
+		  END AS series_loses
+		, COALESCE(SUM(r."Home Goals"), 0) AS goals_for
+		, COALESCE(SUM(r."Away Goals"), 0) AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM s19_rounds r
-	INNER JOIN matches m
+	FROM matches m
+	LEFT JOIN s19_rounds r
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
@@ -397,19 +417,23 @@ with S19standings as (
 	UNION ALL
 	
 	SELECT
-		r.match_id
+		m.match_id
 		, m.league
 		, m.game_mode
-		, r.Away AS team_name
+		, m.away AS team_name
 		, m.away_wins AS wins
 		, m.home_wins AS loses
-		, CASE WHEN r.Away = m.winning_team THEN 1 ELSE 0 END AS series_wins
-		, CASE WHEN r.Away != m.winning_team THEN 1 ELSE 0 END AS series_loses
-		, SUM(r."Away Goals") AS goals_for
-		, SUM(r."Home Goals") AS goals_against
+		, CASE WHEN m.away = m.winning_team THEN 1 ELSE 0 END AS series_wins
+		, CASE
+			WHEN m.winning_team = 'Not Played / Data Unavailable' THEN 0
+			WHEN m.away = m.winning_team THEN 0
+			ELSE 1
+		  END AS series_loses
+		, COALESCE(SUM(r."Away Goals"), 0) AS goals_for
+		, COALESCE(SUM(r."Home Goals"), 0) AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM s19_rounds r
-	INNER JOIN matches m
+	FROM matches m
+	LEFT JOIN s19_rounds r
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
@@ -547,19 +571,23 @@ with S19standings as (
 ), results AS (
 
 	SELECT
-		r.match_id
+		m.match_id
 		, m.league
 		, m.game_mode
-		, r.Home AS team_name
+		, m.home AS team_name
 		, m.home_wins AS wins
 		, m.away_wins AS loses
-		, CASE WHEN r.Home = m.winning_team THEN 1 ELSE 0 END AS series_wins
-		, CASE WHEN r.Home != m.winning_team THEN 1 ELSE 0 END AS series_loses
-		, SUM(r."Home Goals") AS goals_for
-		, SUM(r."Away Goals") AS goals_against
+		, CASE WHEN m.home = m.winning_team THEN 1 ELSE 0 END AS series_wins
+		, CASE
+			WHEN m.winning_team = 'Not Played / Data Unavailable' THEN 0
+			WHEN m.home = m.winning_team THEN 0
+			ELSE 1
+		  END AS series_loses
+		, COALESCE(SUM(r."Home Goals"), 0) AS goals_for
+		, COALESCE(SUM(r."Away Goals"), 0) AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM s19_rounds r
-	INNER JOIN matches m
+	FROM matches m
+	LEFT JOIN s19_rounds r
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
@@ -570,19 +598,23 @@ with S19standings as (
 	UNION ALL
 	
 	SELECT
-		r.match_id
+		m.match_id
 		, m.league
 		, m.game_mode
-		, r.Away AS team_name
+		, m.away AS team_name
 		, m.away_wins AS wins
 		, m.home_wins AS loses
-		, CASE WHEN r.Away = m.winning_team THEN 1 ELSE 0 END AS series_wins
-		, CASE WHEN r.Away != m.winning_team THEN 1 ELSE 0 END AS series_loses
-		, SUM(r."Away Goals") AS goals_for
-		, SUM(r."Home Goals") AS goals_against
+		, CASE WHEN m.away = m.winning_team THEN 1 ELSE 0 END AS series_wins
+		, CASE
+			WHEN m.winning_team = 'Not Played / Data Unavailable' THEN 0
+			WHEN m.away = m.winning_team THEN 0
+			ELSE 1
+		  END AS series_loses
+		, COALESCE(SUM(r."Away Goals"), 0) AS goals_for
+		, COALESCE(SUM(r."Home Goals"), 0) AS goals_against
 		, goals_for - goals_against AS goal_diff
-	FROM s19_rounds r
-	INNER JOIN matches m
+	FROM matches m
+	LEFT JOIN s19_rounds r
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
