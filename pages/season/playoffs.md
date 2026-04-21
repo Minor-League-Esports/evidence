@@ -22,10 +22,11 @@ sidebar_position: 3
     <ButtonGroupItem valueLabel="Standard" value="Standard" />
 </ButtonGroup>
 
-<!-- Playoff seeds: calculates seeding for each league/mode combination.
+<!-- Playoff seeds: returns ALL eligible teams per partition (no seed_rank cutoff).
+     Full tiebreaker resolution (H2H, division%) happens in JS — cutting at 4 here
+     would drop teams that tie on win% outside the top 4 before H2H can promote them.
      Partitions by conference (16-team) or super_division (32-team).
-     Division leaders get seeds 1-2, wildcards get 3-4.
-     Ordered by: divisional leader status, win%, series win%, goal diff, goals for. -->
+     Division leaders get seeds 1-2, wildcards get 3-4. -->
 
 ```sql playoff_seeds
 WITH S19standings AS (
@@ -139,7 +140,6 @@ ranked AS (
     FROM staging
 )
 SELECT * FROM ranked
-WHERE seed_rank <= 4
 ORDER BY conference, super_division, seed_rank
 ```
 

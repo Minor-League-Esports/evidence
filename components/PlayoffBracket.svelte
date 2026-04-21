@@ -32,125 +32,143 @@
   // Division leaders are guaranteed seeds 1–2; wildcards get seeds 3–4.
   // Within each group, teams are sorted by win% first, then tiebreakers resolve only
   // among teams with identical win%.
+  //
+  // h2h_records and division_records are passed explicitly into resolveTiebreakers so
+  // Svelte's static reactive-dep tracking re-runs the computation when those arrays
+  // arrive asynchronously — reading them via closure would miss the initial arrival
+  // and silently drop the H2H/division% steps. (Same pattern as roundGames below.)
 
-  // Returns teamA's game win percentage against teamB (0–1), or null if they never played.
-  function getH2HWinPct(teamA, teamB) {
-    let aWins = 0, bWins = 0;
-    const direct = h2h_records.find(r => r.team_a === teamA && r.team_b === teamB);
-    if (direct) { aWins += direct.a_game_wins; bWins += direct.b_game_wins; }
-    const reverse = h2h_records.find(r => r.team_a === teamB && r.team_b === teamA);
-    if (reverse) { aWins += reverse.b_game_wins; bWins += reverse.a_game_wins; }
-    if (aWins + bWins === 0) return null;
-    return aWins / (aWins + bWins);
-  }
-
-  function beatsAll(team, opponents) {
-    return opponents.every(opp => {
-      const pct = getH2HWinPct(team.team_name, opp.team_name);
-      return pct !== null && pct > 0.5;
-    });
-  }
-
-  function losesToAll(team, opponents) {
-    return opponents.every(opp => {
-      const pct = getH2HWinPct(team.team_name, opp.team_name);
-      return pct !== null && pct < 0.5;
-    });
-  }
-
-  // Multi-team H2H elimination (rules 1.9.2.1–1.9.2.3):
-  // Iteratively removes teams that beat ALL or lose to ALL others, then restarts.
-  function multiTeamH2H(teams) {
-    let remaining = [...teams];
-    let top = [], bottom = [];
-    let changed = true;
-    while (changed && remaining.length > 1) {
-      changed = false;
-      let newTop = [], newBottom = [];
-      // Rules 1.9.2.1 + 1.9.2.2 observed simultaneously (1.9.2.3)
-      for (const team of remaining) {
-        const others = remaining.filter(t => t !== team);
-        if (beatsAll(team, others)) newTop.push(team);
-        else if (losesToAll(team, others)) newBottom.push(team);
-      }
-      if (newTop.length > 0 || newBottom.length > 0) {
-        top.push(...newTop);
-        bottom.unshift(...newBottom);
-        remaining = remaining.filter(t => !newTop.includes(t) && !newBottom.includes(t));
-        changed = true;
-      }
-    }
-    return { top, bottom, remaining };
-  }
-
-  // Groups teams by a stat value (descending), returns array of arrays with equal values.
-  function groupByValue(teams, stat) {
-    if (teams.length === 0) return [];
-    const sorted = [...teams].sort((a, b) => (b[stat] ?? 0) - (a[stat] ?? 0));
-    const groups = [[sorted[0]]];
-    for (let i = 1; i < sorted.length; i++) {
-      if ((sorted[i][stat] ?? 0) === (groups[groups.length - 1][0][stat] ?? 0)) {
-        groups[groups.length - 1].push(sorted[i]);
-      } else {
-        groups.push([sorted[i]]);
-      }
-    }
-    return groups;
-  }
-
-  function allShareDivision(teams) {
-    const divs = new Set(teams.map(t => t.division).filter(Boolean));
-    return divs.size === 1;
-  }
-
-  function getDivWinPct(teamName) {
-    return division_records.find(r => r.team_name === teamName)?.div_win_pct ?? 0;
-  }
-
-  // Recursive tiebreaker resolution per rules 1.9.1-1.9.6.
-  // On any elimination the procedure restarts from the top (via recursion).
-  function resolveCluster(tiedTeams) {
-    if (tiedTeams.length <= 1) return tiedTeams;
-
-    // Step 2: H2H
-    if (tiedTeams.length === 2) {
-      const pct = getH2HWinPct(tiedTeams[0].team_name, tiedTeams[1].team_name);
-      if (pct !== null && pct !== 0.5) {
-        return pct > 0.5 ? [tiedTeams[0], tiedTeams[1]] : [tiedTeams[1], tiedTeams[0]];
-      }
-    } else {
-      const { top, bottom, remaining } = multiTeamH2H(tiedTeams);
-      if (top.length > 0 || bottom.length > 0) {
-        return [...top, ...resolveCluster(remaining), ...bottom];
-      }
-    }
-
-    // Step 3: Series win %
-    const bySeries = groupByValue(tiedTeams, 'series_win_pct');
-    if (bySeries.length > 1) return bySeries.flatMap(g => resolveCluster(g));
-
-    // Step 4: Division game win % (only if all tied teams share a division)
-    if (allShareDivision(tiedTeams)) {
-      const withDiv = tiedTeams.map(t => ({ ...t, _dwp: getDivWinPct(t.team_name) }));
-      const byDiv = groupByValue(withDiv, '_dwp');
-      if (byDiv.length > 1) return byDiv.flatMap(g => resolveCluster(g));
-    }
-
-    // Step 5: Goal differential
-    const byGD = groupByValue(tiedTeams, 'goal_differential');
-    if (byGD.length > 1) return byGD.flatMap(g => resolveCluster(g));
-
-    // Step 6: Goals for
-    const byGF = groupByValue(tiedTeams, 'goals_for');
-    if (byGF.length > 1) return byGF.flatMap(g => resolveCluster(g));
-
-    return tiedTeams;
-  }
-
-  // Main entry point: partitions seeds by conference or super_division, then resolves
-  // seeding within each partition. Leaders (div winners) are ranked first, then wildcards.
-  function resolveTiebreakers(seeds, is16Team) {
+  function resolveTiebreakers(seeds, is16Team, h2h, divRecords) {
     if (!seeds || seeds.length === 0) return [];
+
+    // Returns teamA's game win percentage against teamB (0–1), or null if they never played.
+    function getH2HWinPct(teamA, teamB) {
+      let aWins = 0, bWins = 0;
+      const direct = (h2h || []).find(r => r.team_a === teamA && r.team_b === teamB);
+      if (direct) { aWins += direct.a_game_wins; bWins += direct.b_game_wins; }
+      const reverse = (h2h || []).find(r => r.team_a === teamB && r.team_b === teamA);
+      if (reverse) { aWins += reverse.b_game_wins; bWins += reverse.a_game_wins; }
+      if (aWins + bWins === 0) return null;
+      return aWins / (aWins + bWins);
+    }
+
+    function beatsAll(team, opponents) {
+      return opponents.every(opp => {
+        const pct = getH2HWinPct(team.team_name, opp.team_name);
+        return pct !== null && pct > 0.5;
+      });
+    }
+
+    function losesToAll(team, opponents) {
+      return opponents.every(opp => {
+        const pct = getH2HWinPct(team.team_name, opp.team_name);
+        return pct !== null && pct < 0.5;
+      });
+    }
+
+    // Multi-team H2H elimination (rules 1.9.2.1–1.9.2.3):
+    // Iteratively removes teams that beat ALL or lose to ALL others, then restarts.
+    function multiTeamH2H(teams) {
+      let remaining = [...teams];
+      let top = [], bottom = [];
+      let changed = true;
+      while (changed && remaining.length > 1) {
+        changed = false;
+        let newTop = [], newBottom = [];
+        // Rules 1.9.2.1 + 1.9.2.2 observed simultaneously (1.9.2.3)
+        for (const team of remaining) {
+          const others = remaining.filter(t => t !== team);
+          if (beatsAll(team, others)) newTop.push(team);
+          else if (losesToAll(team, others)) newBottom.push(team);
+        }
+        if (newTop.length > 0 || newBottom.length > 0) {
+          top.push(...newTop);
+          bottom.unshift(...newBottom);
+          remaining = remaining.filter(t => !newTop.includes(t) && !newBottom.includes(t));
+          changed = true;
+        }
+      }
+      return { top, bottom, remaining };
+    }
+
+    // Groups teams by a stat value (descending), returns array of arrays with equal values.
+    function groupByValue(teams, stat) {
+      if (teams.length === 0) return [];
+      const sorted = [...teams].sort((a, b) => (b[stat] ?? 0) - (a[stat] ?? 0));
+      const groups = [[sorted[0]]];
+      for (let i = 1; i < sorted.length; i++) {
+        if ((sorted[i][stat] ?? 0) === (groups[groups.length - 1][0][stat] ?? 0)) {
+          groups[groups.length - 1].push(sorted[i]);
+        } else {
+          groups.push([sorted[i]]);
+        }
+      }
+      return groups;
+    }
+
+    function allShareDivision(teams) {
+      const divs = new Set(teams.map(t => t.division).filter(Boolean));
+      return divs.size === 1;
+    }
+
+    function getDivWinPct(teamName) {
+      return (divRecords || []).find(r => r.team_name === teamName)?.div_win_pct ?? 0;
+    }
+
+    // Recursive tiebreaker resolution per rules 1.9.1-1.9.6.
+    // On any elimination the procedure restarts from the top (via recursion).
+    function resolveCluster(tiedTeams) {
+      if (tiedTeams.length <= 1) return tiedTeams;
+
+      // Step 2: H2H
+      if (tiedTeams.length === 2) {
+        const pct = getH2HWinPct(tiedTeams[0].team_name, tiedTeams[1].team_name);
+        if (pct !== null && pct !== 0.5) {
+          return pct > 0.5 ? [tiedTeams[0], tiedTeams[1]] : [tiedTeams[1], tiedTeams[0]];
+        }
+      } else {
+        const { top, bottom, remaining } = multiTeamH2H(tiedTeams);
+        if (top.length > 0 || bottom.length > 0) {
+          return [...top, ...resolveCluster(remaining), ...bottom];
+        }
+      }
+
+      // Step 3: Series win %
+      const bySeries = groupByValue(tiedTeams, 'series_win_pct');
+      if (bySeries.length > 1) return bySeries.flatMap(g => resolveCluster(g));
+
+      // Step 4: Division game win % (only if all tied teams share a division)
+      if (allShareDivision(tiedTeams)) {
+        const withDiv = tiedTeams.map(t => ({ ...t, _dwp: getDivWinPct(t.team_name) }));
+        const byDiv = groupByValue(withDiv, '_dwp');
+        if (byDiv.length > 1) return byDiv.flatMap(g => resolveCluster(g));
+      }
+
+      // Step 5: Goal differential
+      const byGD = groupByValue(tiedTeams, 'goal_differential');
+      if (byGD.length > 1) return byGD.flatMap(g => resolveCluster(g));
+
+      // Step 6: Goals for
+      const byGF = groupByValue(tiedTeams, 'goals_for');
+      if (byGF.length > 1) return byGF.flatMap(g => resolveCluster(g));
+
+      return tiedTeams;
+    }
+
+    function resolveGroup(teams) {
+      if (teams.length <= 1) return teams;
+      const byWinPct = groupByValue(teams, 'win_pct');
+      return byWinPct.flatMap(g => g.length === 1 ? g : resolveCluster(g));
+    }
+
+    // Partition seeds by conference or super_division. Within each partition, the
+    // rules require division standings to be decided FIRST: run the full tiebreaker
+    // procedure inside each division to pick its winner (guaranteed a top seed),
+    // then rank the division winners among themselves and the non-winners among
+    // themselves using the same procedure. The SQL `is_divisional_leader` flag is
+    // ignored here because it comes from an external standings table that doesn't
+    // apply the H2H step — e.g. when two teams in one division tie on wins, SQL
+    // may crown the wrong team as leader.
     const partKey = is16Team ? 'conference' : 'super_division';
     const groups = {};
     for (const t of seeds) {
@@ -158,26 +176,32 @@
       if (!groups[k]) groups[k] = [];
       groups[k].push(t);
     }
-    // Sort by win_pct first, then only apply tiebreakers within same win_pct
-    function resolveGroup(teams) {
-      if (teams.length <= 1) return teams;
-      const byWinPct = groupByValue(teams, 'win_pct');
-      return byWinPct.flatMap(g => g.length === 1 ? g : resolveCluster(g));
-    }
 
     const result = [];
     for (const teams of Object.values(groups)) {
-      const leaders = teams.filter(t => t.is_divisional_leader == 1);
-      const others = teams.filter(t => t.is_divisional_leader != 1);
-      const resolved = [...resolveGroup(leaders), ...resolveGroup(others)];
+      const divisions = {};
+      for (const t of teams) {
+        const d = t.division ?? 'unknown';
+        if (!divisions[d]) divisions[d] = [];
+        divisions[d].push(t);
+      }
+      const leaders = [];
+      const nonLeaders = [];
+      for (const divTeams of Object.values(divisions)) {
+        const ranked = resolveGroup(divTeams);
+        leaders.push(ranked[0]);
+        nonLeaders.push(...ranked.slice(1));
+      }
+      const resolved = [...resolveGroup(leaders), ...resolveGroup(nonLeaders)];
       result.push(...resolved.map((t, i) => ({ ...t, resolved_rank: i + 1 })));
     }
     return result;
   }
 
   // ===== Resolved Seeds =====
-  // Pass is16 explicitly so Svelte tracks the dependency on both playoff_seeds and is16
-  $: resolvedSeeds = resolveTiebreakers(playoff_seeds, is16);
+  // h2h_records and division_records are passed explicitly so Svelte re-runs this
+  // when either arrives after playoff_seeds (see comment on resolveTiebreakers).
+  $: resolvedSeeds = resolveTiebreakers(playoff_seeds, is16, h2h_records, division_records);
 
   // ===== Shared Helpers =====
   // Note: seed lookups below reference resolvedSeeds directly in the $: expression
