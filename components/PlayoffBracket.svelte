@@ -120,6 +120,39 @@
     function resolveCluster(tiedTeams) {
       if (tiedTeams.length <= 1) return tiedTeams;
 
+      // Rule 1.9 cross-division clause: "If multiple teams from the same division
+      // are involved in a tie ... with the other division, the highest ranked team
+      // from each division in the tie will be compared first. The team that loses
+      // the tie will then compare against the next highest team in the tie from
+      // the other division."
+      // Trigger: tied cluster spans 2+ divisions AND at least one division contains
+      // 2+ tied teams. Procedure: rank each division's tied teams internally, then
+      // iteratively pair the current top-of-each-division, seed the winner, and let
+      // the loser face the next candidate from the opposite division.
+      const divGroups = {};
+      for (const t of tiedTeams) {
+        const d = t.division ?? '_unknown';
+        if (!divGroups[d]) divGroups[d] = [];
+        divGroups[d].push(t);
+      }
+      const divNames = Object.keys(divGroups);
+      if (divNames.length > 1 && divNames.some(d => divGroups[d].length > 1)) {
+        const queues = {};
+        for (const d of divNames) queues[d] = resolveCluster(divGroups[d]);
+        const out = [];
+        while (true) {
+          const active = divNames.filter(d => queues[d].length > 0);
+          if (active.length === 0) break;
+          if (active.length === 1) { out.push(...queues[active[0]]); break; }
+          const candidates = active.map(d => queues[d][0]);
+          const ranked = resolveCluster(candidates);
+          const winner = ranked[0];
+          out.push(winner);
+          queues[winner.division ?? '_unknown'].shift();
+        }
+        return out;
+      }
+
       // Step 2: H2H
       if (tiedTeams.length === 2) {
         const pct = getH2HWinPct(tiedTeams[0].team_name, tiedTeams[1].team_name);
