@@ -1,8 +1,7 @@
 ---
-title: Home
+title: Minor League Esports Statistics
 sidebar_position: 1
 ---
-
 
 ```sql teamLogos
 SELECT 
@@ -12,412 +11,226 @@ franchise,
 FROM teams
 ORDER BY franchise ASC
 ```
+
 <div style="width:100%; max-width:700px; margin:auto;">
-<div style="display:flex; flex-direction:row; align-items:center; justify-content:center; flex-wrap:wrap; gap:0.25rem;"> 
+<div style="display:flex; flex-direction:row; align-items:center; justify-content:center; flex-wrap:wrap; gap:0.25rem;">
 {#each teamLogos || [] as t}
-<a href="{t.franchiseLink}" > 
+<a href="{t.franchiseLink}">
   {#if t.logo}
-    <img class="h-10 w-10" alt={t.franchise} style="content: url({t.logo}); object-fit: contain;" /> 
+    <img class="h-10 w-10" alt={t.franchise} style="content: url({t.logo}); object-fit: contain;" />
   {/if}
 </a>
 {/each}
 </div>
 </div>
 
+<h2 style="font-size: 25px;"><b><u> Season 19 Playoffs </u></b></h2>
 
-<p>&nbsp; </p>
-<h1 style="font-size: 40px;"><center><b> MLE Homepage </b></center></h1>
+<LastRefreshed prefix="Data last updated"/>
 
+<ButtonGroup name=League>
+    <ButtonGroupItem valueLabel="Foundation League" value="Foundation League" default />
+    <ButtonGroupItem valueLabel="Academy League" value="Academy League" />
+    <ButtonGroupItem valueLabel="Champion League" value="Champion League" />
+    <ButtonGroupItem valueLabel="Master League" value="Master League" />
+    <ButtonGroupItem valueLabel="Premier League" value="Premier League" />
+</ButtonGroup>
 
-Evidence is your gateway into MLE's statistics. Here you will find pages for
-many areas of current, and historical stats (performance, standings, etc).
-If you don't see something here, or are unsure of how to use this tool, reach out
-to the team on [Discord](https://discord.com/channels/172404472637685760/323511951357509642).
+<ButtonGroup name=GameMode>
+    <ButtonGroupItem valueLabel="Doubles" value="Doubles" default />
+    <ButtonGroupItem valueLabel="Standard" value="Standard" />
+</ButtonGroup>
 
-<h2 style="font-size: 25px;"><center><b><u> Season 18 Champions </u></b></center></h2>
-
-<h3 style="font-size: 20px;"><center><b> Doubles: </b></center></h3>
-
-<div style="text-align: center;">
-    <span style="display: inline-flex; align-items: center;">
-        <b>FL:</b> &nbsp;Flames {#if teamLogos?.[11]?.logo}<img class="h-10" alt="Flames" style="content: url('{teamLogos[11].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>AL:</b> &nbsp;Hurricanes {#if teamLogos?.[15]?.logo}<img class="h-10" alt="Hurricanes" style="content: url('{teamLogos[15].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>CL:</b> &nbsp;Tyrants {#if teamLogos?.[29]?.logo}<img class="h-10" alt="Tyrants" style="content: url('{teamLogos[29].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>ML:</b> &nbsp;Ducks {#if teamLogos?.[7]?.logo}<img class="h-10" alt="Ducks" style="content: url('{teamLogos[7].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>PL:</b> &nbsp;Bulls {#if teamLogos?.[3]?.logo}<img class="h-10" alt="Bulls" style="content: url('{teamLogos[3].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-</div>
-
-<h3 style="font-size: 20px;"><center><b> Standard: </b></center></h3>
-
-<div style="text-align: center;">
-    <span style="display: inline-flex; align-items: center;">
-        <b>FL:</b> &nbsp;Flames {#if teamLogos?.[11]?.logo}<img class="h-10" alt="Flames" style="content: url('{teamLogos[11].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>AL:</b> &nbsp;Bulls {#if teamLogos?.[3]?.logo}<img class="h-10" alt="Bulls" style="content: url('{teamLogos[3].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>CL:</b> &nbsp;Flames {#if teamLogos?.[11]?.logo}<img class="h-10" alt="Flames" style="content: url('{teamLogos[11].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>ML:</b> &nbsp;Ducks {#if teamLogos?.[7]?.logo}<img class="h-10" alt="Ducks" style="content: url('{teamLogos[7].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>PL:</b> &nbsp;Shadow {#if teamLogos?.[25]?.logo}<img class="h-10" alt="Shadow" style="content: url('{teamLogos[25].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-</div>
-
-<Tabs>
-
-<Tab label=" S19 Conference Standings">
-
-  <LastRefreshed prefix="Data last updated"/>
-
-<p> 
-<ButtonGroup name=League_Selection>
-      <ButtonGroupItem valueLabel="Foundation League" value= "Foundation League" />
-      <ButtonGroupItem valueLabel="Academy League" value= "Academy League" default />
-      <ButtonGroupItem valueLabel="Champion League" value="Champion League" />
-      <ButtonGroupItem valueLabel="Master League" value="Master League" />
-      <ButtonGroupItem valueLabel="Premier League" value="Premier League" />
-    </ButtonGroup>
-</p>
-
-<p>
-<ButtonGroup name=GameMode_Selection>
-      <ButtonGroupItem valueLabel="Doubles" value= "Doubles" default/>
-      <ButtonGroupItem valueLabel="Standard" value= "Standard" />
-      <ButtonGroupItem valueLabel="Overall" value= "Overall" />
-    </ButtonGroup>
-</p>
-
-```sql conference
-SELECT DISTINCT
-	t.Conference
-	, CASE
-		WHEN t.Conference = 'Orange' THEN '#FFA500'
-		WHEN t.Conference = 'Blue' THEN '#1E90FF'
-		ELSE 'OH NO, SOMETHING IS WEIRD'
-	END AS conference_color
-FROM teams t
-```
-
-```sql conference_standings
-with S19standings as (
-    
-    SELECT *
+```sql playoff_seeds
+WITH S19standings AS (
+    SELECT
+        *
         , CASE
             WHEN s19.mode IN ('Doubles', 'Standard') THEN s19.mode
             ELSE 'Overall'
         END AS game_mode
     FROM S19_standings s19
-    INNER JOIN teams t
-        ON s19.name = t.Franchise
-
-), results AS (
-
-	SELECT
-		m.match_id
-		, m.league
-		, m.game_mode
-		, m.home AS team_name
-		, m.home_wins AS wins
-		, m.away_wins AS loses
-		, CASE WHEN m.home = m.winning_team THEN 1 ELSE 0 END AS series_wins
-		, CASE
-			WHEN m.winning_team = 'Not Played / Data Unavailable' THEN 0
-			WHEN m.home = m.winning_team THEN 0
-			ELSE 1
-		  END AS series_loses
-		, COALESCE(SUM(r."Home Goals"), 0) AS goals_for
-		, COALESCE(SUM(r."Away Goals"), 0) AS goals_against
-		, goals_for - goals_against AS goal_diff
-	FROM matches m
-	LEFT JOIN s19_rounds r
-	    ON r.match_id = m.match_id
-	INNER JOIN match_groups mg
-	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 19'
-	GROUP BY
-		1, 2, 3, 4, 5, 6, 7, 8
-		
-	UNION ALL
-	
-	SELECT
-		m.match_id
-		, m.league
-		, m.game_mode
-		, m.away AS team_name
-		, m.away_wins AS wins
-		, m.home_wins AS loses
-		, CASE WHEN m.away = m.winning_team THEN 1 ELSE 0 END AS series_wins
-		, CASE
-			WHEN m.winning_team = 'Not Played / Data Unavailable' THEN 0
-			WHEN m.away = m.winning_team THEN 0
-			ELSE 1
-		  END AS series_loses
-		, COALESCE(SUM(r."Away Goals"), 0) AS goals_for
-		, COALESCE(SUM(r."Home Goals"), 0) AS goals_against
-		, goals_for - goals_against AS goal_diff
-	FROM matches m
-	LEFT JOIN s19_rounds r
-	    ON r.match_id = m.match_id
-	INNER JOIN match_groups mg
-	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 19'
-	GROUP BY
-		1, 2, 3, 4, 5, 6, 7, 8
-
-), series_and_goal_diff AS (
-
+    INNER JOIN teams t ON s19.name = t.Franchise
+),
+results AS (
     SELECT
-        league
-        , game_mode
-        , team_name
-        , SUM(wins) AS wins
-        , SUM(loses) AS loses
-        , SUM(series_wins) AS series_wins
-        , SUM(series_loses) AS series_loses
-        , SUM(goals_for) AS goals_for
-        , SUM(goals_against) AS goals_against
-        , SUM(goal_diff) AS goal_diff
-    FROM results
-    GROUP BY 1, 2, 3
-
+        r.match_id
+        , m.league
+        , m.game_mode
+        , r.Home AS team_name
+        , m.home_wins AS wins
+        , m.away_wins AS loses
+        , CASE WHEN r.Home = m.winning_team THEN 1 ELSE 0 END AS series_wins
+        , CASE WHEN r.Home != m.winning_team THEN 1 ELSE 0 END AS series_loses
+        , SUM(r."Home Goals") AS goals_for
+        , SUM(r."Away Goals") AS goals_against
+        , goals_for - goals_against AS goal_diff
+    FROM s19_rounds r
+    INNER JOIN matches m ON r.match_id = m.match_id
+    INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
+    WHERE mg.parent_group_title = 'Season 19'
+    GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
     UNION ALL
-
     SELECT
-        league
-        , 'Overall' AS game_mode
-        , team_name
-        , SUM(wins) AS wins
-        , SUM(loses) AS loses
-        , SUM(series_wins) AS series_wins
-        , SUM(series_loses) AS series_loses
-        , SUM(goals_for) AS goals_for
-        , SUM(goals_against) AS goals_against
+        r.match_id
+        , m.league
+        , m.game_mode
+        , r.Away AS team_name
+        , m.away_wins AS wins
+        , m.home_wins AS loses
+        , CASE WHEN r.Away = m.winning_team THEN 1 ELSE 0 END AS series_wins
+        , CASE WHEN r.Away != m.winning_team THEN 1 ELSE 0 END AS series_loses
+        , SUM(r."Away Goals") AS goals_for
+        , SUM(r."Home Goals") AS goals_against
+        , goals_for - goals_against AS goal_diff
+    FROM s19_rounds r
+    INNER JOIN matches m ON r.match_id = m.match_id
+    INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
+    WHERE mg.parent_group_title = 'Season 19'
+    GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
+),
+series_and_goal_diff AS (
+    SELECT
+        league, game_mode, team_name
+        , SUM(wins) AS wins, SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins, SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for, SUM(goals_against) AS goals_against
         , SUM(goal_diff) AS goal_diff
-    FROM results
-    GROUP BY 1, 2, 3
-
-
-)
-
-SELECT
-    s19.ranking AS divisional_rank
-    , s19.Franchise AS team_name
-    , s19."Photo URL" AS team_logo
-    , s19.Division AS division
-    , s19."Super Division" AS super_division
-    , '/franchises/' || s19.Franchise AS Franchise_Link
-	, s19.Conference
-    , s19.team_wins::INT || ' - ' || s19.team_losses::INT AS record
-    , sagd.series_wins || ' - ' || sagd.series_loses AS series_record
-    , sagd.goals_for
-    , sagd.goals_against
-    , sagd.goal_diff AS goal_differential
-FROM S19standings s19
-INNER JOIN series_and_goal_diff sagd
-    ON s19.Franchise = sagd.team_name
-    AND s19.league = sagd.league
-    AND s19.game_mode = sagd.game_mode
-WHERE s19.division_name NOT NULL
-    AND s19.league LIKE '${inputs.League_Selection}'
-    AND s19.game_mode LIKE '${inputs.GameMode_Selection}'
-ORDER BY
-    s19.team_wins DESC
-    , sagd.series_wins DESC
-    , sagd.goal_diff DESC
-    , sagd.goals_for DESC
-```
-
-{#each conference as c}
-
-	## {c.Conference} Conference
-
-	<DataTable data={conference_standings.where(`LOWER(conference) = LOWER('${c.Conference}')`)} rows=16 rowShading=true headerColor={c.conference_color} wrapTitles=true link=Franchise_Link>
-		<Column id=divisional_rank align=center />
-		<Column id=team_name align=center />
-		<Column id=team_logo contentType=image height=25px align=center />
-		<Column id=super_division align=center />
-		<Column id=division align=center />
-		<Column id=record align=center />
-		<Column id=series_record align=center />
-		<Column id=goals_for align=center />
-		<Column id=goals_against align=center />
-		<Column id=goal_differential align=center />
-	</DataTable>
-
-{/each}
-
-  </Tab>
-
-<Tab label="S19 Leaderboard">
-
-
-```sql S19leaderboard2s
-With playerstats as (
-    Select name,
-    salary as Salary,
-    team_name as Team,
-    s19.skill_group as league,
-    "Primary Color" as primColor,
-    CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode,
-    count(*) as games_played,
-    avg(dpi) as Avg_DPI,
-    avg(gpi) as sprocket_rating,
-    avg(opi) as Avg_OPI,
-    avg(score) as Score_Per_Game,
-    avg(goals) as Goals_Per_Game,
-    sum(goals) as total_goals,
-    avg(assists) as Assists_Per_Game,
-    sum(assists) as total_assists,
-    avg(saves) as Saves_Per_Game,
-    sum(saves) as total_saves,
-    avg(shots) as Shots_Per_Game,
-    avg(goals_against) as goals_against_per_game,
-    avg(shots_against) as shots_against_per_game,
-    sum(goals)/sum(shots) as shooting_pct2
- from players p
-    inner join S19_stats s19
-        on p.member_id = s19.member_id
-    inner join teams t 
-        on p.franchise = t.franchise
-
-group by name, salary, team_name, league, primColor, gamemode)
-
-SELECT
-    name
-    ,GameMode
-    ,league
-    ,games_played
-    ,primColor
-    ,${inputs.stats.value} as stat1
-
-FROM playerstats
-
-WHERE league='${inputs.leagueSelect}'
-    AND GameMode='Doubles'
-    AND games_played>='${inputs.gamesSlider}'
-
-ORDER BY stat1 DESC
-
-LIMIT 10
-```
-
-
-```sql S19leaderboard3s
-With playerstats as (
-    Select name,
-    salary as Salary,
-    team_name as Team,
-    s19.skill_group as league,
-    "Primary Color" as primColor,
-    CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode,
-    count(*) as games_played,
-    avg(dpi) as Avg_DPI,
-    avg(gpi) as sprocket_rating,
-    avg(opi) as Avg_OPI,
-    avg(score) as Score_Per_Game,
-    avg(goals) as Goals_Per_Game,
-    sum(goals) as total_goals,
-    avg(assists) as Assists_Per_Game,
-    sum(assists) as total_assists,
-    avg(saves) as Saves_Per_Game,
-    sum(saves) as total_saves,
-    avg(shots) as Shots_Per_Game,
-    avg(goals_against) as goals_against_per_game,
-    avg(shots_against) as shots_against_per_game,
-    sum(goals)/sum(shots) as shooting_pct2
- from players p
-    inner join S19_stats s19
-        on p.member_id = s19.member_id
-    inner join teams t 
-        on p.franchise = t.franchise
-group by name, salary, team_name, league, primColor, gamemode)
-
-SELECT
-    name
-    ,GameMode
-    ,league
-    ,games_played
-    ,primColor
-    ,${inputs.stats.value} as stat1
-
-FROM playerstats
-
-WHERE league='${inputs.leagueSelect}'
-    AND GameMode='Standard'
-    AND games_played>='${inputs.gamesSlider}'
-
-ORDER BY stat1 DESC
-
-LIMIT 10
-```
-
-```sql slider
+    FROM results GROUP BY 1, 2, 3
+    UNION ALL
     SELECT
-        member_id
-        , skill_group
-        , CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
-        , COUNT(*) as games_played
-
-    FROM S19_stats s19
-
-    WHERE skill_group='${inputs.leagueSelect}'
-
-    GROUP BY
-        member_id
-        , skill_group
-        , GameMode
-
-    ORDER BY
-        games_played DESC
+        league, 'Overall' AS game_mode, team_name
+        , SUM(wins) AS wins, SUM(loses) AS loses
+        , SUM(series_wins) AS series_wins, SUM(series_loses) AS series_loses
+        , SUM(goals_for) AS goals_for, SUM(goals_against) AS goals_against
+        , SUM(goal_diff) AS goal_diff
+    FROM results GROUP BY 1, 2, 3
+),
+staging AS (
+    SELECT
+        s19.Franchise AS team_name
+        , s19."Photo URL" AS team_logo
+        , s19."Super Division" AS super_division
+        , CASE
+            WHEN UPPER(s19.Conference) = 'BLUE' THEN 'Blue'
+            WHEN UPPER(s19.Conference) = 'ORANGE' THEN 'Orange'
+            ELSE s19.Conference
+        END AS conference
+        , s19.league
+        , s19.game_mode
+        , s19.Division AS division
+        , s19.team_wins::INT || ' - ' || s19.team_losses::INT AS record
+        , s19.team_wins / NULLIF(s19.team_wins + s19.team_losses, 0) AS win_pct
+        , sagd.series_wins / NULLIF(sagd.series_wins + sagd.series_loses, 0) AS series_win_pct
+        , sagd.goals_for
+        , sagd.goal_diff AS goal_differential
+        , CASE WHEN s19.ranking = 1 THEN 1 ELSE 0 END AS is_divisional_leader
+    FROM S19standings s19
+    INNER JOIN series_and_goal_diff sagd
+        ON s19.Franchise = sagd.team_name
+        AND s19.league = sagd.league
+        AND s19.game_mode = sagd.game_mode
+    WHERE s19.Conference NOT NULL
+        AND s19.division_name NOT NULL
+        AND s19.league = '${inputs.League}'
+        AND s19.game_mode = '${inputs.GameMode}'
+),
+ranked AS (
+    SELECT
+        *
+        , ROW_NUMBER() OVER (
+            PARTITION BY CASE
+                WHEN league IN ('Foundation League', 'Premier League') THEN conference
+                ELSE super_division
+            END
+            ORDER BY
+                is_divisional_leader DESC
+                , win_pct DESC
+                , series_win_pct DESC
+                , goal_differential DESC
+                , goals_for DESC
+        ) AS seed_rank
+    FROM staging
+)
+SELECT * FROM ranked
+ORDER BY conference, super_division, seed_rank
 ```
 
+```sql h2h_records
+SELECT
+    m.home AS team_a
+    , m.away AS team_b
+    , SUM(m.home_wins) AS a_game_wins
+    , SUM(m.away_wins) AS b_game_wins
+FROM matches m
+INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
+WHERE mg.parent_group_title = 'Season 19'
+    AND m.league = '${inputs.League}'
+    AND m.game_mode = '${inputs.GameMode}'
+GROUP BY m.home, m.away
+```
 
-<ButtonGroup name=leagueSelect>
-      <ButtonGroupItem valueLabel="Foundation League" value= "Foundation League" />
-      <ButtonGroupItem valueLabel="Academy League" value= "Academy League" default />
-      <ButtonGroupItem valueLabel="Champion League" value="Champion League" />
-      <ButtonGroupItem valueLabel="Master League" value="Master League" />
-      <ButtonGroupItem valueLabel="Premier League" value="Premier League" />
-</ButtonGroup>
+```sql division_records
+SELECT
+    team_name
+    , SUM(wins) AS div_wins
+    , SUM(losses) AS div_losses
+    , SUM(wins)::FLOAT / NULLIF(SUM(wins) + SUM(losses), 0) AS div_win_pct
+FROM (
+    SELECT
+        m.home AS team_name
+        , m.home_wins AS wins
+        , m.away_wins AS losses
+    FROM matches m
+    INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
+    INNER JOIN teams t_home ON m.home = t_home.Franchise
+    INNER JOIN teams t_away ON m.away = t_away.Franchise
+    WHERE mg.parent_group_title = 'Season 19'
+        AND m.league = '${inputs.League}'
+        AND m.game_mode = '${inputs.GameMode}'
+        AND t_home.Division = t_away.Division
+    UNION ALL
+    SELECT
+        m.away AS team_name
+        , m.away_wins AS wins
+        , m.home_wins AS losses
+    FROM matches m
+    INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
+    INNER JOIN teams t_home ON m.home = t_home.Franchise
+    INNER JOIN teams t_away ON m.away = t_away.Franchise
+    WHERE mg.parent_group_title = 'Season 19'
+        AND m.league = '${inputs.League}'
+        AND m.game_mode = '${inputs.GameMode}'
+        AND t_home.Division = t_away.Division
+) div_matchups
+GROUP BY team_name
+```
 
-<Dropdown name=stats defaultValue=sprocket_rating>
-    <DropdownOption value=avg_dpi valueLabel="Avg DPI" />
-    <DropdownOption value=sprocket_rating valueLabel="Avg Sprocket Rating" />
-    <DropdownOption value=avg_opi valueLabel="Avg OPI" />
-    <DropdownOption value=Score_Per_Game valueLabel="Avg Score" />
-    <DropdownOption value=goals_per_game valueLabel="Avg Goals" />
-    <DropdownOption value=total_goals valueLabel="Total Goals" />
-    <DropdownOption value=assists_per_game valueLabel="Avg Assists" />
-    <DropdownOption value=total_assists valueLabel="Total Assists" />
-    <DropdownOption value=saves_per_game valueLabel="Avg Saves" />
-    <DropdownOption value=total_saves valueLabel="Total Saves" />
-    <DropdownOption value=shots_per_game valueLabel="Avg Shots" />
-    <DropdownOption value=goals_against_per_game valueLabel="Avg Goals Against" />
-    <DropdownOption value=shots_against_per_game valueLabel="Avg Shots Against"/>
-    <DropdownOption value=shooting_pct2 valueLabel="Avg Shooting %" />
-</Dropdown>
+```sql playoff_games
+SELECT
+    m.home
+    , m.away
+    , m.home_wins::INT AS home_wins
+    , m.away_wins::INT AS away_wins
+    , CASE
+        WHEN m.winning_team = 'Not Played / Data Unavailable' OR m.winning_team IS NULL THEN NULL
+        ELSE m.winning_team
+    END AS winner
+    , mg.match_group_title AS round
+FROM matches m
+INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
+WHERE mg.parent_group_title = 'Season 19 Playoffs'
+    AND m.league = '${inputs.League}'
+    AND m.game_mode = '${inputs.GameMode}'
+ORDER BY mg.match_group_title
+```
 
-<Slider title='Minimum Games Played' name=gamesSlider size=large data={slider} min=1 maxColumn=games_played />
+```sql team_logos
+SELECT DISTINCT
+    Franchise AS team_name
+    , "Photo URL" AS team_logo
+FROM teams
+WHERE "Photo URL" IS NOT NULL AND "Photo URL" != ''
+```
 
-<Grid cols=2 >
-    <BarChart data={S19leaderboard2s} title="Top 10 for 2s" x=name y=stat1 swapXY=true series=name seriesLabels=false legend=false yAxisTitle='{inputs.stats.value}' pointSize=15 colorPalette={[S19leaderboard2s[0].primColor, S19leaderboard2s[1].primColor, S19leaderboard2s[2].primColor, S19leaderboard2s[3].primColor, S19leaderboard2s[4].primColor, S19leaderboard2s[5].primColor, S19leaderboard2s[6].primColor, S19leaderboard2s[7].primColor, S19leaderboard2s[8].primColor, S19leaderboard2s[9].primColor]} />
-    <BarChart data={S19leaderboard3s} title="Top 10 for 3s" x=name y=stat1 swapXY=true series=name seriesLabels=false legend=false yAxisTitle='{inputs.stats.value}' pointSize=15 colorPalette={[S19leaderboard3s[0].primColor, S19leaderboard3s[1].primColor, S19leaderboard3s[2].primColor, S19leaderboard3s[3].primColor, S19leaderboard3s[4].primColor, S19leaderboard3s[5].primColor, S19leaderboard3s[6].primColor, S19leaderboard3s[7].primColor, S19leaderboard3s[8].primColor, S19leaderboard3s[9].primColor]} />
-</Grid>
-
-</Tab>
-
-</Tabs>
-
+<PlayoffBracket {playoff_seeds} {playoff_games} {h2h_records} {division_records} {team_logos} league="{inputs.League}" />

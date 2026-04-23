@@ -504,7 +504,7 @@
   <div class="bk-headers">
     <div class="bk-h">CONF. SEMI-FINALS</div>
     <div class="bk-h">CONF. FINALS</div>
-    <div class="bk-h">LEAGUE CHAMPIONSHIP</div>
+    <div class="bk-h">GRAND FINAL</div>
   </div>
 
   <div class="bk-body">

@@ -11,6 +11,24 @@
 
 	body {
 		@apply select-none;
+		background-color: #f5f7fc;
+		background-image:
+			radial-gradient(ellipse 90% 60% at 50% -5%, rgba(42, 75, 130, 0.35) 0%, transparent 70%),
+			radial-gradient(ellipse 65% 45% at 95% 105%, rgba(42, 75, 130, 0.2) 0%, transparent 65%),
+			radial-gradient(circle, rgba(42, 75, 130, 0.1) 1px, transparent 1px);
+		background-size: auto, auto, 26px 26px;
+		background-attachment: fixed;
+	}
+
+	[data-theme='dark'] body,
+	body[data-theme='dark'] {
+		background-color: #080e18;
+		background-image:
+			radial-gradient(ellipse 90% 55% at 50% -5%, rgba(42, 75, 130, 0.55) 0%, transparent 70%),
+			radial-gradient(ellipse 60% 40% at 95% 105%, rgba(42, 75, 130, 0.25) 0%, transparent 65%),
+			radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+		background-size: auto, auto, 26px 26px;
+		background-attachment: fixed;
 	}
 
 	/* Default border color */
@@ -142,7 +160,7 @@
 	}
 
 	h1.title {
-		@apply mt-5 mb-1 text-2xl tracking-wide font-bold break-inside-avoid;
+		@apply mt-5 mb-1 text-2xl tracking-wide font-bold break-inside-avoid text-center;
 	}
 
 	h1.markdown {
@@ -364,3 +382,20 @@
 /* .styled-table tbody tr:last-of-type {
 	border-bottom: 2px solid #2a4b82;
 } */
+
+/* ── DataTable image alignment ───────────────────────────────────────────── */
+/* Evidence wraps contentType=image in a flex div that ignores text-align.
+   Target the wrapper by the cell's alignment class to force left/right. */
+td.text-right > div { justify-content: flex-end !important; }
+td.text-left  > div { justify-content: flex-start !important; }
+
+/* ── Transparent sidebar ─────────────────────────────────────────────────── */
+aside > div {
+	background-color: transparent !important;
+}
+
+aside .sticky {
+	background-color: transparent !important;
+	box-shadow: none !important;
+	-webkit-box-shadow: none !important;
+}
