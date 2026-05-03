@@ -2,57 +2,47 @@
 title: MLE Champions
 ---
 
-```sql teamLogos
-SELECT 
-franchise,
-'/franchises/' || franchise as franchiseLink,
-"Photo URL" as logo
-FROM teams
-ORDER BY franchise ASC
+```sql championsTable
+SELECT
+    'Season ' || c.season::INTEGER AS season,
+    COALESCE(fl_t."Photo URL", 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') AS fl_logo,
+    COALESCE(al_t."Photo URL", 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') AS al_logo,
+    COALESCE(cl_t."Photo URL", 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') AS cl_logo,
+    COALESCE(ml_t."Photo URL", 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') AS ml_logo,
+    COALESCE(pl_t."Photo URL", 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') AS pl_logo
+FROM champions c
+LEFT JOIN teams fl_t ON fl_t.Franchise = CASE WHEN '${inputs.mode}' = 'Doubles' THEN c.fl_doubles ELSE c.fl_standard END
+LEFT JOIN teams al_t ON al_t.Franchise = CASE WHEN '${inputs.mode}' = 'Doubles' THEN c.al_doubles ELSE c.al_standard END
+LEFT JOIN teams cl_t ON cl_t.Franchise = CASE WHEN '${inputs.mode}' = 'Doubles' THEN COALESCE(c.cl_doubles, c.solo_doubles) ELSE c.cl_standard END
+LEFT JOIN teams ml_t ON ml_t.Franchise = CASE WHEN '${inputs.mode}' = 'Doubles' THEN c.ml_doubles ELSE c.ml_standard END
+LEFT JOIN teams pl_t ON pl_t.Franchise = CASE WHEN '${inputs.mode}' = 'Doubles' THEN c.pl_doubles ELSE c.pl_standard END
+WHERE '${inputs.mode}' = 'Doubles' OR c.season > 11
+ORDER BY c.season DESC
 ```
 
-<h2 style="font-size: 25px;"><center><b><u> Season 18 Champions </u></b></center></h2>
+```sql earlyChampions
+SELECT
+    'Season ' || c.season::INTEGER AS season,
+    c.solo_doubles AS champion
+FROM champions c
+WHERE c.season <= 5 AND c.solo_doubles IS NOT NULL
+ORDER BY c.season
+```
 
-<h3 style="font-size: 20px;"><center><b> Doubles: </b></center></h3>
+<Alert>
+  Multiple leagues were not introduced until Season 6. Seasons 1–5 had a single champion.
+</Alert>
 
-<div style="text-align: center;">
-    <span style="display: inline-flex; align-items: center;">
-        <b>FL:</b> &nbsp;Flames {#if teamLogos?.[11]?.logo}<img class="h-10" alt="Flames" style="content: url('{teamLogos[11].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>AL:</b> &nbsp;Hurricanes {#if teamLogos?.[15]?.logo}<img class="h-10" alt="Hurricanes" style="content: url('{teamLogos[15].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>CL:</b> &nbsp;Tyrants {#if teamLogos?.[29]?.logo}<img class="h-10" alt="Tyrants" style="content: url('{teamLogos[29].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>ML:</b> &nbsp;Ducks {#if teamLogos?.[7]?.logo}<img class="h-10" alt="Ducks" style="content: url('{teamLogos[7].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>PL:</b> &nbsp;Bulls {#if teamLogos?.[3]?.logo}<img class="h-10" alt="Bulls" style="content: url('{teamLogos[3].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-</div>
+<ButtonGroup name="mode">
+    <ButtonGroupItem value="Doubles" valueLabel="Doubles" default/>
+    <ButtonGroupItem value="Standard" valueLabel="Standard" />
+</ButtonGroup>
 
-<h3 style="font-size: 20px;"><center><b> Standard: </b></center></h3>
-
-<div style="text-align: center;">
-    <span style="display: inline-flex; align-items: center;">
-        <b>FL:</b> &nbsp;Flames {#if teamLogos?.[11]?.logo}<img class="h-10" alt="Flames" style="content: url('{teamLogos[11].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>AL:</b> &nbsp;Bulls {#if teamLogos?.[3]?.logo}<img class="h-10" alt="Bulls" style="content: url('{teamLogos[3].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>CL:</b> &nbsp;Flames {#if teamLogos?.[11]?.logo}<img class="h-10" alt="Flames" style="content: url('{teamLogos[11].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>ML:</b> &nbsp;Ducks {#if teamLogos?.[7]?.logo}<img class="h-10" alt="Ducks" style="content: url('{teamLogos[7].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-    <span style="display: inline-flex; align-items: center;">
-        <b>PL:</b> &nbsp;Shadow {#if teamLogos?.[25]?.logo}<img class="h-10" alt="Shadow" style="content: url('{teamLogos[25].logo}'); object-fit: contain; vertical-align: middle; margin-left: 0.5rem; margin-right: 3rem;" />{/if}
-    </span>
-</div>
-
-<p style="text-align: center; color: gray; font-style: italic; margin-top: 2rem;">
-    Previous season champions and full MLE history coming soon.
-</p>
+<DataTable data={championsTable} rowShading=true headerColor=#2a4b82 headerFontColor=white rows=100>
+    <Column id=season    title="Season"             align=center />
+    <Column id=fl_logo   title="Foundation League"  align=center contentType=image height=2rem />
+    <Column id=al_logo   title="Academy League"     align=center contentType=image height=2rem />
+    <Column id=cl_logo   title="Champion League"    align=center contentType=image height=2rem />
+    <Column id=ml_logo   title="Master League"      align=center contentType=image height=2rem />
+    <Column id=pl_logo   title="Premier League"     align=center contentType=image height=2rem />
+</DataTable>
