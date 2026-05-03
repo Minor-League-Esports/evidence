@@ -36,7 +36,7 @@
   // h2h_records and division_records are passed explicitly into resolveTiebreakers so
   // Svelte's static reactive-dep tracking re-runs the computation when those arrays
   // arrive asynchronously — reading them via closure would miss the initial arrival
-  // and silently drop the H2H/division% steps. (Same pattern as roundGames below.)
+  // and silently drop the H2H/division% steps. (Same pattern as findRoundMatch below.)
 
   function resolveTiebreakers(seeds, is16Team, h2h, divRecords) {
     if (!seeds || seeds.length === 0) return [];
@@ -248,21 +248,79 @@
     return (logos || []).find(t => t.team_name === name)?.team_logo ?? '';
   }
 
-  // Takes `games` explicitly (rather than reading the prop via closure) so Svelte's
-  // static reactive-dep tracking sees `playoff_games` in every $: callsite —
-  // otherwise these reactives miss the initial async arrival of playoff_games.
-  function roundGames(games, kw, conf, seeds) {
-    return (games || []).filter(g => {
-      const r = g.round?.toLowerCase() ?? '';
-      if (!r.includes(kw)) return false;
+  const TBD = { topName:'TBD', topLogo:'', topScore:null, botName:'TBD', botLogo:'', botScore:null, winner:null, matchId:null, gameTime:null };
+
+  // Round-name predicates. match_group_title strings include keywords like
+  // "Semifinals", "Conference Finals", "Grand Finals". CF must exclude any
+  // round whose name also matches another round.
+  const isSF = g => (g.round?.toLowerCase() ?? '').includes('semi');
+  const isCF = g => {
+    const r = g.round?.toLowerCase() ?? '';
+    return r.includes('final')
+      && !r.includes('grand') && !r.includes('championship')
+      && !r.includes('semi') && !r.includes('quarter');
+  };
+  const isGF = g => {
+    const r = g.round?.toLowerCase() ?? '';
+    return r.includes('grand') || r.includes('championship');
+  };
+
+  // slotWinnerName: returns the team name that won this slot's series, or null.
+  // Both bd()-produced and buildFirstRoundSlot-produced slots populate `winner`.
+  function slotWinnerName(slot) {
+    return slot?.winner ?? null;
+  }
+
+  // findRoundMatch: locate a real playoff_games row matching a projected pair
+  // of team names, restricted to a round predicate and (optionally) conference.
+  // Same precedence as findFirstRoundMatch: exact pair first, then partial.
+  // `games` is passed explicitly (not via closure) so Svelte's static dep
+  // tracking re-runs reactives when playoff_games arrives async — same pattern
+  // as buildFirstRoundSlot.
+  function findRoundMatch(games, roundPred, expectedA, expectedB, conf, seeds) {
+    const candidates = (games || []).filter(g => {
+      if (!roundPred(g)) return false;
       if (!conf) return true;
       const hc = (seeds || []).find(t => t.team_name === g.home)?.conference;
       const ac = (seeds || []).find(t => t.team_name === g.away)?.conference;
       return hc === conf || ac === conf;
     });
+    if (expectedA && expectedB) {
+      const exact = candidates.find(g =>
+        (g.home === expectedA && g.away === expectedB) ||
+        (g.home === expectedB && g.away === expectedA)
+      );
+      if (exact) return exact;
+    }
+    if (expectedA) {
+      const g = candidates.find(x => x.home === expectedA || x.away === expectedA);
+      if (g) return g;
+    }
+    if (expectedB) {
+      const g = candidates.find(x => x.home === expectedB || x.away === expectedB);
+      if (g) return g;
+    }
+    return null;
   }
 
-  const TBD = { topName:'TBD', topLogo:'', topScore:null, botName:'TBD', botLogo:'', botScore:null, winner:null };
+  // buildProjectedSlot: when a real game exists for the projected pair, render
+  // it via bd(). Otherwise show the projected names (or TBD when unknown) with
+  // no score, so the bracket advances visually as soon as prior-round winners
+  // are known — even before League Ops creates the next round's match record.
+  function buildProjectedSlot(topName, botName, realGame, seeds, logos) {
+    if (realGame) return bd(realGame, seeds, logos);
+    return {
+      topName: topName ?? 'TBD',
+      topLogo: topName ? getLogo(topName, seeds, logos) : '',
+      topScore: null,
+      botName: botName ?? 'TBD',
+      botLogo: botName ? getLogo(botName, seeds, logos) : '',
+      botScore: null,
+      winner: null,
+      matchId: null,
+      gameTime: null,
+    };
+  }
 
   function bd(game, seeds, logos) {
     return {
@@ -272,7 +330,9 @@
       botName: game.away,
       botLogo: getLogo(game.away, seeds, logos),
       botScore: game.winner !== null ? game.away_wins : null,
-      winner: game.winner
+      winner: game.winner,
+      matchId: game.match_id ?? null,
+      gameTime: game.game_time ?? null
     };
   }
 
@@ -337,6 +397,9 @@
         botSeedLabel: botSeed ? botLabel : '',
         botScore: null,
         botCls: botSeed ? '' : 'tbd',
+        winner: null,
+        matchId: null,
+        gameTime: null,
       };
     }
     const { game, actualTop, actualBot } = match;
@@ -359,48 +422,10 @@
       topSeedLabel: top.seedLabel, topScore: top.score, topCls: top.cls,
       botName: bot.name, botLogo: bot.logo, botRec: bot.rec,
       botSeedLabel: bot.seedLabel, botScore: bot.score, botCls: bot.cls,
+      winner: game.winner ?? null,
+      matchId: game.match_id ?? null,
+      gameTime: game.game_time ?? null,
     };
-  }
-
-  // ===== SF pair ordering (32-team) =====
-  // Each SF slot is fed by a specific QF pair. Classify by checking whether
-  // either team's (super_division, resolved_rank) lands in pair 1 or pair 2's set.
-  // Division leaders (seeds 1-2) are the stable anchors; wildcards rarely reach SF
-  // without a leader also present, so one lookup usually suffices.
-  function classifySFTeam(seed) {
-    if (!seed?.super_division || !seed.resolved_rank) return null;
-    const sd = seed.super_division.toLowerCase();
-    const r = seed.resolved_rank;
-    if (seed.conference === 'Orange') {
-      const w = sd.includes('west'), e = sd.includes('east');
-      if ((w && r === 1) || (e && r === 4) || (e && r === 2) || (w && r === 3)) return 'top';
-      if ((e && r === 1) || (w && r === 4) || (w && r === 2) || (e && r === 3)) return 'bot';
-    } else if (seed.conference === 'Blue') {
-      const n = sd.includes('north'), s = sd.includes('south');
-      if ((n && r === 1) || (s && r === 4) || (s && r === 2) || (n && r === 3)) return 'top';
-      if ((s && r === 1) || (n && r === 4) || (n && r === 2) || (s && r === 3)) return 'bot';
-    }
-    return null;
-  }
-
-  function orderSFGames(games, seeds) {
-    const out = [null, null];
-    const pending = [];
-    for (const g of games) {
-      let cls = null;
-      for (const name of [g.home, g.away]) {
-        const s = (seeds || []).find(t => t.team_name === name);
-        if (s) { const c = classifySFTeam(s); if (c) { cls = c; break; } }
-      }
-      if (cls === 'top' && !out[0]) out[0] = g;
-      else if (cls === 'bot' && !out[1]) out[1] = g;
-      else pending.push(g);
-    }
-    for (const g of pending) {
-      const i = out.indexOf(null);
-      if (i >= 0) out[i] = g;
-    }
-    return out;
   }
 
   // ===== 32-Team Seeds & Matchups =====
@@ -433,21 +458,48 @@
     buildFirstRoundSlot(bN2, bS3, 'N#2', 'S#3', firstRoundGames, resolvedSeeds, team_logos),
   ];
 
-  $: oSF = orderSFGames(roundGames(playoff_games, 'semi','Orange', resolvedSeeds), resolvedSeeds).map(g => g ? bd(g, resolvedSeeds, team_logos) : TBD);
-  $: bSF = orderSFGames(roundGames(playoff_games, 'semi','Blue',  resolvedSeeds), resolvedSeeds).map(g => g ? bd(g, resolvedSeeds, team_logos) : TBD);
+  // SF (32-team only): each slot projects from its QF pair. SF pair ordering
+  // falls out automatically: oSF[0] is fed by oQF[0]+oQF[1], oSF[1] by oQF[2]+oQF[3].
+  $: oSF = [
+    buildProjectedSlot(
+      slotWinnerName(oQF[0]), slotWinnerName(oQF[1]),
+      findRoundMatch(playoff_games, isSF, slotWinnerName(oQF[0]), slotWinnerName(oQF[1]), 'Orange', resolvedSeeds),
+      resolvedSeeds, team_logos
+    ),
+    buildProjectedSlot(
+      slotWinnerName(oQF[2]), slotWinnerName(oQF[3]),
+      findRoundMatch(playoff_games, isSF, slotWinnerName(oQF[2]), slotWinnerName(oQF[3]), 'Orange', resolvedSeeds),
+      resolvedSeeds, team_logos
+    ),
+  ];
+  $: bSF = [
+    buildProjectedSlot(
+      slotWinnerName(bQF[0]), slotWinnerName(bQF[1]),
+      findRoundMatch(playoff_games, isSF, slotWinnerName(bQF[0]), slotWinnerName(bQF[1]), 'Blue', resolvedSeeds),
+      resolvedSeeds, team_logos
+    ),
+    buildProjectedSlot(
+      slotWinnerName(bQF[2]), slotWinnerName(bQF[3]),
+      findRoundMatch(playoff_games, isSF, slotWinnerName(bQF[2]), slotWinnerName(bQF[3]), 'Blue', resolvedSeeds),
+      resolvedSeeds, team_logos
+    ),
+  ];
 
-  // CF round filter: "Conference Finals" only — exclude rounds whose names also
-  // contain 'final' ("semifinals", "quarterfinals", "grand finals").
-  $: oCF = roundGames(playoff_games, 'final','Orange', resolvedSeeds).filter(g => {
-    const r = g.round?.toLowerCase() ?? '';
-    return !r.includes('grand') && !r.includes('championship')
-        && !r.includes('semi') && !r.includes('quarter');
-  }).map(g => bd(g, resolvedSeeds, team_logos))[0] ?? TBD;
-  $: bCF = roundGames(playoff_games, 'final','Blue', resolvedSeeds).filter(g => {
-    const r = g.round?.toLowerCase() ?? '';
-    return !r.includes('grand') && !r.includes('championship')
-        && !r.includes('semi') && !r.includes('quarter');
-  }).map(g => bd(g, resolvedSeeds, team_logos))[0] ?? TBD;
+  // CF: prior-round source depends on layout — oSF16/bSF16 for 16-team, oSF/bSF for 32-team.
+  $: oCFTopName = is16 ? slotWinnerName(oSF16[0]) : slotWinnerName(oSF[0]);
+  $: oCFBotName = is16 ? slotWinnerName(oSF16[1]) : slotWinnerName(oSF[1]);
+  $: bCFTopName = is16 ? slotWinnerName(bSF16[0]) : slotWinnerName(bSF[0]);
+  $: bCFBotName = is16 ? slotWinnerName(bSF16[1]) : slotWinnerName(bSF[1]);
+  $: oCF = buildProjectedSlot(
+    oCFTopName, oCFBotName,
+    findRoundMatch(playoff_games, isCF, oCFTopName, oCFBotName, 'Orange', resolvedSeeds),
+    resolvedSeeds, team_logos
+  );
+  $: bCF = buildProjectedSlot(
+    bCFTopName, bCFBotName,
+    findRoundMatch(playoff_games, isCF, bCFTopName, bCFBotName, 'Blue', resolvedSeeds),
+    resolvedSeeds, team_logos
+  );
 
   // Grand Final: place the Orange-conference team on top, Blue on bottom,
   // regardless of which side of the game.home/game.away split they fall on.
@@ -467,16 +519,18 @@
       botName: blueName,
       botLogo: getLogo(blueName, seeds, logos),
       botScore: game.winner !== null ? blueScore : null,
-      winner: game.winner
+      winner: game.winner,
+      matchId: game.match_id ?? null,
+      gameTime: game.game_time ?? null
     };
   }
-  $: gf = buildGF(
-    playoff_games.find(g => {
-      const r = g.round?.toLowerCase() ?? '';
-      return r.includes('grand') || r.includes('championship');
-    }),
-    resolvedSeeds, team_logos
-  );
+  // GF: project from Orange CF winner (top) vs Blue CF winner (bottom). When a
+  // real GF row exists, defer to buildGF for its Orange-on-top reordering of
+  // game.home/game.away. Projection already puts Orange-conf on top by construction.
+  $: gfRealGame = playoff_games.find(isGF);
+  $: gf = gfRealGame
+    ? buildGF(gfRealGame, resolvedSeeds, team_logos)
+    : buildProjectedSlot(slotWinnerName(oCF), slotWinnerName(bCF), null, resolvedSeeds, team_logos);
 
   // ===== 16-Team Seeds & Matchups =====
   // _cs: look up a seed by conference and resolved rank (no super_division for 16-team leagues).
@@ -519,22 +573,25 @@
       <div class="bk-pair">
         {#each oSF16 as m}
         <div class="bk-slot">
-          <div class="pp-card">
-            <div class="pp-row {m.topCls} pp-sep">
-              {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.topName}</span>
-              {#if m.topRec}<span class="pp-rec">{m.topRec}</span>{/if}
-              {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
-              {#if m.topSeedLabel}<span class="pp-seed">{m.topSeedLabel}</span>{/if}
+          <a class="pp-card-link" href={m.matchId ? `/matchups/${m.matchId}` : undefined}>
+            <div class="pp-card">
+              <div class="pp-row {m.topCls} pp-sep">
+                {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{m.topName}</span>
+                {#if m.topRec}<span class="pp-rec">{m.topRec}</span>{/if}
+                {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
+                {#if m.topSeedLabel}<span class="pp-seed">{m.topSeedLabel}</span>{/if}
+              </div>
+              <div class="pp-row {m.botCls}">
+                {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{m.botName}</span>
+                {#if m.botRec}<span class="pp-rec">{m.botRec}</span>{/if}
+                {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
+                {#if m.botSeedLabel}<span class="pp-seed">{m.botSeedLabel}</span>{/if}
+              </div>
+              <div class="pp-time">{m.gameTime ?? 'N/A'}</div>
             </div>
-            <div class="pp-row {m.botCls}">
-              {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.botName}</span>
-              {#if m.botRec}<span class="pp-rec">{m.botRec}</span>{/if}
-              {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
-              {#if m.botSeedLabel}<span class="pp-seed">{m.botSeedLabel}</span>{/if}
-            </div>
-          </div>
+          </a>
         </div>
         {/each}
       </div>
@@ -544,22 +601,25 @@
       <div class="bk-pair">
         {#each bSF16 as m}
         <div class="bk-slot">
-          <div class="pp-card">
-            <div class="pp-row {m.topCls} pp-sep">
-              {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.topName}</span>
-              {#if m.topRec}<span class="pp-rec">{m.topRec}</span>{/if}
-              {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
-              {#if m.topSeedLabel}<span class="pp-seed">{m.topSeedLabel}</span>{/if}
+          <a class="pp-card-link" href={m.matchId ? `/matchups/${m.matchId}` : undefined}>
+            <div class="pp-card">
+              <div class="pp-row {m.topCls} pp-sep">
+                {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{m.topName}</span>
+                {#if m.topRec}<span class="pp-rec">{m.topRec}</span>{/if}
+                {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
+                {#if m.topSeedLabel}<span class="pp-seed">{m.topSeedLabel}</span>{/if}
+              </div>
+              <div class="pp-row {m.botCls}">
+                {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{m.botName}</span>
+                {#if m.botRec}<span class="pp-rec">{m.botRec}</span>{/if}
+                {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
+                {#if m.botSeedLabel}<span class="pp-seed">{m.botSeedLabel}</span>{/if}
+              </div>
+              <div class="pp-time">{m.gameTime ?? 'N/A'}</div>
             </div>
-            <div class="pp-row {m.botCls}">
-              {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.botName}</span>
-              {#if m.botRec}<span class="pp-rec">{m.botRec}</span>{/if}
-              {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
-              {#if m.botSeedLabel}<span class="pp-seed">{m.botSeedLabel}</span>{/if}
-            </div>
-          </div>
+          </a>
         </div>
         {/each}
       </div>
@@ -569,32 +629,38 @@
     <div class="bk-col bk-next">
       <div class="bk-pair">
         <div class="bk-slot">
-          <div class="pp-card pp-orange">
-            <div class="pp-row {slotCls(oCF,false)} pp-sep">
-              {#if oCF.topLogo}<img src={oCF.topLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{oCF.topName}</span>
-              {#if oCF.topScore !== null}<span class="pp-score">{oCF.topScore}</span>{/if}
+          <a class="pp-card-link" href={oCF.matchId ? `/matchups/${oCF.matchId}` : undefined}>
+            <div class="pp-card pp-orange">
+              <div class="pp-row {slotCls(oCF,false)} pp-sep">
+                {#if oCF.topLogo}<img src={oCF.topLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{oCF.topName}</span>
+                {#if oCF.topScore !== null}<span class="pp-score">{oCF.topScore}</span>{/if}
+              </div>
+              <div class="pp-row {slotCls(oCF,true)}">
+                {#if oCF.botLogo}<img src={oCF.botLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{oCF.botName}</span>
+                {#if oCF.botScore !== null}<span class="pp-score">{oCF.botScore}</span>{/if}
+              </div>
+              <div class="pp-time">{oCF.gameTime ?? 'N/A'}</div>
             </div>
-            <div class="pp-row {slotCls(oCF,true)}">
-              {#if oCF.botLogo}<img src={oCF.botLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{oCF.botName}</span>
-              {#if oCF.botScore !== null}<span class="pp-score">{oCF.botScore}</span>{/if}
-            </div>
-          </div>
+          </a>
         </div>
         <div class="bk-slot">
-          <div class="pp-card pp-blue">
-            <div class="pp-row {slotCls(bCF,false)} pp-sep">
-              {#if bCF.topLogo}<img src={bCF.topLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{bCF.topName}</span>
-              {#if bCF.topScore !== null}<span class="pp-score">{bCF.topScore}</span>{/if}
+          <a class="pp-card-link" href={bCF.matchId ? `/matchups/${bCF.matchId}` : undefined}>
+            <div class="pp-card pp-blue">
+              <div class="pp-row {slotCls(bCF,false)} pp-sep">
+                {#if bCF.topLogo}<img src={bCF.topLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{bCF.topName}</span>
+                {#if bCF.topScore !== null}<span class="pp-score">{bCF.topScore}</span>{/if}
+              </div>
+              <div class="pp-row {slotCls(bCF,true)}">
+                {#if bCF.botLogo}<img src={bCF.botLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{bCF.botName}</span>
+                {#if bCF.botScore !== null}<span class="pp-score">{bCF.botScore}</span>{/if}
+              </div>
+              <div class="pp-time">{bCF.gameTime ?? 'N/A'}</div>
             </div>
-            <div class="pp-row {slotCls(bCF,true)}">
-              {#if bCF.botLogo}<img src={bCF.botLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{bCF.botName}</span>
-              {#if bCF.botScore !== null}<span class="pp-score">{bCF.botScore}</span>{/if}
-            </div>
-          </div>
+          </a>
         </div>
       </div>
     </div>
@@ -602,20 +668,23 @@
     <!-- Championship column -->
     <div class="bk-col bk-gf">
       <div class="bk-slot">
-        <div class="pp-card pp-gold">
-          <div class="pp-row {slotCls(gf,false)} pp-sep">
-            {#if gf.topLogo}<img src={gf.topLogo} alt="" class="pp-logo" />{/if}
-            <span class="pp-name">{gf.topName}</span>
-            {#if gf.topScore !== null}<span class="pp-score">{gf.topScore}</span>{/if}
-            <span class="pp-tag pp-tag-orange">Orange</span>
+        <a class="pp-card-link" href={gf.matchId ? `/matchups/${gf.matchId}` : undefined}>
+          <div class="pp-card pp-gold">
+            <div class="pp-row {slotCls(gf,false)} pp-sep">
+              {#if gf.topLogo}<img src={gf.topLogo} alt="" class="pp-logo" />{/if}
+              <span class="pp-name">{gf.topName}</span>
+              {#if gf.topScore !== null}<span class="pp-score">{gf.topScore}</span>{/if}
+              <span class="pp-tag pp-tag-orange">Orange</span>
+            </div>
+            <div class="pp-row {slotCls(gf,true)}">
+              {#if gf.botLogo}<img src={gf.botLogo} alt="" class="pp-logo" />{/if}
+              <span class="pp-name">{gf.botName}</span>
+              {#if gf.botScore !== null}<span class="pp-score">{gf.botScore}</span>{/if}
+              <span class="pp-tag pp-tag-blue">Blue</span>
+            </div>
+            <div class="pp-time">{gf.gameTime ?? 'N/A'}</div>
           </div>
-          <div class="pp-row {slotCls(gf,true)}">
-            {#if gf.botLogo}<img src={gf.botLogo} alt="" class="pp-logo" />{/if}
-            <span class="pp-name">{gf.botName}</span>
-            {#if gf.botScore !== null}<span class="pp-score">{gf.botScore}</span>{/if}
-            <span class="pp-tag pp-tag-blue">Blue</span>
-          </div>
-        </div>
+        </a>
       </div>
     </div>
   </div>
@@ -642,22 +711,25 @@
       <div class="bk-pair">
         {#each pair as m}
         <div class="bk-slot">
-          <div class="pp-card">
-            <div class="pp-row {m.topCls} pp-sep">
-              {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.topName}</span>
-              {#if m.topRec}<span class="pp-rec">{m.topRec}</span>{/if}
-              {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
-              {#if m.topSeedLabel}<span class="pp-seed">{m.topSeedLabel}</span>{/if}
+          <a class="pp-card-link" href={m.matchId ? `/matchups/${m.matchId}` : undefined}>
+            <div class="pp-card">
+              <div class="pp-row {m.topCls} pp-sep">
+                {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{m.topName}</span>
+                {#if m.topRec}<span class="pp-rec">{m.topRec}</span>{/if}
+                {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
+                {#if m.topSeedLabel}<span class="pp-seed">{m.topSeedLabel}</span>{/if}
+              </div>
+              <div class="pp-row {m.botCls}">
+                {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{m.botName}</span>
+                {#if m.botRec}<span class="pp-rec">{m.botRec}</span>{/if}
+                {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
+                {#if m.botSeedLabel}<span class="pp-seed">{m.botSeedLabel}</span>{/if}
+              </div>
+              <div class="pp-time">{m.gameTime ?? 'N/A'}</div>
             </div>
-            <div class="pp-row {m.botCls}">
-              {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.botName}</span>
-              {#if m.botRec}<span class="pp-rec">{m.botRec}</span>{/if}
-              {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
-              {#if m.botSeedLabel}<span class="pp-seed">{m.botSeedLabel}</span>{/if}
-            </div>
-          </div>
+          </a>
         </div>
         {/each}
       </div>
@@ -669,22 +741,25 @@
       <div class="bk-pair">
         {#each pair as m}
         <div class="bk-slot">
-          <div class="pp-card">
-            <div class="pp-row {m.topCls} pp-sep">
-              {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.topName}</span>
-              {#if m.topRec}<span class="pp-rec">{m.topRec}</span>{/if}
-              {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
-              {#if m.topSeedLabel}<span class="pp-seed">{m.topSeedLabel}</span>{/if}
+          <a class="pp-card-link" href={m.matchId ? `/matchups/${m.matchId}` : undefined}>
+            <div class="pp-card">
+              <div class="pp-row {m.topCls} pp-sep">
+                {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{m.topName}</span>
+                {#if m.topRec}<span class="pp-rec">{m.topRec}</span>{/if}
+                {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
+                {#if m.topSeedLabel}<span class="pp-seed">{m.topSeedLabel}</span>{/if}
+              </div>
+              <div class="pp-row {m.botCls}">
+                {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{m.botName}</span>
+                {#if m.botRec}<span class="pp-rec">{m.botRec}</span>{/if}
+                {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
+                {#if m.botSeedLabel}<span class="pp-seed">{m.botSeedLabel}</span>{/if}
+              </div>
+              <div class="pp-time">{m.gameTime ?? 'N/A'}</div>
             </div>
-            <div class="pp-row {m.botCls}">
-              {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.botName}</span>
-              {#if m.botRec}<span class="pp-rec">{m.botRec}</span>{/if}
-              {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
-              {#if m.botSeedLabel}<span class="pp-seed">{m.botSeedLabel}</span>{/if}
-            </div>
-          </div>
+          </a>
         </div>
         {/each}
       </div>
@@ -696,18 +771,21 @@
       <div class="bk-pair">
         {#each oSF as m}
         <div class="bk-slot">
-          <div class="pp-card">
-            <div class="pp-row {slotCls(m,false)} pp-sep">
-              {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.topName}</span>
-              {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
+          <a class="pp-card-link" href={m.matchId ? `/matchups/${m.matchId}` : undefined}>
+            <div class="pp-card">
+              <div class="pp-row {slotCls(m,false)} pp-sep">
+                {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{m.topName}</span>
+                {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
+              </div>
+              <div class="pp-row {slotCls(m,true)}">
+                {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{m.botName}</span>
+                {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
+              </div>
+              <div class="pp-time">{m.gameTime ?? 'N/A'}</div>
             </div>
-            <div class="pp-row {slotCls(m,true)}">
-              {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.botName}</span>
-              {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
-            </div>
-          </div>
+          </a>
         </div>
         {/each}
       </div>
@@ -717,18 +795,21 @@
       <div class="bk-pair">
         {#each bSF as m}
         <div class="bk-slot">
-          <div class="pp-card">
-            <div class="pp-row {slotCls(m,false)} pp-sep">
-              {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.topName}</span>
-              {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
+          <a class="pp-card-link" href={m.matchId ? `/matchups/${m.matchId}` : undefined}>
+            <div class="pp-card">
+              <div class="pp-row {slotCls(m,false)} pp-sep">
+                {#if m.topLogo}<img src={m.topLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{m.topName}</span>
+                {#if m.topScore !== null}<span class="pp-score">{m.topScore}</span>{/if}
+              </div>
+              <div class="pp-row {slotCls(m,true)}">
+                {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{m.botName}</span>
+                {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
+              </div>
+              <div class="pp-time">{m.gameTime ?? 'N/A'}</div>
             </div>
-            <div class="pp-row {slotCls(m,true)}">
-              {#if m.botLogo}<img src={m.botLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{m.botName}</span>
-              {#if m.botScore !== null}<span class="pp-score">{m.botScore}</span>{/if}
-            </div>
-          </div>
+          </a>
         </div>
         {/each}
       </div>
@@ -738,32 +819,38 @@
     <div class="bk-col bk-next">
       <div class="bk-pair">
         <div class="bk-slot">
-          <div class="pp-card pp-orange">
-            <div class="pp-row {slotCls(oCF,false)} pp-sep">
-              {#if oCF.topLogo}<img src={oCF.topLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{oCF.topName}</span>
-              {#if oCF.topScore !== null}<span class="pp-score">{oCF.topScore}</span>{/if}
+          <a class="pp-card-link" href={oCF.matchId ? `/matchups/${oCF.matchId}` : undefined}>
+            <div class="pp-card pp-orange">
+              <div class="pp-row {slotCls(oCF,false)} pp-sep">
+                {#if oCF.topLogo}<img src={oCF.topLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{oCF.topName}</span>
+                {#if oCF.topScore !== null}<span class="pp-score">{oCF.topScore}</span>{/if}
+              </div>
+              <div class="pp-row {slotCls(oCF,true)}">
+                {#if oCF.botLogo}<img src={oCF.botLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{oCF.botName}</span>
+                {#if oCF.botScore !== null}<span class="pp-score">{oCF.botScore}</span>{/if}
+              </div>
+              <div class="pp-time">{oCF.gameTime ?? 'N/A'}</div>
             </div>
-            <div class="pp-row {slotCls(oCF,true)}">
-              {#if oCF.botLogo}<img src={oCF.botLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{oCF.botName}</span>
-              {#if oCF.botScore !== null}<span class="pp-score">{oCF.botScore}</span>{/if}
-            </div>
-          </div>
+          </a>
         </div>
         <div class="bk-slot">
-          <div class="pp-card pp-blue">
-            <div class="pp-row {slotCls(bCF,false)} pp-sep">
-              {#if bCF.topLogo}<img src={bCF.topLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{bCF.topName}</span>
-              {#if bCF.topScore !== null}<span class="pp-score">{bCF.topScore}</span>{/if}
+          <a class="pp-card-link" href={bCF.matchId ? `/matchups/${bCF.matchId}` : undefined}>
+            <div class="pp-card pp-blue">
+              <div class="pp-row {slotCls(bCF,false)} pp-sep">
+                {#if bCF.topLogo}<img src={bCF.topLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{bCF.topName}</span>
+                {#if bCF.topScore !== null}<span class="pp-score">{bCF.topScore}</span>{/if}
+              </div>
+              <div class="pp-row {slotCls(bCF,true)}">
+                {#if bCF.botLogo}<img src={bCF.botLogo} alt="" class="pp-logo" />{/if}
+                <span class="pp-name">{bCF.botName}</span>
+                {#if bCF.botScore !== null}<span class="pp-score">{bCF.botScore}</span>{/if}
+              </div>
+              <div class="pp-time">{bCF.gameTime ?? 'N/A'}</div>
             </div>
-            <div class="pp-row {slotCls(bCF,true)}">
-              {#if bCF.botLogo}<img src={bCF.botLogo} alt="" class="pp-logo" />{/if}
-              <span class="pp-name">{bCF.botName}</span>
-              {#if bCF.botScore !== null}<span class="pp-score">{bCF.botScore}</span>{/if}
-            </div>
-          </div>
+          </a>
         </div>
       </div>
     </div>
@@ -771,20 +858,23 @@
     <!-- GF column -->
     <div class="bk-col bk-gf">
       <div class="bk-slot">
-        <div class="pp-card pp-gold">
-          <div class="pp-row {slotCls(gf,false)} pp-sep">
-            {#if gf.topLogo}<img src={gf.topLogo} alt="" class="pp-logo" />{/if}
-            <span class="pp-name">{gf.topName}</span>
-            {#if gf.topScore !== null}<span class="pp-score">{gf.topScore}</span>{/if}
-            <span class="pp-tag pp-tag-orange">Orange</span>
+        <a class="pp-card-link" href={gf.matchId ? `/matchups/${gf.matchId}` : undefined}>
+          <div class="pp-card pp-gold">
+            <div class="pp-row {slotCls(gf,false)} pp-sep">
+              {#if gf.topLogo}<img src={gf.topLogo} alt="" class="pp-logo" />{/if}
+              <span class="pp-name">{gf.topName}</span>
+              {#if gf.topScore !== null}<span class="pp-score">{gf.topScore}</span>{/if}
+              <span class="pp-tag pp-tag-orange">Orange</span>
+            </div>
+            <div class="pp-row {slotCls(gf,true)}">
+              {#if gf.botLogo}<img src={gf.botLogo} alt="" class="pp-logo" />{/if}
+              <span class="pp-name">{gf.botName}</span>
+              {#if gf.botScore !== null}<span class="pp-score">{gf.botScore}</span>{/if}
+              <span class="pp-tag pp-tag-blue">Blue</span>
+            </div>
+            <div class="pp-time">{gf.gameTime ?? 'N/A'}</div>
           </div>
-          <div class="pp-row {slotCls(gf,true)}">
-            {#if gf.botLogo}<img src={gf.botLogo} alt="" class="pp-logo" />{/if}
-            <span class="pp-name">{gf.botName}</span>
-            {#if gf.botScore !== null}<span class="pp-score">{gf.botScore}</span>{/if}
-            <span class="pp-tag pp-tag-blue">Blue</span>
-          </div>
-        </div>
+        </a>
       </div>
     </div>
   </div>
@@ -947,10 +1037,36 @@
     border: 1px solid var(--bk-card-border);
     background: var(--bk-card-bg);
     width: 100%;
+    transition: box-shadow 120ms ease;
   }
   .pp-orange { border-color: rgba(249,115,22,0.4); }
   .pp-blue   { border-color: rgba(96,165,250,0.4); }
   .pp-gold   { border-color: rgba(251,191,36,0.5); }
+
+  /* Wrapper anchor: links to /matchups/{match_id} when a match record exists.
+     Cards without an href (projected slots, TBD) stay non-interactive. */
+  .pp-card-link {
+    display: block;
+    width: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+  .pp-card-link[href] { cursor: pointer; }
+  .pp-card-link[href]:hover .pp-card {
+    box-shadow: 0 0 0 2px rgba(96,165,250,0.5);
+  }
+
+  /* Scheduled-time strip — always rendered so every card has the same
+     height (keeps the orange/blue rule aligned with the conf-col rule when
+     mixes of played + unplayed cards differ between halves). Shows the
+     formatted time when present, 'N/A' otherwise. */
+  .pp-time {
+    padding: 3px 9px;
+    font-size: 0.65rem;
+    color: var(--bk-muted);
+    text-align: center;
+    border-top: 1px solid var(--bk-sep);
+  }
 
   .pp-row {
     display: flex;

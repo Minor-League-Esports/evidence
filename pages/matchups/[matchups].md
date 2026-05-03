@@ -322,7 +322,11 @@ ORDER BY stat1 DESC
         || '<img src="' || franchise_logo || '" style="width:22px;height:22px;object-fit:contain;" />'
         || '</a>' AS team_html
     FROM matches m
-        INNER JOIN s19_stats s19
+        INNER JOIN (
+            SELECT * FROM S19_stats
+            UNION ALL
+            SELECT * FROM S19_playoff_stats
+        ) s19
             ON m.match_id = s19.match_id
         INNER JOIN teams home
             ON m.home = home.franchise
@@ -368,7 +372,11 @@ ORDER BY stat1 DESC
         || '<span class="markdown">' || player_team || '</span>'
         || '<img src="' || franchise_logo || '" style="width:22px;height:22px;object-fit:contain;" />'
         || '</a>' AS team_html
-    FROM s19_stats s19
+    FROM (
+        SELECT * FROM S19_stats
+        UNION ALL
+        SELECT * FROM S19_playoff_stats
+    ) s19
         INNER JOIN players p
             ON s19.member_id = p.member_id
         INNER JOIN teams t
@@ -394,7 +402,11 @@ ORDER BY stat1 DESC
     DENSE_RANK() OVER (
         ORDER BY round_id ASC
     ) AS rank_id, 
-    FROM s19_stats s19
+    FROM (
+        SELECT * FROM S19_stats
+        UNION ALL
+        SELECT * FROM S19_playoff_stats
+    ) s19
         INNER JOIN players p
             ON s19.member_id = p.member_id
     WHERE s19.match_id = '${params.matchups}' 
@@ -411,7 +423,11 @@ ORDER BY stat1 DESC
         SUM(s19.saves) AS total_saves,
         SUM(s19.shots) AS total_shots
     FROM matches m
-        INNER JOIN s19_stats s19
+        INNER JOIN (
+            SELECT * FROM S19_stats
+            UNION ALL
+            SELECT * FROM S19_playoff_stats
+        ) s19
             ON m.match_id = s19.match_id
         INNER JOIN teams home
             ON m.home = home.franchise

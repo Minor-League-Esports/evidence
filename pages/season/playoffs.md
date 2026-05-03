@@ -203,7 +203,8 @@ GROUP BY team_name
 
 ```sql playoff_games
 SELECT
-    m.home
+    m.match_id
+    , m.home
     , m.away
     , m.home_wins::INT AS home_wins
     , m.away_wins::INT AS away_wins
@@ -212,6 +213,7 @@ SELECT
         ELSE m.winning_team
     END AS winner
     , mg.match_group_title AS round
+    , strftime(m.scheduled_time AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York', '%m/%d %I:%M %p') AS game_time
 FROM matches m
 INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
 WHERE mg.parent_group_title = 'Season 19 Playoffs'
