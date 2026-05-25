@@ -117,6 +117,12 @@ CREATE OR REPLACE TEMP TABLE total_scrim_stats AS
     FROM read_parquet(
         'https://sprocket-public-datasets.nyc3.cdn.digitaloceanspaces.com/datasets/Total_Scrim_Stats_13m.parquet'
 	);
+
+CREATE OR REPLACE TEMP TABLE scrim_results AS
+    SELECT *
+    FROM read_parquet(
+        'https://sprocket-public-datasets.nyc3.cdn.digitaloceanspaces.com/datasets/Scrim_Results_13m.parquet'
+	);
 	
 	
 CREATE OR REPLACE TEMP TABLE trackers AS
