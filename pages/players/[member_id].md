@@ -31,9 +31,13 @@
     LEFT JOIN leagues l
         ON p.skill_group = l.league_name
     WHERE p.member_id = '${params.member_id}'
+        QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY p.member_id
+        ORDER BY (p.sprocket_player_id IN (SELECT player_id FROM eligibility)) DESC
+    ) = 1
 ```
 
-<LastRefreshed prefix="Data last updated"/>
+    <LastRefreshed prefix="Data last updated"/>
 
 {#if basic_info[0].logo}
 <a href="{basic_info[0].franchiseLink}" >
@@ -63,7 +67,7 @@ WITH player_scrims as (
 	    scrim_created_at + INTERVAL 31 DAY AS "expiry_date" -- Interval includes the starting date (scrim_created_at) so to get scrim_created_at + 30 days we must add interval 31 day to account for this
 	FROM eligibility e
 	--The scrim stats does not include the member_id so we must grab the other binding feature from the basic info query
-	WHERE e.player_id = (
+	WHERE e.player_id IN (
         SELECT sprocket_player_id
         FROM ${basic_info}
     )
@@ -92,11 +96,11 @@ points_by_day AS (
 eligibility_state AS (
 	SELECT
 		p.*,
-		(SELECT eligibility_requirement FROM ${basic_info}) AS eligibility_requirement,
+		(SELECT MIN(eligibility_requirement) FROM ${basic_info}) AS eligibility_requirement,
 		DATE_TRUNC('WEEK', p.eval_date)::DATE AS week_start,
 		MIN(
 			CASE 
-				WHEN p.points >= (SELECT eligibility_requirement FROM ${basic_info})
+				WHEN p.points >= (SELECT MIN(eligibility_requirement) FROM ${basic_info})
 				THEN p.eval_date 
 			END
 		) OVER (PARTITION BY DATE_TRUNC('WEEK', p.eval_date)::DATE) AS first_eligible_date
@@ -319,7 +323,7 @@ from ${player_stats}
 
         SELECT
             p.name,
-            p.salary,
+
             r.Home AS home,
             r.Away AS away,
             m.match_id AS match_id,
@@ -354,7 +358,7 @@ from ${player_stats}
 
         GROUP BY
             p.name
-            , p.salary
+
             , s19.team_name
             , r.home
             , r.away
@@ -368,7 +372,7 @@ from ${player_stats}
     ), seriesStats AS (
 
         SELECT
-            p.member_id,
+            s19.member_id,
             s19.team_name,
             s19.gamemode,
             s19.match_id,
@@ -388,15 +392,12 @@ from ${player_stats}
             avg(s19.shots_against) AS shots_against_per_game,
             sum(s19.goals) / NULLIF(sum(s19.shots), 0) AS shooting_pct2
 
-        FROM players p
-
-        INNER JOIN S19_stats s19
-            ON p.member_id = s19.member_id
+        FROM S19_stats s19
         
-        WHERE p.member_id = '${params.member_id}'
+        WHERE s19.member_id = '${params.member_id}'
         
         GROUP BY
-            p.member_id
+            s19.member_id
             , s19.team_name
             , s19.gamemode
             , s19.match_id
