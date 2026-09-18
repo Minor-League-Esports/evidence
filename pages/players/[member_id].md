@@ -31,10 +31,6 @@
     LEFT JOIN leagues l
         ON p.skill_group = l.league_name
     WHERE p.member_id = '${params.member_id}'
-        QUALIFY ROW_NUMBER() OVER (
-        PARTITION BY p.member_id
-        ORDER BY (p.sprocket_player_id IN (SELECT player_id FROM eligibility)) DESC
-    ) = 1
 ```
 
     <LastRefreshed prefix="Data last updated"/>
