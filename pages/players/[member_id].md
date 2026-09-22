@@ -63,7 +63,7 @@ WITH player_scrims as (
 	    scrim_created_at + INTERVAL 31 DAY AS "expiry_date" -- Interval includes the starting date (scrim_created_at) so to get scrim_created_at + 30 days we must add interval 31 day to account for this
 	FROM eligibility e
 	--The scrim stats does not include the member_id so we must grab the other binding feature from the basic info query
-	WHERE e.player_id IN (
+	WHERE e.player_id = (
         SELECT sprocket_player_id
         FROM ${basic_info}
     )
@@ -92,11 +92,11 @@ points_by_day AS (
 eligibility_state AS (
 	SELECT
 		p.*,
-		(SELECT MIN(eligibility_requirement) FROM ${basic_info}) AS eligibility_requirement,
+		(SELECT eligibility_requirement FROM ${basic_info}) AS eligibility_requirement,
 		DATE_TRUNC('WEEK', p.eval_date)::DATE AS week_start,
 		MIN(
 			CASE 
-				WHEN p.points >= (SELECT MIN(eligibility_requirement) FROM ${basic_info})
+				WHEN p.points >= (SELECT eligibility_requirement FROM ${basic_info})
 				THEN p.eval_date 
 			END
 		) OVER (PARTITION BY DATE_TRUNC('WEEK', p.eval_date)::DATE) AS first_eligible_date
