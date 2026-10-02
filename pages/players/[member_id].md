@@ -33,7 +33,7 @@
     WHERE p.member_id = '${params.member_id}'
 ```
 
-    <LastRefreshed prefix="Data last updated"/>
+<LastRefreshed prefix="Data last updated"/>
 
 {#if basic_info[0].logo}
 <a href="{basic_info[0].franchiseLink}" >
@@ -141,7 +141,7 @@ ORDER BY e.eval_date;
     title="Scrim Point Decay"
     xAxisTitle="Date"
     yAxisTitle="Scrim Points"
-    
+
     echartsOptions={
     	scrim_decay?.length
     		? {
@@ -190,10 +190,10 @@ ORDER BY e.eval_date;
     							: null;
     					})
     				}
-                    
-    				    				
+
+
     			]
-            
+
     		}
     		: {}
     }
@@ -319,7 +319,7 @@ from ${player_stats}
 
         SELECT
             p.name,
-
+            p.salary,
             r.Home AS home,
             r.Away AS away,
             m.match_id AS match_id,
@@ -344,7 +344,7 @@ from ${player_stats}
 
         INNER JOIN matches m
             ON r.match_id = m.match_id
-            
+
 
         INNER JOIN match_groups mg
             ON m.match_group_id = mg.match_group_id
@@ -354,7 +354,7 @@ from ${player_stats}
 
         GROUP BY
             p.name
-
+            , p.salary
             , s19.team_name
             , r.home
             , r.away
@@ -368,7 +368,7 @@ from ${player_stats}
     ), seriesStats AS (
 
         SELECT
-            s19.member_id,
+            p.member_id,
             s19.team_name,
             s19.gamemode,
             s19.match_id,
@@ -388,12 +388,15 @@ from ${player_stats}
             avg(s19.shots_against) AS shots_against_per_game,
             sum(s19.goals) / NULLIF(sum(s19.shots), 0) AS shooting_pct2
 
-        FROM S19_stats s19
-        
-        WHERE s19.member_id = '${params.member_id}'
-        
+        FROM players p
+
+        INNER JOIN S19_stats s19
+            ON p.member_id = s19.member_id
+
+        WHERE p.member_id = '${params.member_id}'
+
         GROUP BY
-            s19.member_id
+            p.member_id
             , s19.team_name
             , s19.gamemode
             , s19.match_id
@@ -538,7 +541,7 @@ from ${player_stats}
 
     LEFT JOIN players p
         ON p.sprocket_player_id = ass.sprocket_player_id
-        
+
     WHERE p.member_id = '${params.member_id}'
 ```
 
