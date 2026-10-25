@@ -34,50 +34,50 @@ WITH base_matchup AS (
 )
 SELECT
     CASE
-        WHEN (s19.division_name IS NULL AND s19.conference IS NULL) THEN
+        WHEN (s20.division_name IS NULL AND s20.conference IS NULL) THEN
             CASE
-                WHEN s19.ranking % 100 IN (11, 12, 13) THEN CAST(s19.ranking AS INTEGER) || 'th'
-                WHEN s19.ranking % 10 = 1 THEN CAST(s19.ranking AS INTEGER) || 'st'
-                WHEN s19.ranking % 10 = 2 THEN CAST(s19.ranking AS INTEGER) || 'nd'
-                WHEN s19.ranking % 10 = 3 THEN CAST(s19.ranking AS INTEGER) || 'rd'
-                ELSE CAST(s19.ranking AS INTEGER) || 'th'
+                WHEN s20.ranking % 100 IN (11, 12, 13) THEN CAST(s20.ranking AS INTEGER) || 'th'
+                WHEN s20.ranking % 10 = 1 THEN CAST(s20.ranking AS INTEGER) || 'st'
+                WHEN s20.ranking % 10 = 2 THEN CAST(s20.ranking AS INTEGER) || 'nd'
+                WHEN s20.ranking % 10 = 3 THEN CAST(s20.ranking AS INTEGER) || 'rd'
+                ELSE CAST(s20.ranking AS INTEGER) || 'th'
             END
         ELSE NULL
     END AS overall_ranking,
     CASE
-        WHEN (s19.division_name IS NULL AND NOT s19.conference IS NULL) THEN
+        WHEN (s20.division_name IS NULL AND NOT s20.conference IS NULL) THEN
             CASE
-                WHEN s19.ranking % 100 IN (11, 12, 13) THEN CAST(s19.ranking AS INTEGER) || 'th'
-                WHEN s19.ranking % 10 = 1 THEN CAST(s19.ranking AS INTEGER) || 'st'
-                WHEN s19.ranking % 10 = 2 THEN CAST(s19.ranking AS INTEGER) || 'nd'
-                WHEN s19.ranking % 10 = 3 THEN CAST(s19.ranking AS INTEGER) || 'rd'
-                ELSE CAST(s19.ranking AS INTEGER) || 'th'
+                WHEN s20.ranking % 100 IN (11, 12, 13) THEN CAST(s20.ranking AS INTEGER) || 'th'
+                WHEN s20.ranking % 10 = 1 THEN CAST(s20.ranking AS INTEGER) || 'st'
+                WHEN s20.ranking % 10 = 2 THEN CAST(s20.ranking AS INTEGER) || 'nd'
+                WHEN s20.ranking % 10 = 3 THEN CAST(s20.ranking AS INTEGER) || 'rd'
+                ELSE CAST(s20.ranking AS INTEGER) || 'th'
             END            
         ELSE NULL
     END AS conference_ranking,
     CASE
-        WHEN (s19.division_name IS NOT NULL AND s19.conference IS NOT NULL) THEN
+        WHEN (s20.division_name IS NOT NULL AND s20.conference IS NOT NULL) THEN
             CASE
-                WHEN s19.ranking % 100 IN (11, 12, 13) THEN CAST(s19.ranking AS INTEGER) || 'th'
-                WHEN s19.ranking % 10 = 1 THEN CAST(s19.ranking AS INTEGER) || 'st'
-                WHEN s19.ranking % 10 = 2 THEN CAST(s19.ranking AS INTEGER) || 'nd'
-                WHEN s19.ranking % 10 = 3 THEN CAST(s19.ranking AS INTEGER) || 'rd'
-                ELSE CAST(s19.ranking AS INTEGER) || 'th'
+                WHEN s20.ranking % 100 IN (11, 12, 13) THEN CAST(s20.ranking AS INTEGER) || 'th'
+                WHEN s20.ranking % 10 = 1 THEN CAST(s20.ranking AS INTEGER) || 'st'
+                WHEN s20.ranking % 10 = 2 THEN CAST(s20.ranking AS INTEGER) || 'nd'
+                WHEN s20.ranking % 10 = 3 THEN CAST(s20.ranking AS INTEGER) || 'rd'
+                ELSE CAST(s20.ranking AS INTEGER) || 'th'
             END
         ELSE NULL
     END AS division_ranking,        
-    s19.name,
-    s19.division_name,
-    s19.conference,
-    s19.league,
-    s19.mode,
-    s19.team_wins,
-    s19.team_losses
-FROM S19_standings s19
+    s20.name,
+    s20.division_name,
+    s20.conference,
+    s20.league,
+    s20.mode,
+    s20.team_wins,
+    s20.team_losses
+FROM S20_standings s20
 INNER JOIN base_matchup
-    ON s19.league = base_matchup.league
-    AND s19.mode = base_matchup.game_mode
-    AND s19.name = base_matchup.home
+    ON s20.league = base_matchup.league
+    AND s20.mode = base_matchup.game_mode
+    AND s20.name = base_matchup.home
 WHERE NOT (overall_ranking IS NULL AND conference_ranking IS NULL AND division_ranking IS NULL)
 ORDER BY overall_ranking, conference_ranking, division_ranking
 ```
@@ -89,50 +89,50 @@ WITH base_matchup AS (
 )
 SELECT
     CASE
-        WHEN (s19.division_name IS NULL AND s19.conference IS NULL) THEN
+        WHEN (s20.division_name IS NULL AND s20.conference IS NULL) THEN
             CASE
-                WHEN s19.ranking % 100 IN (11, 12, 13) THEN CAST(s19.ranking AS INTEGER) || 'th'
-                WHEN s19.ranking % 10 = 1 THEN CAST(s19.ranking AS INTEGER) || 'st'
-                WHEN s19.ranking % 10 = 2 THEN CAST(s19.ranking AS INTEGER) || 'nd'
-                WHEN s19.ranking % 10 = 3 THEN CAST(s19.ranking AS INTEGER) || 'rd'
-                ELSE CAST(s19.ranking AS INTEGER) || 'th'
+                WHEN s20.ranking % 100 IN (11, 12, 13) THEN CAST(s20.ranking AS INTEGER) || 'th'
+                WHEN s20.ranking % 10 = 1 THEN CAST(s20.ranking AS INTEGER) || 'st'
+                WHEN s20.ranking % 10 = 2 THEN CAST(s20.ranking AS INTEGER) || 'nd'
+                WHEN s20.ranking % 10 = 3 THEN CAST(s20.ranking AS INTEGER) || 'rd'
+                ELSE CAST(s20.ranking AS INTEGER) || 'th'
             END
         ELSE NULL
     END AS overall_ranking,
     CASE
-        WHEN (s19.division_name IS NULL AND NOT s19.conference IS NULL) THEN
+        WHEN (s20.division_name IS NULL AND NOT s20.conference IS NULL) THEN
             CASE
-                WHEN s19.ranking % 100 IN (11, 12, 13) THEN CAST(s19.ranking AS INTEGER) || 'th'
-                WHEN s19.ranking % 10 = 1 THEN CAST(s19.ranking AS INTEGER) || 'st'
-                WHEN s19.ranking % 10 = 2 THEN CAST(s19.ranking AS INTEGER) || 'nd'
-                WHEN s19.ranking % 10 = 3 THEN CAST(s19.ranking AS INTEGER) || 'rd'
-                ELSE CAST(s19.ranking AS INTEGER) || 'th'
+                WHEN s20.ranking % 100 IN (11, 12, 13) THEN CAST(s20.ranking AS INTEGER) || 'th'
+                WHEN s20.ranking % 10 = 1 THEN CAST(s20.ranking AS INTEGER) || 'st'
+                WHEN s20.ranking % 10 = 2 THEN CAST(s20.ranking AS INTEGER) || 'nd'
+                WHEN s20.ranking % 10 = 3 THEN CAST(s20.ranking AS INTEGER) || 'rd'
+                ELSE CAST(s20.ranking AS INTEGER) || 'th'
             END            
         ELSE NULL
     END AS conference_ranking,
     CASE
-        WHEN (s19.division_name IS NOT NULL AND s19.conference IS NOT NULL) THEN
+        WHEN (s20.division_name IS NOT NULL AND s20.conference IS NOT NULL) THEN
             CASE
-                WHEN s19.ranking % 100 IN (11, 12, 13) THEN CAST(s19.ranking AS INTEGER) || 'th'
-                WHEN s19.ranking % 10 = 1 THEN CAST(s19.ranking AS INTEGER) || 'st'
-                WHEN s19.ranking % 10 = 2 THEN CAST(s19.ranking AS INTEGER) || 'nd'
-                WHEN s19.ranking % 10 = 3 THEN CAST(s19.ranking AS INTEGER) || 'rd'
-                ELSE CAST(s19.ranking AS INTEGER) || 'th'
+                WHEN s20.ranking % 100 IN (11, 12, 13) THEN CAST(s20.ranking AS INTEGER) || 'th'
+                WHEN s20.ranking % 10 = 1 THEN CAST(s20.ranking AS INTEGER) || 'st'
+                WHEN s20.ranking % 10 = 2 THEN CAST(s20.ranking AS INTEGER) || 'nd'
+                WHEN s20.ranking % 10 = 3 THEN CAST(s20.ranking AS INTEGER) || 'rd'
+                ELSE CAST(s20.ranking AS INTEGER) || 'th'
             END
         ELSE NULL
     END AS division_ranking,        
-    s19.name,
-    s19.division_name,
-    s19.conference,
-    s19.league,
-    s19.mode,
-    s19.team_wins,
-    s19.team_losses
-FROM S19_standings s19
+    s20.name,
+    s20.division_name,
+    s20.conference,
+    s20.league,
+    s20.mode,
+    s20.team_wins,
+    s20.team_losses
+FROM S20_standings s20
 INNER JOIN base_matchup
-    ON s19.league = base_matchup.league
-    AND s19.mode = base_matchup.game_mode
-    AND s19.name = base_matchup.away
+    ON s20.league = base_matchup.league
+    AND s20.mode = base_matchup.game_mode
+    AND s20.name = base_matchup.away
 WHERE NOT (overall_ranking IS NULL AND conference_ranking IS NULL AND division_ranking IS NULL)
 ORDER BY overall_ranking, conference_ranking, division_ranking
 ```
@@ -222,7 +222,7 @@ WITH playerstats AS (
     SELECT name,
     salary AS Salary,
     team_name AS Team,
-    s19.skill_group AS league,
+    s20.skill_group AS league,
     "Primary Color" AS primColor,
     CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END AS GameMode,
     count(*) AS games_played,
@@ -241,8 +241,8 @@ WITH playerstats AS (
     avg(shots_against) AS shots_against_per_game,
     sum(goals)/sum(shots) AS shooting_pct2
  FROM players p
-    INNER JOIN S19_stats s19
-        ON p.member_id = s19.member_id
+    INNER JOIN S20_stats s20
+        ON p.member_id = s20.member_id
     INNER JOIN teams t 
         ON p.franchise = t.franchise
 
@@ -297,24 +297,24 @@ ORDER BY stat1 DESC
     SELECT 
         p.name,
         '/players/' || CAST(p.member_id AS INTEGER) AS id_link,
-        s19.team_name AS player_team,
-        s19.member_id,
+        s20.team_name AS player_team,
+        s20.member_id,
         m.match_id,
-        AVG(s19.gpi) AS "Sprocket Rating",
-        AVG(s19.opi) AS "OPI",
-        AVG(s19.dpi) AS "DPI",
-        SUM(s19.goals) AS total_goals,
-        SUM(s19.assists) AS total_assists,
-        SUM(s19.saves) AS total_saves,
-        SUM(s19.shots) AS total_shots,
+        AVG(s20.gpi) AS "Sprocket Rating",
+        AVG(s20.opi) AS "OPI",
+        AVG(s20.dpi) AS "DPI",
+        SUM(s20.goals) AS total_goals,
+        SUM(s20.assists) AS total_assists,
+        SUM(s20.saves) AS total_saves,
+        SUM(s20.shots) AS total_shots,
         CASE
-            WHEN s19.team_name = m.home THEN '/franchises/' || home.franchise
-            WHEN s19.team_name = m.away THEN '/franchises/' || away.franchise
+            WHEN s20.team_name = m.home THEN '/franchises/' || home.franchise
+            WHEN s20.team_name = m.away THEN '/franchises/' || away.franchise
             ELSE NULL
         END AS franchise_link,
         CASE
-            WHEN s19.team_name = m.home THEN home."Photo URL"
-            WHEN s19.team_name = m.away THEN away."Photo URL"
+            WHEN s20.team_name = m.home THEN home."Photo URL"
+            WHEN s20.team_name = m.away THEN away."Photo URL"
             ELSE NULL
         END AS franchise_logo,
         '<a href="' || franchise_link || '" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;">'
@@ -323,22 +323,22 @@ ORDER BY stat1 DESC
         || '</a>' AS team_html
     FROM matches m
         INNER JOIN (
-            SELECT * FROM S19_stats
+            SELECT * FROM S20_stats
             UNION ALL
-            SELECT * FROM S19_playoff_stats
-        ) s19
-            ON m.match_id = s19.match_id
+            SELECT * FROM S20_playoff_stats
+        ) s20
+            ON m.match_id = s20.match_id
         INNER JOIN teams home
             ON m.home = home.franchise
         INNER JOIN teams away
             ON m.away = away.franchise 
         INNER JOIN players p
-            ON s19.member_id = p.member_id
+            ON s20.member_id = p.member_id
     WHERE m.match_id = '${params.matchups}'
     GROUP BY
         p.name,
         player_team,
-        s19.member_id,
+        s20.member_id,
         m.match_id,
         home.franchise,
         away.franchise,
@@ -354,17 +354,17 @@ ORDER BY stat1 DESC
     SELECT
         p.name,
         '/players/' || CAST(p.member_id AS INTEGER) AS id_link,
-        s19.member_id,
-        s19.round_id,
-        s19.match_id,
-        s19.team_name AS player_team,
-        s19.gpi AS "Sprocket Rating",
-        s19.opi AS "OPI",
-        s19.dpi AS "DPI",
-        s19.goals AS total_goals,
-        s19.assists AS total_assists,
-        s19.saves AS total_saves,
-        s19.shots AS total_shots,
+        s20.member_id,
+        s20.round_id,
+        s20.match_id,
+        s20.team_name AS player_team,
+        s20.gpi AS "Sprocket Rating",
+        s20.opi AS "OPI",
+        s20.dpi AS "DPI",
+        s20.goals AS total_goals,
+        s20.assists AS total_assists,
+        s20.saves AS total_saves,
+        s20.shots AS total_shots,
         DENSE_RANK() OVER (ORDER BY round_id ASC) AS rank_id,
         '/franchises/' || t.franchise AS franchise_link,
         t."Photo URL" AS franchise_logo,
@@ -373,16 +373,16 @@ ORDER BY stat1 DESC
         || '<img src="' || franchise_logo || '" style="width:22px;height:22px;object-fit:contain;" />'
         || '</a>' AS team_html
     FROM (
-        SELECT * FROM S19_stats
+        SELECT * FROM S20_stats
         UNION ALL
-        SELECT * FROM S19_playoff_stats
-    ) s19
+        SELECT * FROM S20_playoff_stats
+    ) s20
         INNER JOIN players p
-            ON s19.member_id = p.member_id
+            ON s20.member_id = p.member_id
         INNER JOIN teams t
-            ON s19.team_name = t.franchise
-    WHERE s19.match_id = '${params.matchups}' 
-    ORDER by s19.round_id, p.name ASC
+            ON s20.team_name = t.franchise
+    WHERE s20.match_id = '${params.matchups}' 
+    ORDER by s20.round_id, p.name ASC
 ```
 
 ```sql game_ids
@@ -390,51 +390,51 @@ ORDER BY stat1 DESC
     FROM (
     SELECT
         p.name,
-        s19.member_id,
-        s19.round_id,
-        s19.match_id,
-        s19.team_name AS player_team,
-        s19.gpi AS "Sprocket Rating",
-        s19.goals AS total_goals,
-        s19.assists AS total_assists,
-        s19.saves AS total_saves,
-        s19.shots AS total_shots,
+        s20.member_id,
+        s20.round_id,
+        s20.match_id,
+        s20.team_name AS player_team,
+        s20.gpi AS "Sprocket Rating",
+        s20.goals AS total_goals,
+        s20.assists AS total_assists,
+        s20.saves AS total_saves,
+        s20.shots AS total_shots,
     DENSE_RANK() OVER (
         ORDER BY round_id ASC
     ) AS rank_id, 
     FROM (
-        SELECT * FROM S19_stats
+        SELECT * FROM S20_stats
         UNION ALL
-        SELECT * FROM S19_playoff_stats
-    ) s19
+        SELECT * FROM S20_playoff_stats
+    ) s20
         INNER JOIN players p
-            ON s19.member_id = p.member_id
-    WHERE s19.match_id = '${params.matchups}' 
-    ORDER by s19.round_id
+            ON s20.member_id = p.member_id
+    WHERE s20.match_id = '${params.matchups}' 
+    ORDER by s20.round_id
     ) CTE
 ```
 
 ```sql grouped_franchise_series_data
     SELECT 
-        s19.team_name AS player_team,
-        AVG(s19.gpi) AS "Sprocket Rating",
-        SUM(s19.goals) AS total_goals,
-        SUM(s19.assists) AS total_assists,
-        SUM(s19.saves) AS total_saves,
-        SUM(s19.shots) AS total_shots
+        s20.team_name AS player_team,
+        AVG(s20.gpi) AS "Sprocket Rating",
+        SUM(s20.goals) AS total_goals,
+        SUM(s20.assists) AS total_assists,
+        SUM(s20.saves) AS total_saves,
+        SUM(s20.shots) AS total_shots
     FROM matches m
         INNER JOIN (
-            SELECT * FROM S19_stats
+            SELECT * FROM S20_stats
             UNION ALL
-            SELECT * FROM S19_playoff_stats
-        ) s19
-            ON m.match_id = s19.match_id
+            SELECT * FROM S20_playoff_stats
+        ) s20
+            ON m.match_id = s20.match_id
         INNER JOIN teams home
             ON m.home = home.franchise
         INNER JOIN teams away
             ON m.away = away.franchise 
         INNER JOIN players p
-            ON s19.member_id = p.member_id
+            ON s20.member_id = p.member_id
     WHERE m.match_id = '${params.matchups}'
     GROUP BY
         player_team,

@@ -32,7 +32,7 @@ WITH weeks AS (
     LEFT JOIN teams t_away
         ON m.Away = t_away.Franchise
 
-    WHERE parent_group_title = 'Season 19'
+    WHERE parent_group_title = 'Season 20'
         AND m.League = '${inputs.League_Selection}'
         AND m.game_mode = '${inputs.GameMode_Selection}'
         AND Week = '${inputs.Week_Selection}'

@@ -1,16 +1,16 @@
 ---
-title: S19 Leaderboard
+title: S20 Leaderboard
 sidebar_position: 6
 ---
 
 <LastRefreshed prefix="Data last updated"/>
 
-```sql S19leaderboard2s
+```sql S20leaderboard2s
 With playerstats as (
     Select name,
     salary as Salary,
     team_name as Team,
-    s19.skill_group as league,
+    s20.skill_group as league,
     "Primary Color" as primColor,
     CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode,
     count(*) as games_played,
@@ -29,8 +29,8 @@ With playerstats as (
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
  from players p
-    inner join S19_stats s19
-        on p.member_id = s19.member_id
+    inner join S20_stats s20
+        on p.member_id = s20.member_id
     inner join teams t 
         on p.franchise = t.franchise
 
@@ -55,12 +55,12 @@ ORDER BY stat1 DESC
 LIMIT 10
 ```
 
-```sql S19leaderboard3s
+```sql S20leaderboard3s
 With playerstats as (
     Select name,
     salary as Salary,
     team_name as Team,
-    s19.skill_group as league,
+    s20.skill_group as league,
     "Primary Color" as primColor,
     CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode,
     count(*) as games_played,
@@ -79,8 +79,8 @@ With playerstats as (
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
  from players p
-    inner join S19_stats s19
-        on p.member_id = s19.member_id
+    inner join S20_stats s20
+        on p.member_id = s20.member_id
     inner join teams t 
         on p.franchise = t.franchise
 group by name, salary, team_name, league, primColor, gamemode)
@@ -111,7 +111,7 @@ LIMIT 10
         , CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode
         , COUNT(*) as games_played
 
-    FROM S19_stats s19
+    FROM S20_stats s20
 
     WHERE skill_group='${inputs.leagueSelect}'
 
@@ -152,6 +152,6 @@ LIMIT 10
 <Slider title='Minimum Games Played' name=gamesSlider size=large data={slider} min=1 maxColumn=games_played />
 
 <Grid cols=2>
-    <BarChart data={S19leaderboard2s} title="Top 10 for 2s" x=name y=stat1 swapXY=true series=name seriesLabels=false legend=false yAxisTitle='{inputs.stats.value}' pointSize=15 colorPalette={[S19leaderboard2s[0].primColor, S19leaderboard2s[1].primColor, S19leaderboard2s[2].primColor, S19leaderboard2s[3].primColor, S19leaderboard2s[4].primColor, S19leaderboard2s[5].primColor, S19leaderboard2s[6].primColor, S19leaderboard2s[7].primColor, S19leaderboard2s[8].primColor, S19leaderboard2s[9].primColor]} />
-    <BarChart data={S19leaderboard3s} title="Top 10 for 3s" x=name y=stat1 swapXY=true series=name seriesLabels=false legend=false yAxisTitle='{inputs.stats.value}' pointSize=15 colorPalette={[S19leaderboard3s[0].primColor, S19leaderboard3s[1].primColor, S19leaderboard3s[2].primColor, S19leaderboard3s[3].primColor, S19leaderboard3s[4].primColor, S19leaderboard3s[5].primColor, S19leaderboard3s[6].primColor, S19leaderboard3s[7].primColor, S19leaderboard3s[8].primColor, S19leaderboard3s[9].primColor]} />
+    <BarChart data={S20leaderboard2s} title="Top 10 for 2s" x=name y=stat1 swapXY=true series=name seriesLabels=false legend=false yAxisTitle='{inputs.stats.value}' pointSize=15 colorPalette={[S20leaderboard2s[0].primColor, S20leaderboard2s[1].primColor, S20leaderboard2s[2].primColor, S20leaderboard2s[3].primColor, S20leaderboard2s[4].primColor, S20leaderboard2s[5].primColor, S20leaderboard2s[6].primColor, S20leaderboard2s[7].primColor, S20leaderboard2s[8].primColor, S20leaderboard2s[9].primColor]} />
+    <BarChart data={S20leaderboard3s} title="Top 10 for 3s" x=name y=stat1 swapXY=true series=name seriesLabels=false legend=false yAxisTitle='{inputs.stats.value}' pointSize=15 colorPalette={[S20leaderboard3s[0].primColor, S20leaderboard3s[1].primColor, S20leaderboard3s[2].primColor, S20leaderboard3s[3].primColor, S20leaderboard3s[4].primColor, S20leaderboard3s[5].primColor, S20leaderboard3s[6].primColor, S20leaderboard3s[7].primColor, S20leaderboard3s[8].primColor, S20leaderboard3s[9].primColor]} />
 </Grid>

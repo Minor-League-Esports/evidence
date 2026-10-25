@@ -9,27 +9,27 @@ sidebar_position: 4
 SELECT DISTINCT 
     p.name
     , p.salary::TEXT AS salary
-    , s19.team_name AS team
-    , s19.skill_group AS league
+    , s20.team_name AS team
+    , s20.skill_group AS league
     , CASE
-        WHEN s19.gamemode = 'RL_DOUBLES' THEN 'Doubles'
-        WHEN s19.gamemode = 'RL_STANDARD' THEN 'Standard'
+        WHEN s20.gamemode = 'RL_DOUBLES' THEN 'Doubles'
+        WHEN s20.gamemode = 'RL_STANDARD' THEN 'Standard'
         ELSE 'Unknown'
     END AS game_mode
     , mg.match_group_title AS week
 
-FROM S19_stats s19
+FROM S20_stats s20
 
 LEFT JOIN players p
-    ON s19.member_id = p.member_id
+    ON s20.member_id = p.member_id
 
 LEFT JOIN matches m
-    ON s19.match_id = m.match_id
+    ON s20.match_id = m.match_id
 
 LEFT JOIN match_groups mg
     ON m.match_group_id = mg.match_group_id
 
-WHERE mg.parent_group_title = 'Season 19'
+WHERE mg.parent_group_title = 'Season 20'
 
 ```
 
@@ -41,7 +41,7 @@ WHERE mg.parent_group_title = 'Season 19'
 
 <Details title='Instructions'>
 
-Below you will find all stats for all players in MLE for S19.
+Below you will find all stats for all players in MLE for S20.
 - You can use the search bar above the table to search for a specific player.
 - You can also use the drop down menus below to Filter the stats however you see fit.
 - Lastly you can click on the stat column to put stats in ascending or descending order.
@@ -55,17 +55,17 @@ SELECT
     p.name AS name,
     '/players/' || CAST(p.member_id AS INTEGER) AS playerLink,
     p.salary,
-    s19.team_name AS team,
-    s19.skill_group AS league,
+    s20.team_name AS team,
+    s20.skill_group AS league,
     CASE
-        WHEN s19.gamemode = 'RL_DOUBLES' THEN 'Doubles'
-        WHEN s19.gamemode = 'RL_STANDARD' THEN 'Standard'
+        WHEN s20.gamemode = 'RL_DOUBLES' THEN 'Doubles'
+        WHEN s20.gamemode = 'RL_STANDARD' THEN 'Standard'
         ELSE 'Unknown'
     END AS game_mode,
     SUM(
         CASE
-            WHEN (s19.team_name = m.home AND s19.home_won) 
-                OR (s19.team_name = m.away AND NOT s19.home_won) THEN 1
+            WHEN (s20.team_name = m.home AND s20.home_won) 
+                OR (s20.team_name = m.away AND NOT s20.home_won) THEN 1
             ELSE 0
         END
         )/COUNT(*) AS win_pct,
@@ -85,29 +85,29 @@ SELECT
     AVG(shots_against) AS shots_against_per_game,
     SUM(goals) / SUM(shots) AS shooting_pct
 
-FROM S19_stats s19
+FROM S20_stats s20
 
 INNER JOIN players p
-    ON s19.member_id = p.member_id
+    ON s20.member_id = p.member_id
 
 LEFT JOIN matches m
-    ON s19.match_id = m.match_id
+    ON s20.match_id = m.match_id
 
 LEFT JOIN match_groups mg
     ON m.match_group_id = mg.match_group_id
 
 WHERE p.salary IN ${inputs.Salary.value}
-    AND s19.team_name IN ${inputs.Team.value}
-    AND s19.skill_group IN ${inputs.League.value}
+    AND s20.team_name IN ${inputs.Team.value}
+    AND s20.skill_group IN ${inputs.League.value}
     AND game_mode IN ${inputs.GameMode.value}
     AND mg.match_group_title IN ${inputs.Week.value}
 
 GROUP BY
     p.name
     , p.salary
-    , s19.team_name
-    , s19.skill_group
-    , s19.gamemode
+    , s20.team_name
+    , s20.skill_group
+    , s20.gamemode
     , p.member_id
 
 ORDER BY
@@ -158,7 +158,7 @@ With playerstats as (
     Select name,
     salary as Salary,
     team_name as Team,
-    s19.skill_group as League,
+    s20.skill_group as League,
     CASE WHEN gamemode = 'RL_DOUBLES' THEN 'Doubles' WHEN gamemode = 'RL_STANDARD' THEN 'Standard' ELSE 'Unknown' END as GameMode,
     count(*) as games_played,
     avg(dpi) as Avg_DPI,
@@ -176,8 +176,8 @@ With playerstats as (
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) as shooting_pct2
  from players p
-    inner join S19_stats s19
-        on p.member_id = s19.member_id
+    inner join S20_stats s20
+        on p.member_id = s20.member_id
 group by name, salary, team_name, League, gamemode)
 
 select 
@@ -235,13 +235,13 @@ sort=false
 ```sql leagueStats
 select
     case
-      when s19.skill_group = 'Foundation League' then 1
-      when s19.skill_group = 'Academy League' then 2
-      when s19.skill_group = 'Champion League' then 3
-      when s19.skill_group = 'Master League' then 4
-      when s19.skill_group = 'Premier League' then 5
+      when s20.skill_group = 'Foundation League' then 1
+      when s20.skill_group = 'Academy League' then 2
+      when s20.skill_group = 'Champion League' then 3
+      when s20.skill_group = 'Master League' then 4
+      when s20.skill_group = 'Premier League' then 5
     end as league_order,
-    s19.skill_group as league,
+    s20.skill_group as league,
     case
       when gamemode = 'RL_DOUBLES' then 'Doubles'
       when gamemode = 'RL_STANDARD' then 'Standard'
@@ -262,8 +262,8 @@ select
     avg(shots_against) as shots_against_per_game,
     sum(goals)/sum(shots) * 100 as shooting_pct2
  from players p
-    inner join s19_stats s19
-        on p.member_id = s19.member_id
+    inner join s20_stats s20
+        on p.member_id = s20.member_id
 group by League, game_mode
 order by league_order
 ```
@@ -318,13 +318,13 @@ yFmt=0.00
 select
     salary,
     case
-      when s19.skill_group = 'Foundation League' then 1
-      when s19.skill_group = 'Academy League' then 2
-      when s19.skill_group = 'Champion League' then 3
-      when s19.skill_group = 'Master League' then 4
-      when s19.skill_group = 'Premier League' then 5
+      when s20.skill_group = 'Foundation League' then 1
+      when s20.skill_group = 'Academy League' then 2
+      when s20.skill_group = 'Champion League' then 3
+      when s20.skill_group = 'Master League' then 4
+      when s20.skill_group = 'Premier League' then 5
     end as league_order,
-    s19.skill_group as league,
+    s20.skill_group as league,
     case
       when gamemode = 'RL_DOUBLES' then 'Doubles'
       when gamemode = 'RL_STANDARD' then 'Standard'
@@ -349,8 +349,8 @@ select
     end as FLstats,
     ${inputs.Stats.value} as value
  from players p
-    inner join s19_stats s19
-        on p.member_id = s19.member_id
+    inner join s20_stats s20
+        on p.member_id = s20.member_id
 where game_mode = '${inputs.mode.value}'
 group by salary, league, game_mode
 order by salary
