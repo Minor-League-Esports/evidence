@@ -1,3 +1,8 @@
+---
+queries:
+  - current_season.sql
+---
+
 ```sql basic_info
     SELECT
         p.name,
@@ -283,7 +288,7 @@ ${inputs.Stats.value} as value
 from ${player_stats}
 ```
 
-<Details title="Season 20 Player Match Averages">
+<Details title="{current_season[0].season_title} Player Match Averages">
 
 <p>Below you can use the dropdown to choose the statistic you would like to display. </p>
 <p><b>Note:</b> If no information appears then you do not have any statistical data to display. </p>
@@ -350,7 +355,7 @@ from ${player_stats}
             ON m.match_group_id = mg.match_group_id
 
         WHERE p.member_id = '${params.member_id}'
-            AND mg.parent_group_title = 'Season 20'
+            AND mg.parent_group_title = (SELECT season_title FROM ${current_season})
 
         GROUP BY
             p.name
@@ -489,7 +494,7 @@ from ${player_stats}
 
 
 
-## Season 20 Stats by Series
+## {current_season[0].season_title} Stats by Series
 <DataTable data={playerSeries} rows=20 rowShading=true headerColor='{basic_info[0].primColor}' headerFontColor=white compact=true wrapTitles=true link=match_link>
     <Column id=week align=center />
     <Column id=game_mode align=center />

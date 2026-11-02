@@ -1,6 +1,8 @@
 ---
 title: Playoff Results
 sidebar_position: 3
+queries:
+  - current_season.sql
 ---
 
 <LastRefreshed prefix="Data last updated"/>
@@ -55,7 +57,7 @@ results AS (
     FROM s20_rounds r
     INNER JOIN matches m ON r.match_id = m.match_id
     INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
-    WHERE mg.parent_group_title = 'Season 20'
+    WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
     GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
     UNION ALL
     SELECT
@@ -73,7 +75,7 @@ results AS (
     FROM s20_rounds r
     INNER JOIN matches m ON r.match_id = m.match_id
     INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
-    WHERE mg.parent_group_title = 'Season 20'
+    WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
     GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
 ),
 series_and_goal_diff AS (
@@ -153,7 +155,7 @@ SELECT
     , SUM(m.away_wins) AS b_game_wins
 FROM matches m
 INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
-WHERE mg.parent_group_title = 'Season 20'
+WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
     AND m.league = '${inputs.League}'
     AND m.game_mode = '${inputs.GameMode}'
 GROUP BY m.home, m.away
@@ -177,7 +179,7 @@ FROM (
     INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
     INNER JOIN teams t_home ON m.home = t_home.Franchise
     INNER JOIN teams t_away ON m.away = t_away.Franchise
-    WHERE mg.parent_group_title = 'Season 20'
+    WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
         AND m.league = '${inputs.League}'
         AND m.game_mode = '${inputs.GameMode}'
         AND t_home.Division = t_away.Division
@@ -190,7 +192,7 @@ FROM (
     INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
     INNER JOIN teams t_home ON m.home = t_home.Franchise
     INNER JOIN teams t_away ON m.away = t_away.Franchise
-    WHERE mg.parent_group_title = 'Season 20'
+    WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
         AND m.league = '${inputs.League}'
         AND m.game_mode = '${inputs.GameMode}'
         AND t_home.Division = t_away.Division
@@ -216,7 +218,7 @@ SELECT
     , strftime(m.scheduled_time AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York', '%m/%d %I:%M %p') AS game_time
 FROM matches m
 INNER JOIN match_groups mg ON m.match_group_id = mg.match_group_id
-WHERE mg.parent_group_title = 'Season 20 Playoffs'
+WHERE mg.parent_group_title = (SELECT playoffs_title FROM ${current_season})
     AND m.league = '${inputs.League}'
     AND m.game_mode = '${inputs.GameMode}'
 ORDER BY mg.match_group_title
@@ -248,7 +250,7 @@ match_group_title as round
 from matches m
   inner join match_groups mg
     on m.match_group_id = mg.match_group_id
-where parent_group_title = 'Season 20 Playoffs'
+where parent_group_title = (SELECT playoffs_title FROM ${current_season})
 and league = '${inputs.League}'
 and game_mode = '${inputs.GameMode}'
 
