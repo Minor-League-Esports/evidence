@@ -12,8 +12,8 @@ SELECT
     p.current_scrim_points,
     "Eligible Through"
 FROM players p
-LEFT JOIN S19_stats s19
-    ON p.member_id = s19.member_id
+LEFT JOIN S20_stats s20
+    ON p.member_id = s20.member_id
 WHERE salary <= 21.0 --filtering out TestUser1 & TestUser2 which have > 21.0 salaries
 AND NOT franchise = 'FP'
 GROUP BY name, salary, p.member_id, franchise, current_scrim_points, "Eligible Through"

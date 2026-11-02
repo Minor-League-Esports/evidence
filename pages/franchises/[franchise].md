@@ -109,7 +109,7 @@ WITH eligibility AS (
 	    ON p.franchise = ru.team_name
 	    AND p.slot = ru.role
 	    AND UPPER(p.skill_group) = CONCAT(ru.league, ' LEAGUE')
-	    AND ru.season_number = 19
+	    AND ru.season_number = 20
 	
 	LEFT JOIN leagues l
 	    ON p.skill_group = l.league_name
@@ -234,7 +234,7 @@ WITH base_slots AS (
     FROM role_usages ru
     WHERE ru.team_name = '${params.franchise}'
         AND ru.role LIKE 'PLAYER%'
-        AND ru.season_number = 19
+        AND ru.season_number = 20
 
 )
 
@@ -278,7 +278,7 @@ LEFT JOIN role_usages ru
     ON ru.role = bs.role
     AND ru.team_name = bs.team_name
     AND ru.league = bs.league
-    AND ru.season_number = 19
+    AND ru.season_number = 20
 
 --join players to fill out p selects
 LEFT JOIN players p
@@ -324,7 +324,7 @@ ORDER BY
 
 
 
-<Tab label="S19 Records">
+<Tab label="S20 Records">
 
 ```sql team_record
 WITH record AS(
@@ -347,11 +347,11 @@ match_group_title
 FROM matches m
     INNER JOIN match_groups mg
         ON m.match_group_id = mg.match_group_id
-    WHERE parent_group_title = 'Season 19'
+    WHERE parent_group_title = 'Season 20'
     AND home = '${params.franchise}'
     AND league = '${inputs.League}'
     AND game_mode = '${inputs.Gamemodes}'
-    OR parent_group_title = 'Season 19'
+    OR parent_group_title = 'Season 20'
     AND away = '${params.franchise}'
     AND league = '${inputs.League}'
     AND game_mode = '${inputs.Gamemodes}'
@@ -370,16 +370,16 @@ CASE
     WHEN r.home = '${params.franchise}' THEN home_goals - away_goals
     WHEN r.away = '${params.franchise}' THEN away_goals - home_goals
     END AS goal_differential
-FROM s19_rounds r
+FROM s20_rounds r
     INNER JOIN matches m
         ON m.match_id = r.match_id
     INNER JOIN match_groups mg
         ON mg.match_group_id = m.match_group_id
-WHERE parent_group_title = 'Season 19'
+WHERE parent_group_title = 'Season 20'
     AND r.home = '${params.franchise}'
     AND m.league = '${inputs.League}'
     AND m.game_mode = '${inputs.Gamemodes}'
-    OR parent_group_title = 'Season 19'
+    OR parent_group_title = 'Season 20'
     AND r.away = '${params.franchise}'
     AND m.league = '${inputs.League}'
     AND m.game_mode = '${inputs.Gamemodes}'
@@ -424,7 +424,7 @@ FROM record re
 
 <BigValue data={teamStatistics} value=record /> <BigValue data={teamStatistics} value=series_record /> <BigValue data={teamStatistics} value=goal_differential />
 
->Season 19 Results
+>Season 20 Results
 <DataTable data={team_record} rowShading=true headerColor='{team_info[0].primary_color}' headerFontColor=white >
     <Column id=week align=center />
     <Column id=franchise_link contentType=link linkLabel=opponent title=Opponent align=center />
@@ -434,17 +434,17 @@ FROM record re
 </DataTable>
 
 ```sql teamStatistics
-WITH S19standings AS (
+WITH S20standings AS (
     
     SELECT
         *
         , CASE
-            WHEN s19.mode IN ('Doubles', 'Standard') THEN s19.mode
+            WHEN s20.mode IN ('Doubles', 'Standard') THEN s20.mode
             ELSE 'Overall'
         END AS game_mode
-    FROM S19_standings s19
+    FROM S20_standings s20
     INNER JOIN teams t
-        ON s19.name = t.Franchise
+        ON s20.name = t.Franchise
 
 ), results AS (
 
@@ -465,11 +465,11 @@ WITH S19standings AS (
 		, COALESCE(SUM(r."Away Goals"), 0) AS goals_against
 		, goals_for - goals_against AS goal_diff
 	FROM matches m
-	LEFT JOIN s19_rounds r
+	LEFT JOIN s20_rounds r
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    ON m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 19'
+	WHERE mg.parent_group_title = 'Season 20'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 		
@@ -492,11 +492,11 @@ WITH S19standings AS (
 		, COALESCE(SUM(r."Home Goals"), 0) AS goals_against
 		, goals_for - goals_against AS goal_diff
 	FROM matches m
-	LEFT JOIN s19_rounds r
+	LEFT JOIN s20_rounds r
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    ON m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 19'
+	WHERE mg.parent_group_title = 'Season 20'
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 
@@ -535,29 +535,29 @@ WITH S19standings AS (
 )
 
 SELECT
-    s19.ranking AS divisional_rank
-    , s19.Franchise AS team_name
-    , s19."Photo URL" AS team_logo
-    , s19.Division AS division
-	, s19."Super Division" AS super_division
-    , s19.Conference
-    , s19.team_wins::INT || ' - ' || s19.team_losses::INT AS record
+    s20.ranking AS divisional_rank
+    , s20.Franchise AS team_name
+    , s20."Photo URL" AS team_logo
+    , s20.Division AS division
+	, s20."Super Division" AS super_division
+    , s20.Conference
+    , s20.team_wins::INT || ' - ' || s20.team_losses::INT AS record
     , sagd.series_wins || ' - ' || sagd.series_loses AS series_record
     , sagd.goals_for
     , sagd.goals_against
     , sagd.goal_diff AS goal_differential
-FROM S19standings s19
+FROM S20standings s20
 INNER JOIN series_and_goal_diff sagd
-    ON s19.Franchise = sagd.team_name
-    AND s19.league = sagd.league
-    AND s19.game_mode = sagd.game_mode
-WHERE s19.conference NOT NULL
-    AND s19.division_name NOT NULL
-    AND s19.league LIKE '${inputs.League}'
-    AND s19.game_mode LIKE '${inputs.Gamemodes}'
+    ON s20.Franchise = sagd.team_name
+    AND s20.league = sagd.league
+    AND s20.game_mode = sagd.game_mode
+WHERE s20.conference NOT NULL
+    AND s20.division_name NOT NULL
+    AND s20.league LIKE '${inputs.League}'
+    AND s20.game_mode LIKE '${inputs.Gamemodes}'
     AND team_name = '${params.franchise}'
 ORDER BY
-    s19.team_wins DESC
+    s20.team_wins DESC
     , sagd.series_wins DESC
     , sagd.goal_diff DESC
     , sagd.goals_for DESC
