@@ -1,5 +1,5 @@
 ---
-title: S20 Leaderboard
+title: Leaderboard
 sidebar_position: 6
 ---
 

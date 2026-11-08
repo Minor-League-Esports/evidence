@@ -364,7 +364,7 @@ ORDER BY m.match_group_id ASC
 ), goal_diff AS (
 SELECT
 r.match_id,
-SUBSTRING(mg.match_group_title, 7)::INT AS week,
+regexp_extract(mg.match_group_title, '[0-9]+')::INT AS week,
 m.league,
 m.game_mode,
 r.home AS home,
@@ -392,7 +392,7 @@ GROUP BY r.match_id, week, m.league, m.game_mode, r.home, r.away
 ORDER BY week ASC
 )
 SELECT 
-SUBSTRING(match_group_title, 7)::INT AS week,
+regexp_extract(match_group_title, '[0-9]+')::INT AS week,
 opponent,
 franchise_link,
 '/matchups/' || gd.match_id AS matchup_link,
