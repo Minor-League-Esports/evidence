@@ -83,16 +83,16 @@ ORDER BY
 <p>
 
 <ButtonGroup name=Week_Selection>
-    <ButtonGroupItem valueLabel="Week 1" value="Match 1" default />
-    <ButtonGroupItem valueLabel="Week 2" value="Match 2" />
-    <ButtonGroupItem valueLabel="Week 3" value="Match 3" />
-    <ButtonGroupItem valueLabel="Week 4" value="Match 4" />
-    <ButtonGroupItem valueLabel="Week 5" value="Match 5" />
-    <ButtonGroupItem valueLabel="Week 6" value="Match 6" />
-    <ButtonGroupItem valueLabel="Week 7" value="Match 7" />
-    <ButtonGroupItem valueLabel="Week 8" value="Match 8" />
-    <ButtonGroupItem valueLabel="Week 9" value="Match 9" />
-    <ButtonGroupItem valueLabel="Week 10" value="Match 10" />
+    <ButtonGroupItem valueLabel="Week 1" value="Week 1" default />
+    <ButtonGroupItem valueLabel="Week 2" value="Week 2" />
+    <ButtonGroupItem valueLabel="Week 3" value="Week 3" />
+    <ButtonGroupItem valueLabel="Week 4" value="Week 4" />
+    <ButtonGroupItem valueLabel="Week 5" value="Week 5" />
+    <ButtonGroupItem valueLabel="Week 6" value="Week 6" />
+    <ButtonGroupItem valueLabel="Week 7" value="Week 7" />
+    <ButtonGroupItem valueLabel="Week 8" value="Week 8" />
+    <ButtonGroupItem valueLabel="Week 9" value="Week 9" />
+    <ButtonGroupItem valueLabel="Week 10" value="Week 10" />
 
 </ButtonGroup>
 
