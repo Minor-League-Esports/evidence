@@ -1,6 +1,8 @@
 ---
 title: Standings
 sidebar_position: 2
+queries:
+  - current_season.sql
 ---
 <LastRefreshed prefix="Data last updated"/>
 
@@ -102,7 +104,7 @@ with S20standings as (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 20'
+	WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 		
@@ -129,7 +131,7 @@ with S20standings as (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 20'
+	WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 
@@ -217,7 +219,7 @@ ORDER BY
 
 
 
-<Tab label="S20 Conference Standings">
+<Tab label="S{current_season[0].season_number} Conference Standings">
 
 ```sql conference_standings
 with S20standings as (
@@ -254,7 +256,7 @@ with S20standings as (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 20'
+	WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 		
@@ -281,7 +283,7 @@ with S20standings as (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 20'
+	WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 
@@ -373,7 +375,7 @@ ORDER BY
 
 
 
-<Tab label="S20 Super Division Standings">
+<Tab label="S{current_season[0].season_number} Super Division Standings">
 
 ```sql super_division_standings
 with S20standings as (
@@ -410,7 +412,7 @@ with S20standings as (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 20'
+	WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 		
@@ -437,7 +439,7 @@ with S20standings as (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 20'
+	WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 
@@ -554,7 +556,7 @@ ORDER BY
 
 
 
-<Tab label="S20 Divisional Standings">
+<Tab label="S{current_season[0].season_number} Divisional Standings">
 
 ```sql divisional_standings
 with S20standings as (
@@ -591,7 +593,7 @@ with S20standings as (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 20'
+	WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 		
@@ -618,7 +620,7 @@ with S20standings as (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    on m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 20'
+	WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 

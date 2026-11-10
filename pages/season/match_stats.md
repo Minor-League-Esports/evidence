@@ -1,6 +1,8 @@
 ---
 title: Match Stats
 sidebar_position: 4
+queries:
+  - current_season.sql
 ---
 
 
@@ -29,7 +31,7 @@ LEFT JOIN matches m
 LEFT JOIN match_groups mg
     ON m.match_group_id = mg.match_group_id
 
-WHERE mg.parent_group_title = 'Season 20'
+WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
 
 ```
 
@@ -41,7 +43,7 @@ WHERE mg.parent_group_title = 'Season 20'
 
 <Details title='Instructions'>
 
-Below you will find all stats for all players in MLE for S20.
+Below you will find all stats for all players in MLE for S{current_season[0].season_number}.
 - You can use the search bar above the table to search for a specific player.
 - You can also use the drop down menus below to Filter the stats however you see fit.
 - Lastly you can click on the stat column to put stats in ascending or descending order.

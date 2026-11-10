@@ -1,3 +1,8 @@
+---
+queries:
+  - current_season.sql
+---
+
 ```sql team_info
 SELECT 
     Franchise,
@@ -109,7 +114,7 @@ WITH eligibility AS (
 	    ON p.franchise = ru.team_name
 	    AND p.slot = ru.role
 	    AND UPPER(p.skill_group) = CONCAT(ru.league, ' LEAGUE')
-	    AND ru.season_number = 20
+	    AND ru.season_number = (SELECT season_number FROM ${current_season})
 	
 	LEFT JOIN leagues l
 	    ON p.skill_group = l.league_name
@@ -234,7 +239,7 @@ WITH base_slots AS (
     FROM role_usages ru
     WHERE ru.team_name = '${params.franchise}'
         AND ru.role LIKE 'PLAYER%'
-        AND ru.season_number = 20
+        AND ru.season_number = (SELECT season_number FROM ${current_season})
 
 )
 
@@ -278,7 +283,7 @@ LEFT JOIN role_usages ru
     ON ru.role = bs.role
     AND ru.team_name = bs.team_name
     AND ru.league = bs.league
-    AND ru.season_number = 20
+    AND ru.season_number = (SELECT season_number FROM ${current_season})
 
 --join players to fill out p selects
 LEFT JOIN players p
@@ -324,7 +329,7 @@ ORDER BY
 
 
 
-<Tab label="S20 Records">
+<Tab label="S{current_season[0].season_number} Records">
 
 ```sql team_record
 WITH record AS(
@@ -347,11 +352,11 @@ match_group_title
 FROM matches m
     INNER JOIN match_groups mg
         ON m.match_group_id = mg.match_group_id
-    WHERE parent_group_title = 'Season 20'
+    WHERE parent_group_title = (SELECT season_title FROM ${current_season})
     AND home = '${params.franchise}'
     AND league = '${inputs.League}'
     AND game_mode = '${inputs.Gamemodes}'
-    OR parent_group_title = 'Season 20'
+    OR parent_group_title = (SELECT season_title FROM ${current_season})
     AND away = '${params.franchise}'
     AND league = '${inputs.League}'
     AND game_mode = '${inputs.Gamemodes}'
@@ -375,11 +380,11 @@ FROM s20_rounds r
         ON m.match_id = r.match_id
     INNER JOIN match_groups mg
         ON mg.match_group_id = m.match_group_id
-WHERE parent_group_title = 'Season 20'
+WHERE parent_group_title = (SELECT season_title FROM ${current_season})
     AND r.home = '${params.franchise}'
     AND m.league = '${inputs.League}'
     AND m.game_mode = '${inputs.Gamemodes}'
-    OR parent_group_title = 'Season 20'
+    OR parent_group_title = (SELECT season_title FROM ${current_season})
     AND r.away = '${params.franchise}'
     AND m.league = '${inputs.League}'
     AND m.game_mode = '${inputs.Gamemodes}'
@@ -424,7 +429,7 @@ FROM record re
 
 <BigValue data={teamStatistics} value=record /> <BigValue data={teamStatistics} value=series_record /> <BigValue data={teamStatistics} value=goal_differential />
 
->Season 20 Results
+>{current_season[0].season_title} Results
 <DataTable data={team_record} rowShading=true headerColor='{team_info[0].primary_color}' headerFontColor=white >
     <Column id=week align=center />
     <Column id=franchise_link contentType=link linkLabel=opponent title=Opponent align=center />
@@ -469,7 +474,7 @@ WITH S20standings AS (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    ON m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 20'
+	WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 		
@@ -496,7 +501,7 @@ WITH S20standings AS (
 	    ON r.match_id = m.match_id
 	INNER JOIN match_groups mg
 	    ON m.match_group_id = mg.match_group_id
-	WHERE mg.parent_group_title = 'Season 20'
+	WHERE mg.parent_group_title = (SELECT season_title FROM ${current_season})
 	GROUP BY
 		1, 2, 3, 4, 5, 6, 7, 8
 

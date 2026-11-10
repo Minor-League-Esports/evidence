@@ -1,6 +1,8 @@
 ---
 title: Matchups
 sidebar_position: 1
+queries:
+  - current_season.sql
 ---
 
 <LastRefreshed prefix="Data last updated"/>
@@ -32,7 +34,7 @@ WITH weeks AS (
     LEFT JOIN teams t_away
         ON m.Away = t_away.Franchise
 
-    WHERE parent_group_title = 'Season 20'
+    WHERE parent_group_title = (SELECT season_title FROM ${current_season})
         AND m.League = '${inputs.League_Selection}'
         AND m.game_mode = '${inputs.GameMode_Selection}'
         AND Week = '${inputs.Week_Selection}'
