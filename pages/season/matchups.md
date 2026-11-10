@@ -37,7 +37,7 @@ WITH weeks AS (
     WHERE parent_group_title = (SELECT season_title FROM ${current_season})
         AND m.League = '${inputs.League_Selection}'
         AND m.game_mode = '${inputs.GameMode_Selection}'
-        AND regexp_extract(Week, '[0-9]+') = regexp_extract('${inputs.Week_Selection}', '[0-9]+')
+        AND Week = '${inputs.Week_Selection}'
 )
 
 SELECT

@@ -328,7 +328,7 @@ from ${player_stats}
             r.Home AS home,
             r.Away AS away,
             m.match_id AS match_id,
-            regexp_extract(mg.match_group_title, '[0-9]+')::INT AS week,
+            SUBSTRING(mg.match_group_title, 7)::INT AS week,
             CASE
                 WHEN r.home = s20.team_name THEN CONCAT(CAST(m.home_wins AS INTEGER), ' - ', CAST(m.away_wins AS INTEGER))   
                 WHEN r.away = s20.team_name THEN CONCAT(CAST(m.away_wins AS INTEGER), ' - ', CAST(m.home_wins AS INTEGER))
