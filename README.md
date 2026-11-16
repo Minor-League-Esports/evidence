@@ -48,6 +48,25 @@
     - This should build Evidence locally, but note it will take some time (~30 minutes or so). If your build fails locally it will fail in prod. If you need help figuring out why your build is failing reach out to OwnerOfTheWhiteSedan or Ol Dirty Dirty. 
     - If your local build is successful feel free to create a PR for the team to look at and approve.
 
+## Run Evidence in Docker
+
+To develop without installing Node.js locally, install Docker Desktop (or Docker Engine with Compose) and run this from the repository root:
+
+```sh
+docker compose up --build
+```
+
+The container uses Node.js 20 and the dependencies in `package-lock.json`. It downloads the current source data and starts the development server. Open http://localhost:3000 to view the site; changes to project files are reflected in the preview. Stop it with `Ctrl+C`, then run `docker compose down`.
+
+If `package.json` or `package-lock.json` changes, recreate the dependency volume so it matches the updated lockfile:
+
+```sh
+docker compose down --volumes
+docker compose up --build
+```
+
+To check a production build inside the container, run `docker compose exec evidence npm run build` while the development server is running.
+
 
 ## Process Flow for Submitting Changes to the Evidence Repository
 1. Before you make any changes to our Evidence repository, create a new branch via Git with the following format: `name/short_description_of_changes`
